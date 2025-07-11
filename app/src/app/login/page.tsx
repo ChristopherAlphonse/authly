@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       // Redirect to dashboard
       router.push("/")
-    } catch (err) {
+    } catch {
       setError("Invalid email or password. Please try again.")
     } finally {
       setLoading(false)
@@ -41,7 +41,7 @@ export default function LoginPage() {
       await authClient.signIn.social({
         provider: "github",
       })
-    } catch (err) {
+    } catch {
       setError("GitHub sign in failed. Please try again.")
     }
   }
@@ -51,7 +51,7 @@ export default function LoginPage() {
       await authClient.signIn.social({
         provider: "google",
       })
-    } catch (err) {
+    } catch {
       setError("Google sign in failed. Please try again.")
     }
   }
@@ -141,7 +141,7 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
               <p className="text-zinc-400 text-sm">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/signup" className="text-white hover:underline font-medium">
                   Create one
                 </Link>

@@ -18,7 +18,6 @@ export function GoAPITest() {
       const response = await fetch("http://localhost:8080/api/auth/verify", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${session?.session?.token}`,
           "Content-Type": "application/json",
         },
       })

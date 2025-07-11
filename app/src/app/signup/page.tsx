@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { signUp } from "@/lib/auth-client"
+import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,14 +20,14 @@ export default function SignUpPage() {
     setError("")
 
     try {
-      await signUp.email({
+      await authClient.signUp.email({
         email,
         password,
         name,
       })
       // Redirect to dashboard or login page
       window.location.href = "/login"
-    } catch (err) {
+    } catch {
       setError("Failed to create account. Please try again.")
     } finally {
       setLoading(false)
