@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { signIn } from "@/lib/auth-client"
+import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -13,18 +14,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const router = useRouter()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
     try {
-      await signIn.email({
+      await authClient.signIn.email({
         email,
         password,
       })
+
       // Redirect to dashboard
-      window.location.href = "/"
+      router.push("/")
     } catch (err) {
       setError("Invalid email or password. Please try again.")
     } finally {
@@ -34,7 +38,7 @@ export default function LoginPage() {
 
   const handleGitHubSignIn = async () => {
     try {
-      await signIn.social({
+      await authClient.signIn.social({
         provider: "github",
       })
     } catch (err) {
@@ -44,7 +48,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn.social({
+      await authClient.signIn.social({
         provider: "google",
       })
     } catch (err) {
@@ -95,7 +99,7 @@ export default function LoginPage() {
                 {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
-            
+
             <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -105,7 +109,7 @@ export default function LoginPage() {
                   <span className="bg-zinc-900 px-2 text-zinc-400">Or continue with</span>
                 </div>
               </div>
-              
+
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <Button
                   type="button"
@@ -134,7 +138,7 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="mt-6 text-center">
               <p className="text-zinc-400 text-sm">
                 Don't have an account?{" "}
