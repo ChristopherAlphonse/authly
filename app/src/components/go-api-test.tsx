@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
+import { goApiClient } from "@/lib/go-api-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -14,25 +15,15 @@ export function GoAPITest() {
     setApiLoading(true)
     setApiResponse("")
 
-    try {
-      const response = await fetch("http://localhost:8080/api/auth/verify", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+    const response = await goApiClient.verifyAuth()
 
-      if (response.ok) {
-        const data = await response.json()
-        setApiResponse(`✅ Go API Success: ${JSON.stringify(data, null, 2)}`)
-      } else {
-        setApiResponse(`❌ Go API Error: ${response.status} ${response.statusText}`)
-      }
-    } catch (error) {
-      setApiResponse(`❌ Connection Error: ${error instanceof Error ? error.message : "Unknown error"}`)
-    } finally {
-      setApiLoading(false)
+    if (response.error) {
+      setApiResponse(`❌ Go API Error: ${response.error}`)
+    } else {
+      setApiResponse(`✅ Go API Success: ${JSON.stringify(response.data, null, 2)}`)
     }
+
+    setApiLoading(false)
   }
 
   return (
