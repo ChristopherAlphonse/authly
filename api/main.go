@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -51,10 +50,6 @@ func verifyAuthHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
-	if err := auth.StartKeyCache(context.Background()); err != nil {
-		log.Fatalln("failed to start key cache:", err)
-	}
 
 	router := http.NewServeMux()
 
