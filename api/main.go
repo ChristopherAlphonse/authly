@@ -61,7 +61,7 @@ func main() {
 
 	port := ":8080"
 
-	fmt.Printf("Server starting on port %s", port)
+	fmt.Println("Server starting on port", port)
 
 	if err := http.ListenAndServe(port, handler); err != nil {
 		log.Fatal("Server failed to start:", err)
