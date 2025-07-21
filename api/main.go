@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -35,6 +36,20 @@ func verifyAuthHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := auth.UserFromRequest(r)
 	if err != nil {
 		slog.Error("failed to get user", slog.Any("error", err))
+		
+		// Return 401 Unauthorized with appropriate error message
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		
+		errorMessage := "Authentication failed"
+		if errors.Is(err, auth.ErrMissingAuthorizationHeader) {
+			errorMessage = "Missing Auth"
+		}
+		
+		errorResponse := ErrorResponse{
+			Error: errorMessage,
+		}
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
