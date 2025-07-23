@@ -32,12 +32,14 @@ class GoApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
+      const token = await authClient.token().then(x => x.data?.token)
+
       // Send request
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
           "Content-Type": "application/json",
-          ...options.headers,
+          "Authorization": `Bearer ${token}`,
         },
       })
 
