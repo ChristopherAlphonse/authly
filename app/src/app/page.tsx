@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AuthStatus } from "@/components/auth-status"
-import { GoAPITest } from "@/components/go-api-test"
+import { GoAPITestAxios } from "@/components/go-api-test-axios"
 
 export default async function Home() {
   return (
@@ -16,7 +16,7 @@ export default async function Home() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <AuthStatus />
-            <GoAPITest />
+            <GoAPITestAxios />
           </div>
 
           <div className="mt-8 text-center">
