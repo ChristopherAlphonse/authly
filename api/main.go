@@ -66,6 +66,7 @@ func main() {
 
 	router.HandleFunc("/health", healthHandler)
 	router.Handle("/api/auth/verify", http.HandlerFunc(verifyAuthHandler))
+	router.Handle("/api/me", http.HandlerFunc(verifyAuthHandler))
 
 	// Enable CORS
 	handler := cors.AllowAll().Handler(middleware.Logging(logger, router))

@@ -15,7 +15,10 @@ export function GoAPITest() {
     setApiLoading(true)
     setApiResponse("")
 
-    const response = await goApiClient.verifyAuth()
+    const response = await fetch("/api/me")
+      .then(x => x.json())
+      .then(x => ({data: x}))
+      .catch(e => ({error: e}))
 
     if (response.error) {
       setApiResponse(`❌ Go API Error: ${response.error}`)
