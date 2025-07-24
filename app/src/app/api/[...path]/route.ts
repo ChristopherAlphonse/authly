@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const GO_API_URL = process.env.GO_API_URL || 'http://localhost:8080'
 
-async function handler(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const path = params.path.join('/')
+async function handler(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const path = await params.then(x => x.path.join('/'))
 
   const url = new URL(`/api/${path}`, GO_API_URL)
   request.nextUrl.searchParams.forEach((value, key) => {
