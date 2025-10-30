@@ -20,7 +20,7 @@ var (
 )
 
 func UserFromRequest(r *http.Request) (User, error) {
-	keyset, err := jwk.Fetch(r.Context(), "http://localhost:3000/api/auth/jwks")
+	keyset, err := jwk.Fetch(r.Context(), "http://localhost:5173/api/auth/jwks")
 	if err != nil {
 		return User{}, fmt.Errorf("fetch jwks: %w", err)
 	}

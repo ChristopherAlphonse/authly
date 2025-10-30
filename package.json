@@ -1,0 +1,23 @@
+{
+  "name": "authly",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd api && go run .",
+    "dev:frontend": "cd app && yarn dev",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd api && go run .",
+    "start:frontend": "cd app && yarn start",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "db:setup": "npm run docker:up && cd app && yarn db:push",
+    "db:studio": "cd app && yarn db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
+

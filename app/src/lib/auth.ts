@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { jwt } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -11,5 +11,5 @@ export const auth = betterAuth({
     enabled: true,
   },
   plugins: [jwt()],
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5127",
 });

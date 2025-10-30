@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/rs/cors"
-
 	"github.com/dreamsofcode-io/authly/api/auth"
 	"github.com/dreamsofcode-io/authly/api/middleware"
+	"github.com/rs/cors"
 )
 
 type AuthResponse struct {
@@ -69,7 +68,12 @@ func main() {
 	router.Handle("/api/me", http.HandlerFunc(verifyAuthHandler))
 
 	// Enable CORS
-	handler := cors.AllowAll().Handler(middleware.Logging(logger, router))
+	handler := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:5173"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	}).Handler(middleware.Logging(logger, router))
+
 
 	port := ":8080"
 
