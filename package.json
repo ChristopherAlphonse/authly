@@ -18,6 +18,9 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.920.0",
+    "@react-email/render": "^1.4.0"
   }
 }
-
