@@ -1,6 +1,6 @@
 # Better-Auth with Go JWT Implementation
 
-This project demonstrates how to integrate [Better-Auth](https://www.better-auth.com/) with a Go backend using JWT (JSON Web Tokens) for authentication. It accompanies a video tutorial by Dreams of Code.
+Continuation of https://github.com/dreamsofcode-io/authly
 
 ## Overview
 
@@ -123,11 +123,4 @@ Check the individual README files in each project directory for specific setup i
 - [Frontend Setup](/app/README.md)
 - [Backend Setup](/api/README.md)
 
-## Additional Documentation
 
-- **[Complete Setup Guide](SETUP.md)** - Detailed step-by-step setup instructions
-- **[Environment Variables](ENV_TEMPLATE.md)** - Configuration guide for all environment variables
-
-## Video Tutorial
-
-This project accompanies a tutorial video by Dreams of Code explaining the implementation details and best practices for integrating Better-Auth with Go.
