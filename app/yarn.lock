@@ -292,7 +292,7 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@better-auth/cli@^1.2.12":
+"@better-auth/cli@^1.3.34":
   version "1.3.34"
   resolved "https://registry.yarnpkg.com/@better-auth/cli/-/cli-1.3.34.tgz#3b3600db1667673ec7c3ee75fd103f4ff32dafe4"
   integrity sha512-CpYJtWg9wnXGjeSIajDi7uhB1J7wfcWfXkFSm9RgmielFiK4ahz2wy6zuee1Rz/ID/7lAfMptxSVeMC1nM+Udg==
@@ -1851,7 +1851,7 @@ baseline-browser-mapping@^2.8.19:
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.8.21.tgz#2f9cccde871bfa4aec9dbf92d0ee746e4f1892e4"
   integrity sha512-JU0h5APyQNsHOlAM7HnQnPToSDQoEBZqzu/YBlqDnEeymPnZDREeXJA3KBMQee+dKteAxZ2AtvQEvVYdZf241Q==
 
-better-auth@1.3.34, better-auth@^1.3.4:
+better-auth@1.3.34, better-auth@^1.3.34:
   version "1.3.34"
   resolved "https://registry.yarnpkg.com/better-auth/-/better-auth-1.3.34.tgz#573b9d807e18ff9c771c5b0f2f7f5fd1effb81cd"
   integrity sha512-LWA52SlvnUBJRbN8VLSTLILPomZY3zZAiLxVJCeSQ5uVmaIKkMBhERitkfJcXB9RJcfl4uP+3EqKkb6hX1/uiw==
