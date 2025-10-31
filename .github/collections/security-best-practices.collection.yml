@@ -12,8 +12,8 @@ items:
     kind: instruction
 
   # Security & Safety Prompts
-  - path: prompts/ai-prompt-engineering-safety-review.prompt.md
-    kind: prompt
+  # - path: prompts/ai-prompt-engineering-safety-review.prompt.md
+  #   kind: prompt
 
 display:
   ordering: alpha
