@@ -5,16 +5,19 @@
 ### ✅ Tests Completed Successfully
 
 #### 1. Port Conflict Resolution
+
 - **Issue**: Port 5432 was already in use by local PostgreSQL
 - **Solution**: Changed Docker port mapping from `5432:5432` to `5433:5432`
 - **Status**: ✅ **RESOLVED**
 - **Verification**:
+
   ```bash
   docker ps
   # Shows: 0.0.0.0:5433->5432/tcp
   ```
 
 #### 2. Docker Container Status
+
 - **Container Name**: `authly-postgres`
 - **Image**: `postgres:14.19-alpine3.21`
 - **Status**: ✅ **RUNNING**
@@ -22,9 +25,11 @@
 - **Health Check**: Starting (healthy after initialization)
 
 #### 3. Environment Variables Configuration
+
 - **File Created**: `app/.env`
 - **Status**: ✅ **CREATED**
 - **Contents**:
+
   ```env
   DATABASE_URL=postgresql://authly:authly_dev_password@localhost:5433/authly
   BETTER_AUTH_SECRET=your-secret-key-change-in-production
@@ -33,6 +38,7 @@
   ```
 
 #### 4. Documentation Updates
+
 - ✅ Updated `README.md` with port 5433
 - ✅ Updated `QUICK_START.md` with port 5433
 - ✅ Updated `SETUP.md` with port 5433
@@ -40,9 +46,10 @@
 - ✅ Updated `CHANGES_SUMMARY.md` with port 5433
 - ✅ Updated `docker-compose.yml` to use port 5433
 
-### 📋 Connection Details
+### Connection Details
 
 **PostgreSQL Connection (Docker):**
+
 - Host: `localhost`
 - Port: `5433` ⚠️ (Changed from 5432 to avoid conflicts)
 - Database: `authly`
@@ -50,11 +57,12 @@
 - Password: `authly_dev_password`
 
 **Full Connection String:**
+
 ```
 postgresql://authly:authly_dev_password@localhost:5433/authly
 ```
 
-### 🚀 Ready to Use
+### Ready to Use
 
 The setup is now complete and ready to use. To start development:
 
@@ -72,25 +80,29 @@ npm run dev
 ```
 
 This will start:
-- **PostgreSQL**: localhost:5433
-- **Go Backend**: http://localhost:8080
-- **Next.js Frontend**: http://localhost:5173
 
-### 🧪 How to Verify Everything Works
+- **PostgreSQL**: localhost:5433
+- **Go Backend**: <http://localhost:8080>
+- **Next.js Frontend**: <http://localhost:5173>
+
+### How to Verify Everything Works
 
 1. **Check Docker container:**
+
    ```bash
    docker ps
    # Should show authly-postgres running on port 5433
    ```
 
 2. **Check PostgreSQL logs:**
+
    ```bash
    npm run docker:logs
    # Should show "database system is ready to accept connections"
    ```
 
 3. **Test database connection:**
+
    ```bash
    cd app
    yarn db:studio
@@ -98,11 +110,11 @@ This will start:
    ```
 
 4. **Test the signup page:**
-   - Navigate to http://localhost:5173/signup
+   - Navigate to <http://localhost:5173/signup>
    - Try creating an account
    - Should successfully create user in database
 
-### ⚠️ Important Notes
+### Important Notes
 
 1. **Port Change**: The Docker PostgreSQL now runs on port **5433** instead of 5432 to avoid conflicts with your local PostgreSQL installation.
 
@@ -111,26 +123,30 @@ This will start:
 3. **Database Schema**: Run `yarn db:push` from the `app` directory to initialize the database tables before first use.
 
 4. **Development Workflow**:
+
    ```bash
    npm run docker:up    # Start PostgreSQL
    npm run dev          # Start both backend and frontend
    ```
 
-### 🔄 Next Steps
+### Next Steps
 
 1. **Start the development servers:**
+
    ```bash
    npm run dev
    ```
 
 2. **Open your browser:**
-   - Frontend: http://localhost:5173
+   - Frontend: <http://localhost:5173>
    - Try the signup/login flows
 
 3. **Check the database:**
+
    ```bash
    npm run db:studio
    ```
+
    View your data in the Drizzle Studio GUI.
 
 ### 📊 Test Summary
@@ -143,19 +159,20 @@ This will start:
 | Documentation | ✅ Updated | - | All files reflect port change |
 | Connection String | ✅ Valid | - | Uses port 5433 |
 
-### 🎉 Conclusion
+### Conclusion
 
 **All tests passed!** The Docker PostgreSQL setup is working correctly with the following configuration:
 
-- ✅ No port conflicts (using 5433)
-- ✅ Container running and healthy
-- ✅ Environment variables configured
-- ✅ Documentation updated
-- ✅ Ready for development
+- No port conflicts (using 5433)
+- Container running and healthy
+- Environment variables configured
+- Documentation updated
+- Ready for development
 
 **You can now:**
+
 1. Run `npm run dev` to start everything
-2. Navigate to http://localhost:5173/signup
+2. Navigate to <http://localhost:5173/signup>
 3. Create an account and test the authentication flow
 4. Use `npm run db:studio` to view the database
 
@@ -165,4 +182,3 @@ This will start:
 **Platform:** Windows 10 (Build 26200)
 **Docker Version:** 28.5.1
 **Docker Compose Version:** v2.40.0-desktop.1
-
