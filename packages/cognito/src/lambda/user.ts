@@ -15,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 		const response = await fetch(GH_API_URL, {
 			method: "GET",
 			headers: {
-					authorization: `token ${authHeaders.split("Bearer ")[1]}`,
+				authorization: `token ${authHeaders.split("Bearer ")[1]}`,
 				accept: "application/json",
 			},
 		});
