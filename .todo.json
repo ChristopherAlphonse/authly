@@ -1,0 +1,12 @@
+{
+  "todos": [
+    { "id": 1, "title": "Clarify verification goal", "description": "Ask the user what they mean by 'verify this workflow' and whether they want an actual MCP call and any credentials or tokens required.", "status": "completed" },
+    { "id": 2, "title": "Locate Better Auth MCP references", "description": "Search repository for references to Better Auth, the MCP URL, env vars, or integration points (routes, auth client, config).", "status": "completed" },
+    { "id": 3, "title": "Attempt MCP connection (if allowed)", "description": "If the user approves and provides any necessary credentials, attempt to query the Better Auth MCP endpoint and validate the workflow responses.", "status": "not-started" },
+    { "id": 4, "title": "Verify local workflow steps", "description": "Check code paths (frontend auth client, backend auth handlers/middleware) to ensure they follow expected Better Auth flow; list mismatches or missing pieces.", "status": "completed" },
+    { "id": 5, "title": "Report and remediation", "description": "Summarize findings, tests performed, and propose fixes or next steps (including adding tests or CI checks).", "status": "completed" },
+    { "id": 6, "title": "Implement session policy changes", "description": "Set short-lived access tokens, refresh token lifetime, idle timeout and warning; add client helpers and UI.", "status": "completed" },
+    { "id": 7, "title": "Add client session helper and warning UI", "description": "Create `session.ts` and `session-warning.tsx` and document integration points.", "status": "completed" },
+    { "id": 8, "title": "Wire timers in app", "description": "Integrate the session timers with the running app - schedule timers after login and on refresh.", "status": "not-started" }
+  ]
+}

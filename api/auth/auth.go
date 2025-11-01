@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 )
@@ -19,8 +18,10 @@ var (
 	ErrMissingUserID = errors.New("missing user id")
 )
 
+var URI = "http://localhost:5173/api/auth"
+
 func UserFromRequest(r *http.Request) (User, error) {
-	keyset, err := jwk.Fetch(r.Context(), "http://localhost:5173/api/auth/jwks")
+	keyset, err := jwk.Fetch(r.Context(), URI+"/jwks")
 	if err != nil {
 		return User{}, fmt.Errorf("fetch jwks: %w", err)
 	}

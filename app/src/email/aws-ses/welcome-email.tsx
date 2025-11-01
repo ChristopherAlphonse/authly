@@ -16,7 +16,7 @@ export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({ userEmail, verifyUrl
       )}
     </p>
     <p>
-      Thank you for signing up. We're excited to have you on board.
+      Thank you for signing up. We&apos;re excited to have you on board.
     </p>
     {verifyUrl && (
       <>
@@ -39,7 +39,7 @@ export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({ userEmail, verifyUrl
         </p>
       </>
     )}
-    <p>If you have any questions, just reply to this email—we're here to help!</p>
+    <p>If you have any questions, just reply to this email—we&apos;re here to help!</p>
     <hr style={{ margin: '32px 0', border: 0, borderTop: '1px solid #eee' }} />
     <p style={{ fontSize: 12, color: '#888' }}>
       Welcome aboard,<br />The Authly Team
