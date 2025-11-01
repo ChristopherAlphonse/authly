@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-
 	"github.com/dreamsofcode-io/authly/api/auth"
 	"github.com/dreamsofcode-io/authly/api/middleware"
 	"github.com/rs/cors"

@@ -3,22 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
+    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
     "dev:backend": "cd api && go run .",
     "dev:frontend": "cd app && yarn dev",
-  "start": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
+    "start": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
     "start:backend": "cd api && go run .",
     "start:frontend": "cd app && yarn start",
+    "cognito:install": "cd packages/cognito && yarn install",
+    "cognito:bootstrap": "cd packages/cognito && npx cdk bootstrap",
+    "cognito:synth": "cd packages/cognito && npx cdk synth",
+    "cognito:deploy": "cd packages/cognito && npx cdk deploy --all",
+    "cognito:destroy": "cd packages/cognito && npx cdk destroy --all",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:restart": "docker-compose restart",
-  "db:setup": "yarn docker:up && cd app && yarn db:push",
+    "db:setup": "yarn docker:up && cd app && yarn db:push",
     "db:studio": "cd app && yarn db:studio"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
-  },
-  "optionalDependencies": {
   }
+
 }
