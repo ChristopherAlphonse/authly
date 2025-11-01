@@ -6,8 +6,8 @@
     "synth": "cdk synth",
     "deploy": "cdk deploy --all",
     "destroy": "cdk destroy --all",
-    "lint": "biome check \"src/**/*.{js,ts,tsx,jsx}\"",
-    "format": "biome format \"src/**/*.{js,ts,tsx,jsx}\" --write"
+    "lint": "biome check src",
+    "format": "biome format src --write"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.2",

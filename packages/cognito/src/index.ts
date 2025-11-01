@@ -1,7 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import type { Construct } from "constructs";
-
+import dotenv from "dotenv";
+dotenv.config({ path: "/packages/cognito/.env" });
 export interface CognitoStackProps extends cdk.StackProps {
 	domainPrefix?: string;
 }
