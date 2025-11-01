@@ -21,8 +21,8 @@
     "db:setup": "yarn docker:up && cd app && yarn db:push",
     "db:studio": "cd app && yarn db:studio"
     ,
-    "biome:format:all": "yarn --cwd app run biome:format && yarn --cwd packages/cognito run format",
-    "biome:lint:all": "yarn --cwd app run format-and-lint:fix && yarn --cwd packages/cognito run lint"
+    "biome:format:all": "concurrently \"yarn --cwd app run format-and-lint:fix\" \"yarn --cwd packages/cognito run format\"",
+    "biome:lint:all": "concurrently \"yarn --cwd app run format-and-lint:fix\" \"yarn --cwd packages/cognito run lint\""
   },
 
   "devDependencies": {
