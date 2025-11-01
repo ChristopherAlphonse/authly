@@ -8,8 +8,8 @@ import path from "node:path";
 
 export type GitHubProviderProps = {
 	userPool: cognito.IUserPool;
-
 	userPoolClient: cognito.IUserPoolClient;
+	domain: cognito.UserPoolDomain;
 	clientId: string;
 	clientSecret: string;
 };
@@ -25,13 +25,8 @@ export class GitHubProvider extends Construct {
 	constructor(scope: Construct, id: string, props: GitHubProviderProps) {
 		super(scope, id);
 
-		// Backend ID To resolve secrets
-
-		// lambda
 
 		const userLambda = new lambda.NodejsFunction(this, "UserLambda", {
-			// Resolve file paths relative to this source file. These handler files
-			// are expected to live in the lambda folder.
 			entry: path.join(__dirname, "../lambda", "user.ts"),
 			runtime: Runtime.NODEJS_18_X,
 		});
@@ -46,7 +41,7 @@ export class GitHubProvider extends Construct {
 			runtime: Runtime.NODEJS_18_X,
 		});
 
-		// Setup API Gateway
+
 
 		const apiGithubGateway = new apigateway.RestApi(this, "APIGateway", {
 			restApiName: "GitHub API Gateway",
@@ -71,7 +66,7 @@ export class GitHubProvider extends Construct {
 			},
 		});
 
-		// Setup Resource Routes
+
 		const userResource = apiGithubGateway.root.addResource("user");
 		const userIntegration = new apigateway.LambdaIntegration(userLambda);
 		userResource.addMethod("GET", userIntegration);
@@ -92,7 +87,7 @@ export class GitHubProvider extends Construct {
 			},
 		);
 
-		// protected Private route
+
 		const privateResource = apiGithubGateway.root.addResource("private");
 		const privateIntegration = new apigateway.LambdaIntegration(privateLambda);
 		privateResource.addMethod("GET", privateIntegration, {
@@ -100,14 +95,12 @@ export class GitHubProvider extends Construct {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 		});
 
-		// Setup Github Identity Provider
+
 		const githubIdentityProvider = new cognito.UserPoolIdentityProviderOidc(
 			this,
 			"GitHubProvider",
 			{
-				// For now accept plain strings for client id / secret (supplied by the stack
-				// when instantiating this construct). If you later wire a secrets manager,
-				// change this to resolve secrets appropriately.
+
 				clientId: props.clientId,
 				clientSecret: props.clientSecret,
 				userPool: props.userPool,
@@ -129,7 +122,7 @@ export class GitHubProvider extends Construct {
 			},
 		);
 
-		// add the new identity provider to the user pool client
+
 		const userPoolClient = props.userPoolClient.node
 			.defaultChild as cognito.CfnUserPoolClient;
 		userPoolClient.supportedIdentityProviders = [
