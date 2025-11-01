@@ -21,6 +21,7 @@
     "db:setup": "yarn docker:up && cd app && yarn db:push",
     "db:studio": "cd app && yarn db:studio"
   },
+
   "devDependencies": {
     "concurrently": "^9.1.2"
   }
