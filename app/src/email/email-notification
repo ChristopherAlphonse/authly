@@ -1,1 +1,0 @@
-// Deprecated: All email sending now handled via AWS SES and React Email in send-verification-email.tsx

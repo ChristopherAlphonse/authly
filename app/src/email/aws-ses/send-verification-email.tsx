@@ -1,7 +1,7 @@
 // Uses AWS SES with React Email for sending emails
 // Reference: https://react.email/docs/integrations/aws-ses
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { renderAsync } from "@react-email/render";
+import { render } from "@react-email/render";
 
 export const sendEmail = async ({
 	email,
@@ -10,10 +10,11 @@ export const sendEmail = async ({
 }: {
 	email: string;
 	subject: string;
-	text: string;
+	// text can be plain HTML/text or a React element from react-email templates
+	text: string | React.ReactElement;
 }) => {
 	// Render HTML using React Email (if text is a React element, otherwise use as is)
-	const html = typeof text === "string" ? text : await renderAsync(text);
+	const html = typeof text === "string" ? text : await render(text);
 
 	const ses = new SESClient({
 		region: process.env.AWS_REGION || "us-east-1",
