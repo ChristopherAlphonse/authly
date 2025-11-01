@@ -6,8 +6,8 @@ import { PasswordResetEmail } from "./password-reset-email";
 import { WelcomeEmail } from "./welcome-email";
 import { VerificationEmail } from "./verification-email";
 
-const REGION = process.env.AWS_REGION || process.env.AWS_SES_REGION || "us-east-1";
-const FROM = process.env.SES_FROM_ADDRESS || process.env.AWS_SES_FROM || "";
+const REGION = process.env.AWS_SES_REGION || "us-east-1";
+const FROM = process.env.AWS_SES_FROM || "";
 
 const ses = new SESClient({
   region: REGION,
@@ -57,6 +57,11 @@ const awsSes = {
   sendRenderedEmail,
   sendPasswordResetEmail,
   sendWelcomeEmail,
+  sendVerificationEmail,
 };
 
 export default awsSes;
+
+
+
+

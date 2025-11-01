@@ -5,6 +5,16 @@ applyTo: "**/*.js,.ts"
 
 **Copilot Rules**:
 
+Zero Anti-Patterns:
+
+- Function-Based Architecture
+- Standard Functions
+- Named Constants
+- Focused Functions
+- Consistent Logging
+- Type Safety
+- API Simplification
+
 - Always use asyncHandler for routes to prevent unhandled promise rejections.
 - Generate route handlers with proper validation, authentication,authorization and error handling.
 - Never include plaintext credentials or sensitive constants in code.
