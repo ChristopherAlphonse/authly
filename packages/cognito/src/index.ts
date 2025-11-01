@@ -1,10 +1,9 @@
+import path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-
 import type { Construct } from "constructs";
-import { GitHubProvider } from "./ghProvider";
 import dotenv from "dotenv";
-import path from "node:path";
+import { GitHubProvider } from "./ghProvider";
 
 // Load package-local .env reliably regardless of cwd. The .env file is expected
 // to live at packages/cognito/.env relative to the repository root.
@@ -48,7 +47,8 @@ export class CognitoStack extends cdk.Stack {
 						cognito.OAuthScope.PROFILE,
 					],
 					callbackUrls: [
-						process.env.BETTER_AUTH_CALLBACK_URL || "http://localhost:5173/api/auth/callback/cognito",
+						process.env.BETTER_AUTH_CALLBACK_URL ||
+							"http://localhost:5173/api/auth/callback/cognito",
 					],
 				},
 				preventUserExistenceErrors: true,
@@ -61,7 +61,6 @@ export class CognitoStack extends cdk.Stack {
 		const domain = userPool.addDomain("CognitoDomain", {
 			cognitoDomain: { domainPrefix },
 		});
-
 
 		new cdk.CfnOutput(this, "CognitoUserPoolId", {
 			value: userPool.userPoolId,

@@ -7,131 +7,137 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import path from "node:path";
 
 export type GitHubProviderProps = {
+	userPool: cognito.IUserPool;
 
-  userPool: cognito.IUserPool;
-
-  userPoolClient: cognito.IUserPoolClient;
-  clientId: string;
-  clientSecret: string;
+	userPoolClient: cognito.IUserPoolClient;
+	clientId: string;
+	clientSecret: string;
 };
 
 // Githubprovider OIDC
 // API Gateway
 // Lambda Functions
 export class GitHubProvider extends Construct {
-  public api: apigateway.RestApi;
-  public apiUrl: string;
-  public provider: cognito.UserPoolIdentityProviderOidc;
+	public api: apigateway.RestApi;
+	public apiUrl: string;
+	public provider: cognito.UserPoolIdentityProviderOidc;
 
-  constructor(scope: Construct, id: string, props: GitHubProviderProps) {
-    super(scope, id);
+	constructor(scope: Construct, id: string, props: GitHubProviderProps) {
+		super(scope, id);
 
-    // Backend ID To resolve secrets
+		// Backend ID To resolve secrets
 
-    // lambda
+		// lambda
 
-    const userLambda = new lambda.NodejsFunction(this, "UserLambda", {
-      // Resolve file paths relative to this source file. These handler files
-      // are expected to live in the lambda folder.
-      entry: path.join(__dirname, "../lambda", "user.ts"),
-      runtime: Runtime.NODEJS_18_X,
-    });
+		const userLambda = new lambda.NodejsFunction(this, "UserLambda", {
+			// Resolve file paths relative to this source file. These handler files
+			// are expected to live in the lambda folder.
+			entry: path.join(__dirname, "../lambda", "user.ts"),
+			runtime: Runtime.NODEJS_18_X,
+		});
 
-    const tokenLambda = new lambda.NodejsFunction(this, "TokenLambda", {
-      entry: path.join(__dirname, "../lambda", "token.ts"),
-      runtime: Runtime.NODEJS_18_X,
-    });
+		const tokenLambda = new lambda.NodejsFunction(this, "TokenLambda", {
+			entry: path.join(__dirname, "../lambda", "token.ts"),
+			runtime: Runtime.NODEJS_18_X,
+		});
 
-    const privateLambda = new lambda.NodejsFunction(this, "PrivateLambda", {
-      entry: path.join(__dirname, "../lambda", "private.ts"),
-      runtime: Runtime.NODEJS_18_X,
-    });
+		const privateLambda = new lambda.NodejsFunction(this, "PrivateLambda", {
+			entry: path.join(__dirname, "../lambda", "private.ts"),
+			runtime: Runtime.NODEJS_18_X,
+		});
 
-    // Setup API Gateway
+		// Setup API Gateway
 
-    const apiGithubGateway = new apigateway.RestApi(this, "APIGateway", {
-      restApiName: "GitHub API Gateway",
-      description: "this is for GitHub API Login",
-      deployOptions: {
-        stageName: "prod",
-      },
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: ["*"], // Specify allowed headers
-      },
-      endpointConfiguration: {
-        types: [apigateway.EndpointType.REGIONAL],
-      },
-    });
+		const apiGithubGateway = new apigateway.RestApi(this, "APIGateway", {
+			restApiName: "GitHub API Gateway",
+			description: "this is for GitHub API Login",
+			deployOptions: {
+				stageName: "prod",
+			},
+			defaultCorsPreflightOptions: {
+				allowOrigins: apigateway.Cors.ALL_ORIGINS,
+				allowMethods: apigateway.Cors.ALL_METHODS,
+				allowHeaders: [
+					"Content-Type",
+					"Authorization",
+					"X-Amz-Date",
+					"X-Api-Key",
+					"X-Amz-Security-Token",
+					"Accept",
+				],
+			},
+			endpointConfiguration: {
+				types: [apigateway.EndpointType.REGIONAL],
+			},
+		});
 
-    // Setup Resource Routes
-    const userResource = apiGithubGateway.root.addResource("user");
-    const userIntegration = new apigateway.LambdaIntegration(userLambda);
-    userResource.addMethod("GET", userIntegration);
+		// Setup Resource Routes
+		const userResource = apiGithubGateway.root.addResource("user");
+		const userIntegration = new apigateway.LambdaIntegration(userLambda);
+		userResource.addMethod("GET", userIntegration);
 
-    const tokenResource = apiGithubGateway.root.addResource("token");
-    const tokenIntegration = new apigateway.LambdaIntegration(tokenLambda);
-    tokenResource.addMethod("POST", tokenIntegration);
+		const tokenResource = apiGithubGateway.root.addResource("token");
+		const tokenIntegration = new apigateway.LambdaIntegration(tokenLambda);
+		tokenResource.addMethod("POST", tokenIntegration);
 
-    const userPoolAuthorizer = new apigateway.CfnAuthorizer(
-      this,
-      "UserPoolAuthorizerGithub",
-      {
-        name: "UserPoolAuthorizer",
-        restApiId: apiGithubGateway.restApiId,
-        type: "COGNITO_USER_POOLS",
-        providerArns: [props.userPool.userPoolArn],
-        identitySource: "method.request.header.Authorization",
-      }
-    );
+		const userPoolAuthorizer = new apigateway.CfnAuthorizer(
+			this,
+			"UserPoolAuthorizerGithub",
+			{
+				name: "UserPoolAuthorizer",
+				restApiId: apiGithubGateway.restApiId,
+				type: "COGNITO_USER_POOLS",
+				providerArns: [props.userPool.userPoolArn],
+				identitySource: "method.request.header.Authorization",
+			},
+		);
 
-    // protected Private route
-    const privateResource = apiGithubGateway.root.addResource("private");
-    const privateIntegration = new apigateway.LambdaIntegration(privateLambda);
-    privateResource.addMethod("GET", privateIntegration, {
-      authorizer: { authorizerId: userPoolAuthorizer.ref },
-      authorizationType: apigateway.AuthorizationType.COGNITO,
-    });
+		// protected Private route
+		const privateResource = apiGithubGateway.root.addResource("private");
+		const privateIntegration = new apigateway.LambdaIntegration(privateLambda);
+		privateResource.addMethod("GET", privateIntegration, {
+			authorizer: { authorizerId: userPoolAuthorizer.ref },
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+		});
 
-    // Setup Github Identity Provider
-    const githubIdentityProvider = new cognito.UserPoolIdentityProviderOidc(
-      this,
-      "GitHubProvider",
-      {
-        // For now accept plain strings for client id / secret (supplied by the stack
-        // when instantiating this construct). If you later wire a secrets manager,
-        // change this to resolve secrets appropriately.
-        clientId: props.clientId,
-        clientSecret: props.clientSecret,
-        userPool: props.userPool,
-        issuerUrl: "https://github.com",
-        attributeRequestMethod: cognito.OidcAttributeRequestMethod.GET,
-        name: "GitHub",
-        endpoints: {
-          authorization: "https://github.com/login/oauth/authorize",
-          jwksUri: apiGithubGateway.url + "token",
-          token: apiGithubGateway.url + "token",
-          userInfo: apiGithubGateway.url + "user",
-        },
-        attributeMapping: {
-          email: cognito.ProviderAttribute.other("email"),
-          preferredUsername: cognito.ProviderAttribute.other("name"),
-          profilePicture: cognito.ProviderAttribute.other("avatar_url"),
-        },
-        scopes: ["openid", "user"],
-      }
-    );
+		// Setup Github Identity Provider
+		const githubIdentityProvider = new cognito.UserPoolIdentityProviderOidc(
+			this,
+			"GitHubProvider",
+			{
+				// For now accept plain strings for client id / secret (supplied by the stack
+				// when instantiating this construct). If you later wire a secrets manager,
+				// change this to resolve secrets appropriately.
+				clientId: props.clientId,
+				clientSecret: props.clientSecret,
+				userPool: props.userPool,
+				issuerUrl: "https://github.com",
+				attributeRequestMethod: cognito.OidcAttributeRequestMethod.GET,
+				name: "GitHub",
+				endpoints: {
+					authorization: "https://github.com/login/oauth/authorize",
+					jwksUri: `${apiGithubGateway.url}token`,
+					token: `${apiGithubGateway.url}token`,
+					userInfo: `${apiGithubGateway.url}user`,
+				},
+				attributeMapping: {
+					email: cognito.ProviderAttribute.other("email"),
+					preferredUsername: cognito.ProviderAttribute.other("name"),
+					profilePicture: cognito.ProviderAttribute.other("avatar_url"),
+				},
+				scopes: ["openid", "user"],
+			},
+		);
 
-    // add the new identity provider to the user pool client
-    const userPoolClient = props.userPoolClient.node
-      .defaultChild as cognito.CfnUserPoolClient;
-    userPoolClient.supportedIdentityProviders = [
-      ...(userPoolClient.supportedIdentityProviders || []),
-      githubIdentityProvider.providerName,
-    ];
-    this.api = apiGithubGateway;
-    this.apiUrl = apiGithubGateway.url;
-    this.provider = githubIdentityProvider;
-  }
+		// add the new identity provider to the user pool client
+		const userPoolClient = props.userPoolClient.node
+			.defaultChild as cognito.CfnUserPoolClient;
+		userPoolClient.supportedIdentityProviders = [
+			...(userPoolClient.supportedIdentityProviders || []),
+			githubIdentityProvider.providerName,
+		];
+		this.api = apiGithubGateway;
+		this.apiUrl = apiGithubGateway.url;
+		this.provider = githubIdentityProvider;
+	}
 }

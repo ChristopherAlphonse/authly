@@ -1,12 +1,13 @@
 // Auth configuration using better-auth as FE client, proxying to AWS Cognito for all user management and sessions.
 // Reference: https://www.better-auth.com/docs/installation
 
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { apiKey, jwt, twoFactor } from "better-auth/plugins";
-import { sendVerificationEmail } from "@/email/aws-ses";
+
 import { SESSION_TIMEOUT } from "../constant/auth_contant";
+import { betterAuth } from "better-auth";
 import { db } from "../db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { sendVerificationEmail } from "@/email/aws-ses";
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
 
