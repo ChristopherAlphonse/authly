@@ -153,3 +153,5 @@ This will output the required values for:
 - User data is stored in both Cognito (primary) and PostgreSQL (via Drizzle adapter for session metadata)
 
 
+
+
