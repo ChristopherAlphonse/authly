@@ -1,7 +1,6 @@
 import type { SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { render } from "@react-email/render";
-import React from "react";
 import { PasswordResetEmail } from "./password-reset-email";
 import { VerificationEmail } from "./verification-email";
 import { WelcomeEmail } from "./welcome-email";
