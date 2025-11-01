@@ -4,6 +4,7 @@ import { render } from "@react-email/render";
 import React from "react";
 import { PasswordResetEmail } from "./password-reset-email";
 import { WelcomeEmail } from "./welcome-email";
+import { VerificationEmail } from "./verification-email";
 
 const REGION = process.env.AWS_REGION || process.env.AWS_SES_REGION || "us-east-1";
 const FROM = process.env.SES_FROM_ADDRESS || process.env.AWS_SES_FROM || "";
@@ -45,6 +46,11 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string, userE
 export async function sendWelcomeEmail(to: string, verifyUrl?: string, userEmail?: string) {
   const html = await render(<WelcomeEmail verifyUrl={verifyUrl} userEmail={userEmail} />);
   return sendRenderedEmail({ to, subject: "Welcome to Authly!", html });
+}
+
+export async function sendVerificationEmail(to: string, verifyUrl: string, userEmail?: string) {
+  const html = await render(<VerificationEmail verifyUrl={verifyUrl} userEmail={userEmail} />);
+  return sendRenderedEmail({ to, subject: "Verify your email", html });
 }
 
 const awsSes = {

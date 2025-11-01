@@ -2,7 +2,7 @@
 // Reference: https://www.better-auth.com/docs/installation
 import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { betterAuth } from "better-auth";
-import { sendEmail } from "@/email/aws-ses/send-verification-email";
+import { sendVerificationEmail } from "@/email/aws-ses";
 import { SESSION_TIMEOUT } from "../constant/auth_contant";
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
@@ -38,11 +38,7 @@ export const auth = betterAuth({
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
-			await sendEmail({
-				email: user.email,
-				subject: "Verify your email",
-				text: `<p>Click the link to verify your email: <a href="${url}">Verify Email</a></p>`
-			});
+			await sendVerificationEmail(user.email, url, user.email);
 		},
 	},
 	// Session and token lifetimes
