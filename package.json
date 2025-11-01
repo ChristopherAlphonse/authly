@@ -3,41 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-
-    "biome:format": "biome format",
-    		"format-and-lint": "biome check .",
-		"check": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
-		"format-and-lint:fix": "biome check . --write",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+  "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
     "dev:backend": "cd api && go run .",
     "dev:frontend": "cd app && yarn dev",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+  "start": "concurrently \"yarn start:backend\" \"yarn start:frontend\"",
     "start:backend": "cd api && go run .",
     "start:frontend": "cd app && yarn start",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:restart": "docker-compose restart",
-    "db:setup": "npm run docker:up && cd app && yarn db:push",
+  "db:setup": "yarn docker:up && cd app && yarn db:push",
     "db:studio": "cd app && yarn db:studio"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "concurrently": "^9.1.2",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.5"
+    "concurrently": "^9.1.2"
   },
   "optionalDependencies": {
-   "@biomejs/biome": "2.1.1"
-  },
-  "dependencies": {
-    "@aws-sdk/client-ses": "^3.920.0",
-    "@react-email/components": "^0.5.7",
-    "@react-email/render": "^1.4.0"
-  },
-  "lint-staged": {
-		"*": [
-			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
-		]
-	}
+  }
 }

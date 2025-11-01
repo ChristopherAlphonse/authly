@@ -10,7 +10,11 @@
     "db:studio": "drizzle-kit studio",
     "dev": "next dev --turbopack -H localhost -p 5173",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+       "biome:format": "biome format",
+    		"format-and-lint": "biome check .",
+		"check": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
+		"format-and-lint:fix": "biome check . --write"
   },
   "dependencies": {
     "@better-auth/cli": "^1.2.12",
@@ -25,10 +29,17 @@
     "pg": "^8.16.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+        "@aws-sdk/client-ses": "^3.920.0",
+    "@react-email/components": "^0.5.7",
+    "@react-email/render": "^1.4.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+       "@types/jest": "^30.0.0",
+
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "@eslint/eslintrc": "^3",   "@biomejs/biome": "2.1.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.15.4",
