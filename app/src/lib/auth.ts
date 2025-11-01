@@ -15,20 +15,20 @@ export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
 	}),
-	cognito: {
-		userPoolId: (process.env.COGNITO_USER_POOL_ID ??
-			process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
-		clientId: (process.env.COGNITO_CLIENT_ID ??
-			process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
-		region: (process.env.AWS_REGION ??
-			process.env.NEXT_PUBLIC_AWS_REGION ??
-			process.env.AuthlyCognitoRegion ??
-			process.env.AUTHLY_COGNITO_REGION) as string,
-	},
 	socialProviders: {
-		github: {
-			clientId: process.env.GITHUB_CLIENT_ID as string,
-			clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+		cognito: {
+			clientId: (process.env.COGNITO_CLIENT_ID ??
+				process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
+			clientSecret: (process.env.COGNITO_CLIENT_SECRET ??
+				process.env.NEXT_PUBLIC_COGNITO_CLIENT_SECRET) as string,
+			domain: (process.env.COGNITO_DOMAIN ??
+				process.env.NEXT_PUBLIC_COGNITO_DOMAIN) as string,
+			region: (process.env.AWS_REGION ??
+				process.env.NEXT_PUBLIC_AWS_REGION ??
+				process.env.AuthlyCognitoRegion ??
+				process.env.AUTHLY_COGNITO_REGION) as string,
+			userPoolId: (process.env.COGNITO_USER_POOL_ID ??
+				process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
 		},
 		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID as string,
