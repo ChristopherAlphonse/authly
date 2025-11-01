@@ -5,8 +5,9 @@ import React from "react";
 import { PasswordResetEmail } from "./password-reset-email";
 import { WelcomeEmail } from "./welcome-email";
 import { VerificationEmail } from "./verification-email";
+import { EMAIL_DEFAULT_REGION } from "../../constant/app_constants"
 
-const REGION = process.env.AWS_SES_REGION || "us-east-1";
+const REGION = process.env.AWS_SES_REGION || EMAIL_DEFAULT_REGION
 const FROM = process.env.AWS_SES_FROM || "";
 
 const ses = new SESClient({

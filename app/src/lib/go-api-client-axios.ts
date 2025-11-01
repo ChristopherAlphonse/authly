@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from "axios"
 import authClient from "./auth-client"
+import { GO_API_DEFAULT_URL, DEFAULT_ERROR_STATUS } from "../constant/app_constants"
 
-const GO_API_URL = process.env.NEXT_PUBLIC_GO_API_URL || "http://localhost:8080"
+const GO_API_URL = process.env.NEXT_PUBLIC_GO_API_URL || GO_API_DEFAULT_URL
 
 export interface ApiResponse<T = unknown> {
   data?: T
@@ -82,7 +83,7 @@ class GoApiClientAxios {
       }
       return {
         error: error instanceof Error ? error.message : "Unknown error occurred",
-        status: 0,
+        status: DEFAULT_ERROR_STATUS,
       }
     }
   }

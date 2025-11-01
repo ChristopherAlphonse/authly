@@ -10,6 +10,9 @@
 //   onRefresh: async () => { await authClient.refresh() }
 // })
 
+import { MS_PER_SECOND, MIN_JWT_PARTS } from "../constant/app_constants"
+import { SESSION_TIMEOUT } from "../constant/auth_contant"
+
 type Callbacks = {
   onWarn?: (msLeft: number) => void
   onExpire?: () => void
@@ -27,7 +30,7 @@ let _expireTimer: ReturnType<typeof setTimeout> | null = null
 function parseJwt(token: string) {
   try {
     const parts = token.split('.')
-    if (parts.length < 2) return null
+    if (parts.length < MIN_JWT_PARTS) return null
     const payload = JSON.parse(atob(parts[1]))
     return payload
   } catch {
@@ -52,11 +55,12 @@ export function scheduleSessionTimers(
   const payload = parseJwt(token)
   if (!payload?.exp) return () => {}
 
-  const expMs = payload.exp * 1000
+  const expMs = payload.exp * MS_PER_SECOND
   const now = Date.now()
   const msLeft = expMs - now
 
-  const warnMs = (options.warnSeconds ?? 60) * 1000
+  // default to configured idle timeout warn seconds or the constant
+  const warnMs = (options.warnSeconds ?? SESSION_TIMEOUT.IDLETIMEOUTWARN) * MS_PER_SECOND
   const warnAt = Math.max(0, msLeft - warnMs)
   const expireAt = Math.max(0, msLeft)
 
@@ -102,5 +106,5 @@ export function msUntilExpirationFromToken(token: string | null) {
   if (!token) return 0
   const payload = parseJwt(token)
   if (!payload?.exp) return 0
-  return Math.max(0, payload.exp * 1000 - Date.now())
+  return Math.max(0, payload.exp * MS_PER_SECOND - Date.now())
 }
