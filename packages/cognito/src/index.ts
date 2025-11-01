@@ -1,8 +1,12 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import type { Construct } from "constructs";
+import path from "node:path";
 import dotenv from "dotenv";
-dotenv.config({ path: "/packages/cognito/.env" });
+// Load package-local .env reliably regardless of cwd. The .env file is expected
+// to live at packages/cognito/.env relative to the repository root.
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+import { GitHubProvider } from "./ghProvider";
 export interface CognitoStackProps extends cdk.StackProps {
 	domainPrefix?: string;
 }
@@ -27,10 +31,23 @@ export class CognitoStack extends cdk.Stack {
 			"AuthlyUserPoolClient",
 			{
 				userPool,
-				generateSecret: false,
+				generateSecret: true,
 				authFlows: {
 					userPassword: true,
 					userSrp: true,
+				},
+				oAuth: {
+					flows: {
+						authorizationCodeGrant: true,
+					},
+					scopes: [
+						cognito.OAuthScope.OPENID,
+						cognito.OAuthScope.EMAIL,
+						cognito.OAuthScope.PROFILE,
+					],
+					callbackUrls: [
+						process.env.BETTER_AUTH_CALLBACK_URL || "http://localhost:5173/api/auth/callback/cognito",
+					],
 				},
 				preventUserExistenceErrors: true,
 			},
@@ -39,9 +56,10 @@ export class CognitoStack extends cdk.Stack {
 		const envPrefix = (globalThis as any).process?.env?.COGNITO_DOMAIN_PREFIX;
 		const domainPrefix = props?.domainPrefix ?? envPrefix ?? "authly-default";
 
-		userPool.addDomain("CognitoDomain", {
+		const domain = userPool.addDomain("CognitoDomain", {
 			cognitoDomain: { domainPrefix },
 		});
+
 
 		new cdk.CfnOutput(this, "CognitoUserPoolId", {
 			value: userPool.userPoolId,
@@ -59,6 +77,21 @@ export class CognitoStack extends cdk.Stack {
 			value: this.region,
 			description: "AWS Region where the stack is deployed",
 			exportName: "AuthlyCognitoRegion",
+		});
+
+		new cdk.CfnOutput(this, "CognitoDomain", {
+			value: `${domainPrefix}.auth.${this.region}.amazoncognito.com`,
+			description: "Cognito Hosted UI Domain",
+			exportName: "AuthlyCognitoDomain",
+		});
+
+		// Attach GitHub provider construct to this stack. The provider expects
+		// simple string client id / secret for now (read from env).
+		new GitHubProvider(this, "GitHubProvider", {
+			clientId: process.env.GITHUB_CLIENT_ID ?? "",
+			clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+			userPool,
+			userPoolClient,
 		});
 	}
 }
