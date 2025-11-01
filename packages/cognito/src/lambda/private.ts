@@ -4,7 +4,7 @@ const AllowedOrigins = [
 	(process.env.FRONT_END_URL as string) || "http://localhost:5173",
 ];
 export const handler: APIGatewayProxyWithCognitoAuthorizerHandler = async (
-	event,
+	_event,
 ) => {
 	return {
 		statusCode: 200,

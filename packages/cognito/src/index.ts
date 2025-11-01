@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import type { Construct } from "constructs";
 
 export interface CognitoStackProps extends cdk.StackProps {
 	domainPrefix?: string;
