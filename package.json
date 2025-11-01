@@ -19,14 +19,14 @@
     "docker:logs": "docker-compose logs -f",
     "docker:restart": "docker-compose restart",
     "db:setup": "yarn docker:up && cd app && yarn db:push",
-    "db:studio": "cd app && yarn db:studio"
-    ,
+    "db:studio": "cd app && yarn db:studio",
     "biome:format:all": "yarn --cwd app run format-and-lint:fix -- --unsafe && yarn --cwd packages/cognito run format",
     "biome:lint:all": "yarn --cwd app run format-and-lint:fix -- --unsafe && yarn --cwd packages/cognito run lint"
   },
-
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
-
 }
