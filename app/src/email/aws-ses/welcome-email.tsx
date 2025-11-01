@@ -1,4 +1,17 @@
-import * as React from "react";
+import React from "react";
+import {
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Preview,
+  Section,
+  Tailwind,
+  Text,
+  pixelBasedPreset,
+} from "@react-email/components";
 
 interface WelcomeEmailProps {
   userEmail?: string;
@@ -6,43 +19,42 @@ interface WelcomeEmailProps {
 }
 
 export const WelcomeEmail: React.FC<WelcomeEmailProps> = ({ userEmail, verifyUrl }) => (
-  <div style={{ fontFamily: 'sans-serif', color: '#222', background: '#f9f9f9', padding: 24 }}>
-    <h2>Welcome to Authly!</h2>
-    <p>
-      {userEmail ? (
-        <>Hi <b>{userEmail}</b>,</>
-      ) : (
-        <>Hello,</>
-      )}
-    </p>
-    <p>
-      Thank you for signing up. We&apos;re excited to have you on board.
-    </p>
-    {verifyUrl && (
-      <>
-        <p>To get started, please verify your email address by clicking the button below:</p>
-        <p>
-          <a
-            href={verifyUrl}
-            style={{
-              display: 'inline-block',
-              background: '#22c55e',
-              color: '#fff',
-              padding: '12px 24px',
-              borderRadius: 6,
-              textDecoration: 'none',
-              fontWeight: 600,
-            }}
-          >
-            Verify Email
-          </a>
-        </p>
-      </>
-    )}
-    <p>If you have any questions, just reply to this email—we&apos;re here to help!</p>
-    <hr style={{ margin: '32px 0', border: 0, borderTop: '1px solid #eee' }} />
-    <p style={{ fontSize: 12, color: '#888' }}>
-      Welcome aboard,<br />The Authly Team
-    </p>
-  </div>
+  <Html>
+    <Head />
+    <Preview>Welcome to Authly!</Preview>
+    <Tailwind config={pixelBasedPreset}>
+      <Body className="bg-gray-50 font-sans text-gray-900">
+        <Section className="py-8">
+          <Container className="bg-white rounded-lg shadow p-6 mx-auto max-w-xl">
+            <Heading className="text-lg font-semibold">Welcome to Authly!</Heading>
+
+            <Text className="mt-4 text-base leading-6">
+              {userEmail ? (
+                <>Hi <strong>{userEmail}</strong>,</>
+              ) : (
+                <>Hello,</>
+              )}
+            </Text>
+
+            <Text className="mt-4 text-sm">Thank you for signing up. We&apos;re excited to have you on board.</Text>
+
+            {verifyUrl && (
+              <Section className="mt-6">
+                <Text className="mb-2">To get started, please verify your email address by clicking the button below:</Text>
+                <Button href={verifyUrl} className="bg-green-600 text-white px-5 py-3 rounded-md font-medium text-sm">Verify Email</Button>
+              </Section>
+            )}
+
+            <Text className="mt-6">If you have any questions, just reply to this email—we&apos;re here to help!</Text>
+
+            <hr className="my-6 border-t border-gray-200" />
+
+            <Text className="text-xs text-gray-500">Welcome aboard,<br />The Authly Team</Text>
+          </Container>
+        </Section>
+      </Body>
+    </Tailwind>
+  </Html>
 );
+
+export default WelcomeEmail;

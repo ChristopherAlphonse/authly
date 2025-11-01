@@ -62,4 +62,4 @@
   - [ ] 8.3 Diagram: Session expiration/refresh (`feature/diagram-session-expiry`)
   - [ ] 8.4 Diagram: Email verification/password reset (`feature/diagram-email-flows`)
 
-  
+

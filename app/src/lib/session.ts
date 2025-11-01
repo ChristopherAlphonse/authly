@@ -50,7 +50,7 @@ export function scheduleSessionTimers(
   if (!token) return () => {}
 
   const payload = parseJwt(token)
-  if (!payload || !payload.exp) return () => {}
+  if (!payload || payload?.exp) return () => {}
 
   const expMs = payload.exp * 1000
   const now = Date.now()
@@ -101,6 +101,6 @@ export function clearSessionTimers() {
 export function msUntilExpirationFromToken(token: string | null) {
   if (!token) return 0
   const payload = parseJwt(token)
-  if (!payload || !payload.exp) return 0
+  if (!payload || payload?.exp) return 0
   return Math.max(0, payload.exp * 1000 - Date.now())
 }
