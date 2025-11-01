@@ -2,6 +2,8 @@
 
 This Go API demonstrates JWT token validation for Better-Auth integration. It provides a secure backend that can validate JWT tokens issued by the Better-Auth frontend.
 
+![alt text](image.png)
+
 ## Features
 
 - JWT token validation using JWKS (JSON Web Key Sets)
@@ -18,11 +20,13 @@ This Go API demonstrates JWT token validation for Better-Auth integration. It pr
 ## Installation
 
 1. Clone the repository and navigate to the API directory:
+
 ```bash
 cd api
 ```
 
 2. Install dependencies:
+
 ```bash
 go mod download
 ```
@@ -30,6 +34,7 @@ go mod download
 ## Running the API
 
 Start the server:
+
 ```bash
 go run main.go
 ```
@@ -44,11 +49,13 @@ The API will start on port 8080 by default.
 ## Environment Variables
 
 The API uses the following environment variables (optional):
+
 - `PORT` - Server port (default: 8080)
 
 ## Testing
 
 Run tests:
+
 ```bash
 go test ./...
 ```
