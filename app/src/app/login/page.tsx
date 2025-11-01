@@ -8,6 +8,82 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 
+function parseHttpError(err: unknown): { status?: number; message?: string } {
+  let status: number | undefined
+  let message: string | undefined
+
+  if (typeof err === "object" && err !== null) {
+    const maybe = err as { [k: string]: unknown }
+
+    const resp = maybe.response
+    if (typeof resp === "object" && resp !== null) {
+      const r = resp as { [k: string]: unknown }
+      const s = r.status
+      if (typeof s === "number") status = s
+
+      const data = r.data
+      if (typeof data === "object" && data !== null) {
+        const d = data as { [k: string]: unknown }
+        if (typeof d.message === "string") message = d.message
+        else if (typeof d.error === "string") message = d.error
+      }
+    }
+
+    if (status === undefined) {
+      const s2 = maybe.status
+      if (typeof s2 === "number") status = s2
+    }
+
+    if (status === undefined) {
+      const s3 = maybe.statusCode
+      if (typeof s3 === "number") status = s3
+    }
+
+    if (!message) {
+      const m = maybe.message
+      if (typeof m === "string") message = m
+    }
+  }
+
+  return { status, message }
+}
+
+function uiMessageFromError(err: unknown): string {
+  let rawMsg: string | undefined
+
+  if (typeof err === "string") rawMsg = err
+  else if (typeof err === "object" && err !== null) {
+    const maybe = err as { [k: string]: unknown }
+    if (typeof maybe.message === "string") rawMsg = maybe.message
+    else {
+      const resp = maybe.response
+      if (typeof resp === "object" && resp !== null) {
+        const r = resp as { [k: string]: unknown }
+        const data = r.data
+        if (typeof data === "object" && data !== null) {
+          const d = data as { [k: string]: unknown }
+          if (typeof d.message === "string") rawMsg = d.message
+        }
+      }
+    }
+  }
+
+  if (typeof rawMsg === "string" && /network error|ECONNREFUSED|connect ECONNREFUSED|failed to fetch/i.test(rawMsg)) {
+    return "Network error — couldn't reach the auth server. Check your connection and try again."
+  }
+
+  const { status, message } = parseHttpError(err)
+  const msg = typeof message === "string" && message.trim().length ? message.trim() : undefined
+
+  if (status === 403) return msg ?? "Access denied — your account may be blocked or require email verification. Check your email for a verification link."
+  if (status === 401) return msg ?? "Incorrect email or password. Please try again."
+  if (status === 404) return msg ?? "No account found for that email. Would you like to register?"
+  if (status === 429) return msg ?? "Too many attempts — please wait a few minutes and try again."
+  if (status && status >= 400 && status < 500) return msg ?? "Sign in failed. Check your input and try again."
+
+  return msg ?? "Sign in failed due to a server or network issue."
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -22,15 +98,34 @@ export default function LoginPage() {
     setError("")
 
     try {
-      await authClient.signIn.email({
+      const result = await authClient.signIn.email({
         email,
         password,
       })
 
-      // Redirect to dashboard
+
+      let signInOk = false
+
+      if (result === null || result === undefined) {
+        signInOk = false
+      } else if (typeof result === "boolean") {
+        signInOk = result
+      } else if (typeof result === "object") {
+        const r = result as { [k: string]: unknown }
+        if (typeof r.ok === "boolean") signInOk = r.ok
+        else if (typeof r.success === "boolean") signInOk = r.success
+        else if (typeof r.status === "number") signInOk = r.status >= 200 && r.status < 300
+        else if (r.user || r.session) signInOk = true
+      }
+
+      if (!signInOk) {
+        setError(uiMessageFromError(result as unknown))
+        return
+      }
+
       router.push("/")
-    } catch {
-      setError("Invalid email or password. Please try again.")
+    } catch (err: unknown) {
+      setError(uiMessageFromError(err))
     } finally {
       setLoading(false)
     }
@@ -41,8 +136,8 @@ export default function LoginPage() {
       await authClient.signIn.social({
         provider: "github",
       })
-    } catch {
-      setError("GitHub sign in failed. Please try again.")
+    } catch (err: unknown) {
+      setError(uiMessageFromError(err))
     }
   }
 
@@ -51,8 +146,8 @@ export default function LoginPage() {
       await authClient.signIn.social({
         provider: "google",
       })
-    } catch {
-      setError("Google sign in failed. Please try again.")
+    } catch (err: unknown) {
+      setError(uiMessageFromError(err))
     }
   }
 

@@ -1,6 +1,6 @@
 # Go API with JWT Authentication
 
-This Go API demonstrates JWT token validation for Better-Auth integration. It provides a secure backend that can validate JWT tokens issued by the Better-Auth frontend.
+This Go API demonstrates JWT token validation for Better-Auth integration. The goal is Go focuses on business logic. Auth responsibilities in Next.js/Better‑Auth
 
 ![alt text](image.png)
 

@@ -4,18 +4,24 @@ import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { sendVerificationEmail } from "@/email/aws-ses";
 import { SESSION_TIMEOUT } from "../constant/auth_contant";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "../db";
+
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
 
 export const auth = betterAuth({
 	appName: "main-app-poc",
-    cognito: {
-		userPoolId: process.env.COGNITO_USER_POOL_ID as string,
-		clientId: process.env.COGNITO_CLIENT_ID as string,
-		region: process.env.COGNITO_REGION as string,
-
+    database: drizzleAdapter(
+        db,{
+            provider: "pg"
+        }
+    ),
+	cognito: {
+		userPoolId: (process.env.COGNITO_USER_POOL_ID ?? process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
+		clientId: (process.env.COGNITO_CLIENT_ID ?? process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
+		region: (process.env.AWS_REGION ?? process.env.NEXT_PUBLIC_AWS_REGION ?? process.env.AuthlyCognitoRegion ?? process.env.AUTHLY_COGNITO_REGION) as string,
 	},
-	// Social providers (if federated via Cognito)
 	socialProviders: {
 		github: {
 			clientId: process.env.GITHUB_CLIENT_ID as string,
@@ -26,7 +32,6 @@ export const auth = betterAuth({
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
-	// Email/password, magic link, FIDO2/WebAuthn, SAML SSO
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
@@ -41,11 +46,6 @@ export const auth = betterAuth({
 			await sendVerificationEmail(user.email, url, user.email);
 		},
 	},
-	// Session and token lifetimes
-	// - accessTokenExpiresIn: short-lived access token (limits damage if compromised)
-	// - refreshTokenExpiresIn: longer-lived refresh token used to obtain new access tokens
-	// - idleTimeout: inactivity timeout (in seconds) that forces re-authentication
-	// - idleTimeoutWarn: seconds before idleTimeout to warn the user
 	session: {
 		accessTokenExpiresIn: SESSION_TIMEOUT.ACCESSTOKENEXPIRESIN,
 		refreshTokenExpiresIn: SESSION_TIMEOUT.REFRESHTOKENEXPIRESIN,
@@ -54,12 +54,14 @@ export const auth = betterAuth({
 		expiresIn: SESSION_TIMEOUT.EXPIRESIN,
 		updateAge: SESSION_TIMEOUT.UPDATEAGE,
 	},
+	logger: {
+		disabled: process.env.NODE_ENV === "production",
+	},
 		plugins: [
 			jwt(),
 			apiKey({ enableMetadata: true }),
 			twoFactor(),
 		],
-
 	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5173",
 });
 
