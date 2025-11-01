@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+
+    "biome:format": "biome format",
+    		"format-and-lint": "biome check .",
+		"check": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
+		"format-and-lint:fix": "biome check . --write",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd api && go run .",
     "dev:frontend": "cd app && yarn dev",
@@ -17,11 +22,22 @@
     "db:studio": "cd app && yarn db:studio"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@types/jest": "^30.0.0",
+    "concurrently": "^9.1.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5"
+  },
+  "optionalDependencies": {
+   "@biomejs/biome": "2.1.1"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.920.0",
     "@react-email/components": "^0.5.7",
     "@react-email/render": "^1.4.0"
-  }
+  },
+  "lint-staged": {
+		"*": [
+			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+		]
+	}
 }

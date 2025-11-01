@@ -5,6 +5,8 @@ applyTo: "**/*.js,.ts"
 
 **Copilot Rules**:
 
+use YARN package manager
+
 Zero Anti-Patterns:
 
 - Function-Based Architecture
