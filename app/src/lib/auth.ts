@@ -1,26 +1,29 @@
 // Auth configuration using better-auth as FE client, proxying to AWS Cognito for all user management and sessions.
 // Reference: https://www.better-auth.com/docs/installation
-import { apiKey, jwt, twoFactor } from "better-auth/plugins";
+
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { sendVerificationEmail } from "@/email/aws-ses";
 import { SESSION_TIMEOUT } from "../constant/auth_contant";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
-
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
 
 export const auth = betterAuth({
 	appName: "main-app-poc",
-    database: drizzleAdapter(
-        db,{
-            provider: "pg"
-        }
-    ),
+	database: drizzleAdapter(db, {
+		provider: "pg",
+	}),
 	cognito: {
-		userPoolId: (process.env.COGNITO_USER_POOL_ID ?? process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
-		clientId: (process.env.COGNITO_CLIENT_ID ?? process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
-		region: (process.env.AWS_REGION ?? process.env.NEXT_PUBLIC_AWS_REGION ?? process.env.AuthlyCognitoRegion ?? process.env.AUTHLY_COGNITO_REGION) as string,
+		userPoolId: (process.env.COGNITO_USER_POOL_ID ??
+			process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
+		clientId: (process.env.COGNITO_CLIENT_ID ??
+			process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
+		region: (process.env.AWS_REGION ??
+			process.env.NEXT_PUBLIC_AWS_REGION ??
+			process.env.AuthlyCognitoRegion ??
+			process.env.AUTHLY_COGNITO_REGION) as string,
 	},
 	socialProviders: {
 		github: {
@@ -57,11 +60,6 @@ export const auth = betterAuth({
 	logger: {
 		disabled: process.env.NODE_ENV === "production",
 	},
-		plugins: [
-			jwt(),
-			apiKey({ enableMetadata: true }),
-			twoFactor(),
-		],
+	plugins: [jwt(), apiKey({ enableMetadata: true }), twoFactor()],
 	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5173",
 });
-
