@@ -117,6 +117,12 @@ A Go service that:
 - `npm run dev:frontend` - Run only the Next.js frontend
 - `npm run start` - Run both services in production mode
 
+### Build Scripts
+
+- `npm run build` - Build both backend and frontend for production
+- `npm run build:backend` - Build only the Go API backend (outputs to `api/bin/authly-api`)
+- `npm run build:frontend` - Build only the Next.js frontend (outputs to `app/.next`)
+
 ### OAuth Development with ngrok
 
 OAuth providers like AWS Cognito and GitHub require public URLs for callbacks. Use ngrok to tunnel your localhost:
