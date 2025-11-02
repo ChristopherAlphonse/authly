@@ -130,50 +130,56 @@ export default function LoginPage() {
 				password,
 			});
 
-			let signInOk = false;
-
-			if (result === null || result === undefined) {
-				signInOk = false;
-			} else if (typeof result === "boolean") {
-				signInOk = result;
-			} else if (typeof result === "object") {
+			// Better Auth's signIn.email returns an object with user/session on success
+			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
-				if (typeof r.ok === "boolean") signInOk = r.ok;
-				else if (typeof r.success === "boolean") signInOk = r.success;
-				else if (typeof r.status === "number")
-					signInOk = r.status >= 200 && r.status < 300;
-				else if (r.user || r.session) signInOk = true;
+				// Sign-in succeeded if we have user or session
+				if (r.user || r.session || r.data) {
+					// Success! Redirect to home
+					router.push("/");
+					return;
+				}
+				// Check for error in response
+				if (r.error) {
+					setError(uiMessageFromError(r.error));
+					return;
+				}
 			}
 
-			if (!signInOk) {
-				setError(uiMessageFromError(result as unknown));
-				return;
-			}
-
-			router.push("/");
+			// If we get here, sign-in failed (no user/session/error)
+			setError(uiMessageFromError(result as unknown));
 		} catch (err: unknown) {
+			console.error("[Login] Sign-in error:", err);
 			setError(uiMessageFromError(err));
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// For Cognito OAuth: Redirect directly to Cognito Hosted UI with identity provider
-	// All OAuth flows go through Cognito for finance app compliance
-	const handleGitHubSignIn = () => {
-		if (typeof window === "undefined") return;
-		const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
-		const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
-		const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
-		window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=GitHub`;
+	// Use Better Auth's social sign-in for direct GitHub OAuth
+	// Users will see GitHub's native OAuth UI, not Cognito Hosted UI
+	const handleGitHubSignIn = async () => {
+		try {
+			await authClient.signIn.social({
+				provider: "github",
+				callbackURL: "/",
+			});
+		} catch (err: unknown) {
+			setError(uiMessageFromError(err));
+		}
 	};
 
-	const handleGoogleSignIn = () => {
-		if (typeof window === "undefined") return;
-		const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
-		const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
-		const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
-		window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=Google`;
+	// Use Better Auth's social sign-in for direct Google OAuth
+	// Users will see Google's native OAuth UI, not Cognito Hosted UI
+	const handleGoogleSignIn = async () => {
+		try {
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/",
+			});
+		} catch (err: unknown) {
+			setError(uiMessageFromError(err));
+		}
 	};
 
 	return (

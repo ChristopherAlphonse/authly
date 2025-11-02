@@ -113,12 +113,20 @@ export default function SignUpPage() {
 								<Button
 									type="button"
 									variant="outline"
-									onClick={() => {
-										if (typeof window !== "undefined") {
-											const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
-											const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
-											const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
-											window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=GitHub`;
+									onClick={async () => {
+										try {
+											await authClient.signIn.social({
+												provider: "github",
+												callbackURL: "/",
+											});
+										} catch (err: unknown) {
+											setError(
+												typeof err === "string"
+													? err
+													: err instanceof Error
+														? err.message
+														: "Failed to sign in with GitHub",
+											);
 										}
 									}}
 									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
@@ -135,12 +143,20 @@ export default function SignUpPage() {
 								<Button
 									type="button"
 									variant="outline"
-									onClick={() => {
-										if (typeof window !== "undefined") {
-											const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
-											const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
-											const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
-											window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=Google`;
+									onClick={async () => {
+										try {
+											await authClient.signIn.social({
+												provider: "google",
+												callbackURL: "/",
+											});
+										} catch (err: unknown) {
+											setError(
+												typeof err === "string"
+													? err
+													: err instanceof Error
+														? err.message
+														: "Failed to sign in with Google",
+											);
 										}
 									}}
 									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
