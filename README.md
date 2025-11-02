@@ -1,274 +1,83 @@
-# Authly - Modern Authentication with Better Auth
-
-A modern, full-stack authentication solution built with Next.js, Better Auth, and AWS Cognito.
-
-## Overview
-
-This implementation showcases a modern authentication flow with:
-
-- **Frontend**: Next.js 15 with Better Auth
-- **Authentication**: Multiple providers (Email, Cognito, GitHub, Google)
-- **Database**: PostgreSQL with Drizzle ORM
-- **Infrastructure**: AWS Cognito via CDK for OAuth
-- **Deployment**: Optimized for Vercel
-
-## Features
-
-- ✅ Email/Password Authentication
-- ✅ Magic Link Authentication
-- ✅ AWS Cognito OAuth Integration
-- ✅ GitHub OAuth (via Cognito)
-- ✅ Google OAuth
-- ✅ Email Verification (AWS SES)
-- ✅ JWT Session Management
-- ✅ Two-Factor Authentication
-- ✅ API Key Support
-- ✅ Protected Routes
-- ✅ Session Management
-
-## Project Structure
-
-```
-authly/
-├── app/                    # Next.js application
-│   ├── src/
-│   │   ├── app/           # App router pages
-│   │   ├── components/    # React components
-│   │   ├── lib/           # Auth configuration
-│   │   ├── db/            # Database schema & migrations
-│   │   └── email/         # Email templates (AWS SES)
-│   └── package.json
-├── packages/
-│   └── cognito/           # AWS CDK infrastructure
-└── package.json
-```
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-> **New to the project? Start here:** [Quick Start Guide](QUICK_START.md)
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v20 or later)
-- [Docker](https://www.docker.com/) and Docker Compose
-- [AWS Account](https://aws.amazon.com/) (for Cognito/SES - optional)
-- [ngrok](https://ngrok.com/) (for OAuth development - optional)
-
-### Quick Setup
-
-1. **Clone and install dependencies**
-   ```bash
-   git clone <repository-url>
-   cd authly
-   yarn install
-   cd app && yarn install && cd ..
-   ```
-
-2. **Set up PostgreSQL with Docker**
-   ```bash
-   yarn docker:up
-   ```
-
-   This starts PostgreSQL on `localhost:5433` with:
-   - Database: `authly`
-   - User: `authly`
-   - Password: `authly_dev_password`
-
-3. **Configure environment variables**
-
-   Create `app/.env.local`:
-   ```bash
-   # Required
-   DATABASE_URL=postgresql://authly:authly_dev_password@localhost:5433/authly
-   BETTER_AUTH_SECRET=<generate with: openssl rand -base64 32>
-   BETTER_AUTH_URL=http://localhost:5173
-
-   # Optional: AWS Cognito (if using)
-   COGNITO_CLIENT_ID=your_cognito_client_id
-   COGNITO_CLIENT_SECRET=your_cognito_client_secret
-   COGNITO_DOMAIN=your-domain-prefix.auth.region.amazoncognito.com
-   COGNITO_USER_POOL_ID=your_user_pool_id
-   AWS_REGION=us-east-1
-
-   # Optional: Email (if using AWS SES)
-   AWS_SES_FROM=noreply@yourdomain.com
-   AWS_SES_REGION=us-east-1
-   AWS_ACCESS_KEY_ID=your_aws_key
-   AWS_SECRET_ACCESS_KEY=your_aws_secret
-   ```
-
-4. **Initialize the database**
-   ```bash
-   yarn db:setup
-   ```
-
-5. **Run the application**
-   ```bash
-   yarn dev
-   ```
-
-   The app will be available at `http://localhost:5173`
-
-## Development Scripts
-
-- `yarn dev` - Run Next.js development server
-- `yarn build` - Build for production
-- `yarn start` - Start production server
-
-### Database Management
-
-- `yarn db:setup` - Start Docker PostgreSQL and push schema
-- `yarn db:studio` - Open Drizzle Studio (database GUI)
-- `yarn docker:up` - Start PostgreSQL in Docker
-- `yarn docker:down` - Stop PostgreSQL container
-- `yarn docker:logs` - View PostgreSQL logs
-
-### AWS Cognito Infrastructure
-
-Deploy authentication infrastructure with AWS CDK:
+First, run the development server:
 
 ```bash
-# Install dependencies
-yarn cognito:install
-
-# Bootstrap CDK (first time only)
-yarn cognito:bootstrap
-
-# Deploy Cognito stack
-yarn cognito:deploy
-
-# Destroy stack (when done)
-yarn cognito:destroy
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-See [COGNITO_INTEGRATION.md](./COGNITO_INTEGRATION.md) for detailed setup.
+Open [:5173](http://localhost:5173/) with your browser to see the result.
 
-### OAuth Development with ngrok
+![alt text](image.png)
 
-OAuth providers require public URLs. Use ngrok to tunnel localhost during development.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-**Note:** The ngrok guides have been removed. For OAuth setup:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1. Install ngrok: https://ngrok.com/download
-2. Start ngrok: `ngrok http 5173`
-3. Copy the ngrok URL
-4. Update OAuth callback URLs in:
-   - AWS Cognito Console
-   - GitHub OAuth App settings
-   - Google Cloud Console
-5. Update environment variables with ngrok URL
-6. Restart dev server
+## Learn More
 
-## Deployment
+To learn more about Next.js, take a look at the following resources:
 
-### Deploy to Vercel
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-1. **Push to GitHub**
-   ```bash
-   git push origin main
-   ```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-2. **Import to Vercel**
-   - Go to [vercel.com/new](https://vercel.com/new)
-   - Import your repository
-   - Set root directory: `app`
-   - Framework: Next.js
+## Deploy on Vercel
 
-3. **Add Environment Variables**
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-   In Vercel Dashboard → Settings → Environment Variables:
-   ```bash
-   BETTER_AUTH_SECRET=<generated-secret>
-   BETTER_AUTH_URL=https://your-app.vercel.app
-   DATABASE_URL=<your-database-url>
-   ```
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-   Optional (if using):
-   - Cognito variables
-   - OAuth provider credentials
-   - AWS SES credentials
+### Better Auth workflow
 
-4. **Set Up Database**
+what better-auth does
 
-   Choose one:
-   - **Vercel Postgres**: Storage → Create Database → Postgres
-   - **Neon**: https://neon.tech
-   - **Supabase**: https://supabase.com
+1. Signup (email/password)
 
-5. **Deploy Cognito** (if using)
-   ```bash
-   # Configure packages/cognito/.env with production URLs
-   yarn cognito:deploy
-   ```
+    Frontend calls better-auth signup API (or the route provided by better-auth).
+    better-auth calls Cognito SignUp API for the configured User Pool.
+    If emailVerification.sendVerificationEmail is configured (it is), better-auth will call that callback with a verification URL that your app sends via SES (you implemented that).
+    Cognito's email verification flag should be enabled (or better-auth will require it). The user remains unconfirmed until they click the link.
 
-6. **Update OAuth Callbacks**
-   - AWS Cognito: Add `https://your-app.vercel.app/api/auth/callback/cognito`
-   - GitHub: Add `https://your-app.vercel.app/api/auth/callback/github`
-   - Google: Add `https://your-app.vercel.app/api/auth/callback/google`
+2. Email verification
 
-### Deployment Configuration
+    User clicks verification link (the URL you generated by better-auth).
+    The verification route exchanges code/params with Cognito (or uses admin confirm if configured) and marks the user confirmed.
+    If autoSignInAfterVerification: true, better-auth will sign them in automatically (returns session tokens).
 
-The project includes Vercel configuration files:
-- `vercel.json` - Root configuration
-- `app/vercel.json` - Next.js app configuration
+3. Sign-in / Session management
 
-## Tech Stack
+    Signing in triggers Cognito authentication (SRP or OAuth) and Cognito issues id/access/refresh tokens.
+    better-auth manages session cookies/tokens per the session config: it will use its configured lifetimes and should handle refresh token exchange with Cognito when access tokens expire (depending on the integration implementation).
+    Your Drizzle adapter can store session metadata or user mappings as needed (refresh token rotation metadata, API keys, etc.).
 
-### Frontend
-- **Framework**: Next.js 15 (App Router)
-- **Authentication**: Better Auth
-- **UI**: Tailwind CSS, shadcn/ui
-- **Email**: React Email, AWS SES
+4. Token refresh & expiry
 
-### Backend
-- **Database**: PostgreSQL
-- **ORM**: Drizzle
-- **Session**: JWT tokens
-- **OAuth**: AWS Cognito, GitHub, Google
+    accessTokenExpiresIn, refreshTokenExpiresIn, idleTimeout, etc., are taken from your SESSION_TIMEOUT constants and applied by better-auth.
+    Ensure Cognito's App Client is configured to issue refresh tokens for the same TTL you expect. Mismatch could lead to refresh attempts failing.
 
-### Infrastructure
-- **Hosting**: Vercel
-- **Database**: Vercel Postgres / Neon / Supabase
-- **Auth Infrastructure**: AWS Cognito (via CDK)
-- **Email**: AWS SES
+5. Social login (GitHub, Google)
 
-## Documentation
+    better-auth will initiate the OAuth redirect to Cognito's Hosted UI or to the provider via Cognito (depends on better-auth implementation).
+    Cognito must be configured with the social provider client IDs/secrets and callback URLs.
 
-- [COGNITO_INTEGRATION.md](./COGNITO_INTEGRATION.md) - AWS Cognito setup guide
-- [QUICK_START.md](./QUICK_START.md) - Quick start guide
-- [SETUP.md](./SETUP.md) - Detailed setup instructions
-- [app/README.md](./app/README.md) - Frontend documentation
+6. Magic-link
 
-## Environment Variables
+    better-auth provides a magic-link flow; when enabled it may either:
+    Use Cognito custom auth/CustomChallenge flows to implement magic links behind the scenes, or
+    Implement magic links in the better-auth layer (issuing one-time tokens stored in your DB and validating upon click).
+    Verify better-auth's Cognito adapter docs to confirm whether magic link relies on Cognito custom auth flows or on better-auth-native behavior.
 
-### Required
-- `DATABASE_URL` - PostgreSQL connection string
-- `BETTER_AUTH_SECRET` - Secret key for JWT signing (generate with `openssl rand -base64 32`)
-- `BETTER_AUTH_URL` - Your application URL
+7. Two-factor (2FA)
 
-### Optional - AWS Cognito
-- `COGNITO_CLIENT_ID` - From AWS Cognito
-- `COGNITO_CLIENT_SECRET` - From AWS Cognito
-- `COGNITO_DOMAIN` - Your Cognito domain
-- `COGNITO_USER_POOL_ID` - From AWS Cognito
-- `AWS_REGION` - AWS region
-
-### Optional - OAuth Providers
-- `GITHUB_CLIENT_ID` - From GitHub OAuth App
-- `GITHUB_CLIENT_SECRET` - From GitHub OAuth App
-- `GOOGLE_CLIENT_ID` - From Google Cloud Console
-- `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
-
-### Optional - Email (AWS SES)
-- `AWS_SES_FROM` - Sender email address
-- `AWS_SES_REGION` - AWS SES region
-- `AWS_ACCESS_KEY_ID` - AWS credentials
-- `AWS_SECRET_ACCESS_KEY` - AWS credentials
-
-## License
-
-MIT
-
-## Credits
-
-Continuation of [dreamsofcode-io/authly](https://github.com/dreamsofcode-io/authly)
+    The twoFactor() plugin enables 2FA support in better-auth.
+    Implementation details: it may integrate with TOTP secrets stored by better-auth (in DB) and use Cognito only for primary account. If you want Cognito-managed MFA, ensure the adapter supports mapping better-auth 2FA workflows with Cognito's MFA settings (or use better-auth's own TOTP flows).
