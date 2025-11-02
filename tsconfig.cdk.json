@@ -24,10 +24,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"types": ["node"]
 	},
-	"include": [
-		"src/bin/**/*.ts",
-		"src/app/aws/**/*.ts"
-	],
+	"include": ["src/bin/**/*.ts", "src/app/aws/**/*.ts"],
 	"exclude": [
 		"node_modules",
 		"cdk.out",

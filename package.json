@@ -21,6 +21,8 @@
 		"cdk:bootstrap": "cdk bootstrap",
 		"cdk:deploy": "cdk deploy --all",
 		"cdk:destroy": "cdk destroy --all",
+		"ses:verify": "pwsh -File verify-ses.ps1",
+		"ses:status": "aws ses get-send-quota && aws ses get-account-sending-enabled",
 		"biome:check": "biome check .",
 		"biome:fix": "biome check . --write",
 		"format": "biome format . --write"

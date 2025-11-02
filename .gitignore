@@ -10,15 +10,56 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Docker volumes
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# AWS CDK
+cdk.out/
+*.d.ts.map
+
+# Database
 postgres_data/
+*.db
+*.db-*
 
 # OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
 
-.next/*
-.next/
-.next/cache/
-.next/cache/
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+.history/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# AWS credentials (extra safety)
+.aws/
+credentials

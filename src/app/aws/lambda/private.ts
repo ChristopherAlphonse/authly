@@ -3,9 +3,7 @@ import type { APIGatewayProxyWithCognitoAuthorizerHandler } from "aws-lambda";
 const AllowedOrigins = [
 	(process.env.FRONT_END_URL as string) || "http://localhost:5173",
 ];
-export const handler: APIGatewayProxyWithCognitoAuthorizerHandler = async (
-	_event,
-) => {
+export const handler: APIGatewayProxyWithCognitoAuthorizerHandler = async () => {
 	return {
 		statusCode: 200,
 		body: JSON.stringify({ message: "Hello from Cognito Authorizer" }),

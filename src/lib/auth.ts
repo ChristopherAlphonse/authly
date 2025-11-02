@@ -1,12 +1,13 @@
 // Auth configuration using better-auth as FE client, proxying to AWS Cognito for all user management and sessions.
 // Reference: https://www.better-auth.com/docs/installation
 
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { apiKey, jwt, twoFactor } from "better-auth/plugins";
-import { sendVerificationEmail } from "@/email/aws-ses";
+
 import { SESSION_TIMEOUT } from "../constants/auth_constant";
+import { betterAuth } from "better-auth";
 import { db } from "../db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { sendVerificationEmail } from "@/email/aws-ses";
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
 
@@ -16,24 +17,31 @@ export const auth = betterAuth({
 		provider: "pg",
 	}),
 	socialProviders: {
-		cognito: {
-			clientId: (process.env.COGNITO_CLIENT_ID ??
-				process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID) as string,
-			clientSecret: (process.env.COGNITO_CLIENT_SECRET ??
-				process.env.NEXT_PUBLIC_COGNITO_CLIENT_SECRET) as string,
-			domain: (process.env.COGNITO_DOMAIN ??
-				process.env.NEXT_PUBLIC_COGNITO_DOMAIN) as string,
-			region: (process.env.AWS_REGION ??
-				process.env.NEXT_PUBLIC_AWS_REGION ??
-				process.env.AuthlyCognitoRegion ??
-				process.env.AUTHLY_COGNITO_REGION) as string,
-			userPoolId: (process.env.COGNITO_USER_POOL_ID ??
-				process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) as string,
-		},
-		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-		},
+		...(process.env.COGNITO_CLIENT_ID &&
+		process.env.COGNITO_CLIENT_SECRET &&
+		process.env.COGNITO_DOMAIN &&
+		process.env.COGNITO_USER_POOL_ID
+			? {
+					cognito: {
+						clientId: process.env.COGNITO_CLIENT_ID,
+						clientSecret: process.env.COGNITO_CLIENT_SECRET,
+						domain: process.env.COGNITO_DOMAIN,
+						region:
+							process.env.AWS_REGION ||
+							process.env.NEXT_PUBLIC_AWS_REGION ||
+							"us-east-1",
+						userPoolId: process.env.COGNITO_USER_POOL_ID,
+					},
+				}
+			: {}),
+		...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+			? {
+					google: {
+						clientId: process.env.GOOGLE_CLIENT_ID,
+						clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+					},
+				}
+			: {}),
 	},
 	emailAndPassword: {
 		enabled: true,

@@ -55,7 +55,7 @@ export class CognitoStack extends cdk.Stack {
 			},
 		);
 
-		const envPrefix = (globalThis as any).process?.env?.COGNITO_DOMAIN_PREFIX;
+		const envPrefix = process.env.COGNITO_DOMAIN_PREFIX;
 		const domainPrefix = props?.domainPrefix ?? envPrefix ?? "authly-default";
 
 		const domain = userPool.addDomain("CognitoDomain", {
