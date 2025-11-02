@@ -66,17 +66,30 @@ func main() {
 	router.Handle("/api/auth/verify", http.HandlerFunc(verifyAuthHandler))
 	router.Handle("/api/me", http.HandlerFunc(verifyAuthHandler))
 
+	// Get allowed origins from environment, default to localhost for development
+	allowedOrigins := []string{"http://localhost:5173"}
+	if origins := os.Getenv("ALLOWED_ORIGINS"); origins != "" {
+		allowedOrigins = []string{origins}
+	}
+
 	// Enable CORS
 	handler := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173"},
+		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Content-Type", "Authorization"},
 	}).Handler(middleware.Logging(logger, router))
 
-
-	port := ":8080"
+	// Get port from environment, default to 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if port[0] != ':' {
+		port = ":" + port
+	}
 
 	fmt.Println("Server starting on port", port)
+	fmt.Println("Allowed origins:", allowedOrigins)
 
 	if err := http.ListenAndServe(port, handler); err != nil {
 		log.Fatal("Server failed to start:", err)

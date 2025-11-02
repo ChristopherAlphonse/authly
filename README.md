@@ -182,4 +182,20 @@ Check the individual README files in each project directory for specific setup i
 - [Frontend Setup](/app/README.md)
 - [Backend Setup](/api/README.md)
 
+---
+
+## Deployment
+
+Ready to deploy to production? See the comprehensive deployment guide:
+
+📖 **[Deployment Guide](./DEPLOYMENT.md)**
+
+**Quick Overview:**
+- **Frontend**: Deploy to Vercel (optimized for Next.js)
+- **Backend**: Deploy to Railway, Fly.io, or Render (supports Go servers)
+- **Database**: Vercel Postgres, Neon, or Supabase
+- **Infrastructure**: AWS Cognito via CDK
+
+The guide includes step-by-step instructions, environment variable configuration, and troubleshooting tips.
+
 

@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd app && yarn build",
+  "devCommand": "cd app && yarn dev",
+  "installCommand": "yarn install && cd app && yarn install",
+  "framework": null,
+  "outputDirectory": "app/.next"
+}
+
