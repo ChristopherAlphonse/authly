@@ -1,9 +1,10 @@
-import path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+
 import type { Construct } from "constructs";
-import dotenv from "dotenv";
 import { GitHubProvider } from "./ghProvider";
+import dotenv from "dotenv";
+import path from "node:path";
 
 // Load package-local .env reliably regardless of cwd. The .env file is expected
 // to live at packages/cognito/.env relative to the repository root.
