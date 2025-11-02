@@ -89,12 +89,15 @@ export class CognitoStack extends cdk.Stack {
 			exportName: "AuthlyCognitoDomain",
 		});
 
-		new GitHubProvider(this, "GitHubProvider", {
-			clientId: process.env.GITHUB_CLIENT_ID ?? "",
-			clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-			userPool,
-			userPoolClient,
-			domain,
-		});
+		// Only add GitHub provider if credentials are provided
+		if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+			new GitHubProvider(this, "GitHubProvider", {
+				clientId: process.env.GITHUB_CLIENT_ID,
+				clientSecret: process.env.GITHUB_CLIENT_SECRET,
+				userPool,
+				userPoolClient,
+				domain,
+			});
+		}
 	}
 }

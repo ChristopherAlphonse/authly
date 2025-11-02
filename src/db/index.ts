@@ -1,6 +1,7 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
 import * as schema from "./schema";
+
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 
 // Use production database in production, local database in development
 const isProduction = process.env.NODE_ENV === "production";
