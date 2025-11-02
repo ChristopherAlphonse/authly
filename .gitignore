@@ -14,14 +14,6 @@ yarn-error.log*
 # Docker volumes
 postgres_data/
 
-# Build outputs
-api/bin/
-api/*.exe
-*.exe
-*.dll
-*.so
-*.dylib
-
 # OS files
 .DS_Store
 Thumbs.db

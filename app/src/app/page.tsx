@@ -1,5 +1,4 @@
 import { AuthStatus } from "@/components/auth-status";
-import { GoAPITest } from "@/components/go-api-test";
 import {
 	Card,
 	CardContent,
@@ -16,14 +15,12 @@ export default async function Home() {
 					<div className="text-center mb-8">
 						<h1 className="text-4xl font-bold mb-4">Authly</h1>
 						<p className="text-zinc-400 text-lg">
-							Authentication demo with Better Auth, Drizzle, and Go API
-							integration
+							Authentication demo with Better Auth and Drizzle
 						</p>
 					</div>
 
-					<div className="grid gap-6 md:grid-cols-2">
+					<div className="grid gap-6">
 						<AuthStatus />
-						<GoAPITest />
 					</div>
 
 					<div className="mt-8 text-center">
@@ -52,7 +49,7 @@ export default async function Home() {
 										<div className="text-2xl mb-2">🚀</div>
 										<h3 className="font-semibold text-white">Test API</h3>
 										<p className="text-zinc-400 text-sm">
-											Verify with Go server
+											Verify your API
 										</p>
 									</div>
 								</div>

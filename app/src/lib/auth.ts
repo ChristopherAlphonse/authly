@@ -44,10 +44,13 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 	emailVerification: {
-		sendOnSignUp: true,
+		sendOnSignUp: !!process.env.AWS_SES_FROM, // Only enable if AWS SES is configured
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
-			await sendVerificationEmail(user.email, url, user.email);
+			// Only send email if AWS SES is configured
+			if (process.env.AWS_SES_FROM) {
+				await sendVerificationEmail(user.email, url, user.email);
+			}
 		},
 	},
 	session: {

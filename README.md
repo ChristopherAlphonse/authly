@@ -1,201 +1,274 @@
-# Better-Auth with Go JWT Implementation
+# Authly - Modern Authentication with Better Auth
 
-Continuation of https://github.com/dreamsofcode-io/authly
+A modern, full-stack authentication solution built with Next.js, Better Auth, and AWS Cognito.
 
 ## Overview
 
-This implementation showcases a modern authentication flow where:
+This implementation showcases a modern authentication flow with:
 
-- The frontend uses Better-Auth (a TypeScript authentication library) with Next.js
-- The backend is built with Go and validates JWTs issued by Better-Auth
-- Authentication state is shared between the Next.js app and Go API using JWT tokens
+- **Frontend**: Next.js 15 with Better Auth
+- **Authentication**: Multiple providers (Email, Cognito, GitHub, Google)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Infrastructure**: AWS Cognito via CDK for OAuth
+- **Deployment**: Optimized for Vercel
+
+## Features
+
+- ✅ Email/Password Authentication
+- ✅ Magic Link Authentication
+- ✅ AWS Cognito OAuth Integration
+- ✅ GitHub OAuth (via Cognito)
+- ✅ Google OAuth
+- ✅ Email Verification (AWS SES)
+- ✅ JWT Session Management
+- ✅ Two-Factor Authentication
+- ✅ API Key Support
+- ✅ Protected Routes
+- ✅ Session Management
 
 ## Project Structure
 
-### [Frontend Application](/app)
-
-A Next.js application that implements:
-
-- User registration and login flows using Better-Auth
-- Session management with JWT tokens
-- Protected routes and authentication status display
-- Integration with PostgreSQL via Drizzle ORM
-
-### [Go API Backend](/api)
-
-A Go service that:
-
-- Validates JWT tokens issued by Better-Auth
-- Implements JWKS (JSON Web Key Set) endpoint for public key distribution
-- Provides protected API endpoints that require valid authentication
-- Includes middleware for JWT verification and request logging
-
-## How It Works
-
-1. **Authentication Flow**: Users authenticate through the Next.js frontend using Better-Auth, which handles user registration, login, and session management.
-
-2. **JWT Generation**: Better-Auth generates JWT tokens signed with a private key when users authenticate successfully.
-
-3. **Token Validation**: The Go backend validates these JWT tokens using the public key exposed through the JWKS endpoint, ensuring requests are from authenticated users.
-
-4. **Shared Authentication**: Both the Next.js app and Go API can verify the same JWT tokens, enabling seamless authentication across different services.
+```
+authly/
+├── app/                    # Next.js application
+│   ├── src/
+│   │   ├── app/           # App router pages
+│   │   ├── components/    # React components
+│   │   ├── lib/           # Auth configuration
+│   │   ├── db/            # Database schema & migrations
+│   │   └── email/         # Email templates (AWS SES)
+│   └── package.json
+├── packages/
+│   └── cognito/           # AWS CDK infrastructure
+└── package.json
+```
 
 ## Getting Started
 
-> **New to the project? Start here:** [Quick Start Guide](QUICK_START.md) - Get up and running in 5 minutes!
+> **New to the project? Start here:** [Quick Start Guide](QUICK_START.md)
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v20 or later)
-- [Go](https://golang.org/) (v1.21 or later)
 - [Docker](https://www.docker.com/) and Docker Compose
-- [ngrok](https://ngrok.com/) (for OAuth development with Cognito/GitHub) - Optional but recommended
+- [AWS Account](https://aws.amazon.com/) (for Cognito/SES - optional)
+- [ngrok](https://ngrok.com/) (for OAuth development - optional)
 
-### Quick Start - Full Setup
+### Quick Setup
 
-1. **Clone the repository**
+1. **Clone and install dependencies**
    ```bash
    git clone <repository-url>
    cd authly
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
+   yarn install
    cd app && yarn install && cd ..
    ```
 
-3. **Set up PostgreSQL with Docker**
+2. **Set up PostgreSQL with Docker**
    ```bash
-   npm run docker:up
+   yarn docker:up
    ```
 
-   This starts a PostgreSQL database using the official [postgres:14.19-alpine3.21](https://hub.docker.com/_/postgres) Docker image with the following configuration:
-   - **Host**: `localhost`
-   - **Port**: `5433` (to avoid conflicts with local PostgreSQL)
-   - **Database**: `authly`
-   - **User**: `authly`
-   - **Password**: `authly_dev_password`
+   This starts PostgreSQL on `localhost:5433` with:
+   - Database: `authly`
+   - User: `authly`
+   - Password: `authly_dev_password`
 
-4. **Configure environment variables**
+3. **Configure environment variables**
 
-   Create a `.env` file in the `app` directory with:
+   Create `app/.env.local`:
    ```bash
+   # Required
    DATABASE_URL=postgresql://authly:authly_dev_password@localhost:5433/authly
+   BETTER_AUTH_SECRET=<generate with: openssl rand -base64 32>
+   BETTER_AUTH_URL=http://localhost:5173
+
+   # Optional: AWS Cognito (if using)
+   COGNITO_CLIENT_ID=your_cognito_client_id
+   COGNITO_CLIENT_SECRET=your_cognito_client_secret
+   COGNITO_DOMAIN=your-domain-prefix.auth.region.amazoncognito.com
+   COGNITO_USER_POOL_ID=your_user_pool_id
+   AWS_REGION=us-east-1
+
+   # Optional: Email (if using AWS SES)
+   AWS_SES_FROM=noreply@yourdomain.com
+   AWS_SES_REGION=us-east-1
+   AWS_ACCESS_KEY_ID=your_aws_key
+   AWS_SECRET_ACCESS_KEY=your_aws_secret
    ```
 
-5. **Initialize the database**
+4. **Initialize the database**
    ```bash
-   npm run db:setup
+   yarn db:setup
    ```
 
-6. **Run the application**
+5. **Run the application**
    ```bash
-   npm run dev
+   yarn dev
    ```
 
-   This will start:
-   - Backend Go API on `http://localhost:8080`
-   - Frontend Next.js app on `http://localhost:5173`
+   The app will be available at `http://localhost:5173`
 
-### Docker Management
+## Development Scripts
 
-- `npm run docker:up` - Start PostgreSQL in Docker (detached mode)
-- `npm run docker:down` - Stop and remove PostgreSQL container
-- `npm run docker:logs` - View PostgreSQL logs
-- `npm run docker:restart` - Restart PostgreSQL container
+- `yarn dev` - Run Next.js development server
+- `yarn build` - Build for production
+- `yarn start` - Start production server
 
 ### Database Management
 
-- `npm run db:setup` - Start Docker PostgreSQL and push schema
-- `npm run db:studio` - Open Drizzle Studio (database GUI)
-
-### Development Scripts
-
-- `npm run dev` - Run both backend and frontend in development mode
-- `npm run dev:backend` - Run only the Go API backend
-- `npm run dev:frontend` - Run only the Next.js frontend
-- `npm run start` - Run both services in production mode
-
-### Build Scripts
-
-- `npm run build` - Build both backend and frontend for production
-- `npm run build:backend` - Build only the Go API backend (outputs to `api/bin/authly-api`)
-- `npm run build:frontend` - Build only the Next.js frontend (outputs to `app/.next`)
-
-### OAuth Development with ngrok
-
-OAuth providers like AWS Cognito and GitHub require public URLs for callbacks. Use ngrok to tunnel your localhost:
-
-**Quick Setup (5 minutes):**
-
-1. **Start your dev servers:**
-   ```bash
-   npm run dev
-   ```
-
-2. **Start ngrok in a new terminal:**
-   ```bash
-   ngrok http 5173
-   ```
-
-3. **Copy your ngrok URL** (e.g., `https://abc123.ngrok-free.app`)
-
-4. **Run the setup script:**
-   ```powershell
-   # Windows PowerShell
-   .\scripts\setup-ngrok.ps1 https://abc123.ngrok-free.app
-   ```
-   ```bash
-   # Mac/Linux
-   ./scripts/setup-ngrok.sh https://abc123.ngrok-free.app
-   ```
-
-5. **Update AWS Cognito** with your ngrok callback URL
-
-📖 **Full guide:** [NGROK_QUICK_START.md](./NGROK_QUICK_START.md) | [Detailed Setup](./ngrok-setup.md)
+- `yarn db:setup` - Start Docker PostgreSQL and push schema
+- `yarn db:studio` - Open Drizzle Studio (database GUI)
+- `yarn docker:up` - Start PostgreSQL in Docker
+- `yarn docker:down` - Stop PostgreSQL container
+- `yarn docker:logs` - View PostgreSQL logs
 
 ### AWS Cognito Infrastructure
 
 Deploy authentication infrastructure with AWS CDK:
 
 ```bash
-# Install Cognito CDK dependencies
-npm run cognito:install
+# Install dependencies
+yarn cognito:install
 
 # Bootstrap CDK (first time only)
-npm run cognito:bootstrap
+yarn cognito:bootstrap
 
 # Deploy Cognito stack
-npm run cognito:deploy
+yarn cognito:deploy
 
-# Destroy Cognito stack (when done)
-npm run cognito:destroy
+# Destroy stack (when done)
+yarn cognito:destroy
 ```
 
 See [COGNITO_INTEGRATION.md](./COGNITO_INTEGRATION.md) for detailed setup.
 
-### Individual Service Setup
+### OAuth Development with ngrok
 
-Check the individual README files in each project directory for specific setup instructions:
+OAuth providers require public URLs. Use ngrok to tunnel localhost during development.
 
-- [Frontend Setup](/app/README.md)
-- [Backend Setup](/api/README.md)
+**Note:** The ngrok guides have been removed. For OAuth setup:
 
----
+1. Install ngrok: https://ngrok.com/download
+2. Start ngrok: `ngrok http 5173`
+3. Copy the ngrok URL
+4. Update OAuth callback URLs in:
+   - AWS Cognito Console
+   - GitHub OAuth App settings
+   - Google Cloud Console
+5. Update environment variables with ngrok URL
+6. Restart dev server
 
 ## Deployment
 
-Ready to deploy to production? See the comprehensive deployment guide:
+### Deploy to Vercel
 
-📖 **[Deployment Guide](./DEPLOYMENT.md)**
+1. **Push to GitHub**
+   ```bash
+   git push origin main
+   ```
 
-**Quick Overview:**
-- **Frontend**: Deploy to Vercel (optimized for Next.js)
-- **Backend**: Deploy to Railway, Fly.io, or Render (supports Go servers)
-- **Database**: Vercel Postgres, Neon, or Supabase
-- **Infrastructure**: AWS Cognito via CDK
+2. **Import to Vercel**
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your repository
+   - Set root directory: `app`
+   - Framework: Next.js
 
-The guide includes step-by-step instructions, environment variable configuration, and troubleshooting tips.
+3. **Add Environment Variables**
+   
+   In Vercel Dashboard → Settings → Environment Variables:
+   ```bash
+   BETTER_AUTH_SECRET=<generated-secret>
+   BETTER_AUTH_URL=https://your-app.vercel.app
+   DATABASE_URL=<your-database-url>
+   ```
 
+   Optional (if using):
+   - Cognito variables
+   - OAuth provider credentials
+   - AWS SES credentials
 
+4. **Set Up Database**
+   
+   Choose one:
+   - **Vercel Postgres**: Storage → Create Database → Postgres
+   - **Neon**: https://neon.tech
+   - **Supabase**: https://supabase.com
+
+5. **Deploy Cognito** (if using)
+   ```bash
+   # Configure packages/cognito/.env with production URLs
+   yarn cognito:deploy
+   ```
+
+6. **Update OAuth Callbacks**
+   - AWS Cognito: Add `https://your-app.vercel.app/api/auth/callback/cognito`
+   - GitHub: Add `https://your-app.vercel.app/api/auth/callback/github`
+   - Google: Add `https://your-app.vercel.app/api/auth/callback/google`
+
+### Deployment Configuration
+
+The project includes Vercel configuration files:
+- `vercel.json` - Root configuration
+- `app/vercel.json` - Next.js app configuration
+
+## Tech Stack
+
+### Frontend
+- **Framework**: Next.js 15 (App Router)
+- **Authentication**: Better Auth
+- **UI**: Tailwind CSS, shadcn/ui
+- **Email**: React Email, AWS SES
+
+### Backend
+- **Database**: PostgreSQL
+- **ORM**: Drizzle
+- **Session**: JWT tokens
+- **OAuth**: AWS Cognito, GitHub, Google
+
+### Infrastructure
+- **Hosting**: Vercel
+- **Database**: Vercel Postgres / Neon / Supabase
+- **Auth Infrastructure**: AWS Cognito (via CDK)
+- **Email**: AWS SES
+
+## Documentation
+
+- [COGNITO_INTEGRATION.md](./COGNITO_INTEGRATION.md) - AWS Cognito setup guide
+- [QUICK_START.md](./QUICK_START.md) - Quick start guide
+- [SETUP.md](./SETUP.md) - Detailed setup instructions
+- [app/README.md](./app/README.md) - Frontend documentation
+
+## Environment Variables
+
+### Required
+- `DATABASE_URL` - PostgreSQL connection string
+- `BETTER_AUTH_SECRET` - Secret key for JWT signing (generate with `openssl rand -base64 32`)
+- `BETTER_AUTH_URL` - Your application URL
+
+### Optional - AWS Cognito
+- `COGNITO_CLIENT_ID` - From AWS Cognito
+- `COGNITO_CLIENT_SECRET` - From AWS Cognito
+- `COGNITO_DOMAIN` - Your Cognito domain
+- `COGNITO_USER_POOL_ID` - From AWS Cognito
+- `AWS_REGION` - AWS region
+
+### Optional - OAuth Providers
+- `GITHUB_CLIENT_ID` - From GitHub OAuth App
+- `GITHUB_CLIENT_SECRET` - From GitHub OAuth App
+- `GOOGLE_CLIENT_ID` - From Google Cloud Console
+- `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
+
+### Optional - Email (AWS SES)
+- `AWS_SES_FROM` - Sender email address
+- `AWS_SES_REGION` - AWS SES region
+- `AWS_ACCESS_KEY_ID` - AWS credentials
+- `AWS_SECRET_ACCESS_KEY` - AWS credentials
+
+## License
+
+MIT
+
+## Credits
+
+Continuation of [dreamsofcode-io/authly](https://github.com/dreamsofcode-io/authly)

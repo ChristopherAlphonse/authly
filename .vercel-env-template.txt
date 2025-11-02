@@ -15,9 +15,6 @@ AWS_REGION=<from CDK output, e.g., us-east-1>
 # Database (choose one)
 DATABASE_URL=<from Vercel Postgres / Neon / Supabase>
 
-# Backend API URL (after deploying to Railway)
-GO_API_URL=https://your-api.up.railway.app
-NEXT_PUBLIC_GO_API_URL=https://your-api.up.railway.app
 
 # OAuth Providers (optional, if using)
 GITHUB_CLIENT_ID=<from GitHub Settings → Developer settings → OAuth Apps>
