@@ -1,7 +1,6 @@
-import type { NextRequest, NextResponse } from "next/server";
-
-import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
+import type { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 
@@ -61,7 +60,8 @@ const addCorsHeaders = (
 // Handle OPTIONS for CORS preflight
 export async function OPTIONS(request: NextRequest) {
 	const origin = request.headers.get("origin");
-	const allowedOrigin = origin && isAllowedOrigin(origin) ? origin : "http://localhost:5173";
+	const allowedOrigin =
+		origin && isAllowedOrigin(origin) ? origin : "http://localhost:5173";
 
 	return new Response(null, {
 		status: 204,
@@ -76,9 +76,7 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 // Wrap handlers to add CORS headers
-export async function POST(
-	request: NextRequest,
-): Promise<NextResponse> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
 		const response = await basePOST(request);
