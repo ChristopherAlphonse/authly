@@ -12,6 +12,7 @@
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
 		"db:setup": "yarn docker:up && yarn db:push",
+		"db:reset": "docker exec -i authly-postgres psql -U authly -d authly -c \"DROP SCHEMA public CASCADE; CREATE SCHEMA public;\" && yarn db:push",
 		"docker:up": "docker-compose up -d",
 		"docker:down": "docker-compose down",
 		"docker:logs": "docker-compose logs -f",
