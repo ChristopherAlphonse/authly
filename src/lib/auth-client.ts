@@ -4,12 +4,13 @@ import { jwtClient } from "better-auth/client/plugins";
 const getBaseURL = () => {
 
 	if (typeof window !== "undefined") {
-		if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-			return "http://localhost:5173";
-		}
+		return ""; // relative URLs => same origin (e.g. https://authly-red.vercel.app)
 	}
 
-	return process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:5173";
+	const envUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL;
+	if (envUrl && typeof envUrl === "string") return envUrl.replace(/\/+$/, "");
+
+	return "http://localhost:5173";
 };
 
 export const authClient = createAuthClient({
