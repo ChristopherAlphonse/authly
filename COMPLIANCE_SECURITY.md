@@ -1,10 +1,6 @@
-# 🔐 Finance App Compliance & Security
 
-## ✅ Why AWS Cognito for OAuth (Finance App Requirement)
 
-For **finance applications**, **ALL OAuth flows MUST go through AWS Cognito** to ensure compliance and security.
-
-### 🛡️ Compliance Benefits
+### Compliance Benefits
 
 1. **SOC 2 Type II Compliance**
    - AWS Cognito is SOC 2 certified
@@ -28,7 +24,7 @@ For **finance applications**, **ALL OAuth flows MUST go through AWS Cognito** to
 
 ---
 
-## 🏗️ Architecture: Better Auth → Cognito → OAuth Providers
+##  Architecture: Better Auth → Cognito → OAuth Providers
 
 ```
 User → Better Auth → Cognito Hosted UI → Google/GitHub → Cognito → Better Auth → User Session
@@ -45,7 +41,7 @@ User → Better Auth → Cognito Hosted UI → Google/GitHub → Cognito → Bet
 
 ---
 
-## 🔒 Security Benefits
+##  Security Benefits
 
 ### 1. **Centralized Authentication**
 - All auth flows go through Cognito
@@ -74,48 +70,25 @@ User → Better Auth → Cognito Hosted UI → Google/GitHub → Cognito → Bet
 - **Password policies** (complexity, rotation)
 - **Device tracking**
 
----
 
-## 🚫 Why NOT Direct OAuth (for Finance Apps)
-
-### ❌ Security Risks:
-1. **No centralized audit trail**
-   - Harder to track OAuth events
-   - Compliance gaps
-
-2. **Secret management in application**
-   - OAuth secrets in `.env` files
-   - Risk of accidental exposure
-
-3. **No enterprise controls**
-   - Missing MFA policies
-   - Limited access controls
-
-4. **Compliance gaps**
-   - May not meet SOC 2/ISO requirements
-   - Audit trail incomplete
-
-5. **Token management complexity**
-   - Manual token refresh handling
-   - Security vulnerabilities
 
 ---
 
-## ✅ Current Configuration
+##  Current Configuration
 
 ### OAuth Flow:
-- ✅ **Google OAuth** → Configured in Cognito (built-in provider)
-- ✅ **GitHub OAuth** → Configured in Cognito (OIDC provider)
-- ✅ **All flows** → Go through Cognito Hosted UI
+-  **Google OAuth** → Configured in Cognito (built-in provider)
+-  **GitHub OAuth** → Configured in Cognito (OIDC provider)
+-  **All flows** → Go through Cognito Hosted UI
 
 ### Better Auth:
-- ✅ **Cognito provider only** → No direct OAuth
-- ✅ **Session management** → Uses Cognito tokens
-- ✅ **User data** → Stored in database with Cognito user IDs
+-  **Cognito provider only** → No direct OAuth
+-  **Session management** → Uses Cognito tokens
+-  **User data** → Stored in database with Cognito user IDs
 
 ---
 
-## 📋 Environment Variables Required
+##  Environment Variables Required
 
 ```bash
 # Cognito (REQUIRED for OAuth)
@@ -135,12 +108,12 @@ GITHUB_CLIENT_SECRET=your-github-secret
 
 ---
 
-## 🔍 Audit & Compliance Checklist
+##  Audit & Compliance Checklist
 
-- ✅ All OAuth flows go through Cognito
-- ✅ CloudTrail logging enabled
-- ✅ Cognito User Pool configured with MFA
-- ✅ Password policies enforced
+-  All OAuth flows go through Cognito
+-  CloudTrail logging enabled
+- Cognito User Pool configured with MFA
+-  Password policies enforced
 - ✅ Session timeouts configured
 - ✅ Email verification required
 - ✅ Secrets stored securely (not in code)

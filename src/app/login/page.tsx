@@ -157,24 +157,22 @@ export default function LoginPage() {
 		}
 	};
 
-	const handleGitHubSignIn = async () => {
-		try {
-			await authClient.signIn.social({
-				provider: "github",
-			});
-		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
-		}
+	// For Cognito OAuth: Redirect directly to Cognito Hosted UI with identity provider
+	// All OAuth flows go through Cognito for finance app compliance
+	const handleGitHubSignIn = () => {
+		if (typeof window === "undefined") return;
+		const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
+		const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
+		const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
+		window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=GitHub`;
 	};
 
-	const handleGoogleSignIn = async () => {
-		try {
-			await authClient.signIn.social({
-				provider: "google",
-			});
-		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
-		}
+	const handleGoogleSignIn = () => {
+		if (typeof window === "undefined") return;
+		const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN || "authly-default";
+		const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "";
+		const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/cognito`);
+		window.location.href = `https://${cognitoDomain}.auth.us-east-1.amazoncognito.com/oauth2/authorize?client_id=${clientId}&response_type=code&scope=openid+email+profile&redirect_uri=${redirectUri}&identity_provider=Google`;
 	};
 
 	return (
