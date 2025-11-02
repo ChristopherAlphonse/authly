@@ -175,7 +175,7 @@ OAuth providers require public URLs. Use ngrok to tunnel localhost during develo
    - Framework: Next.js
 
 3. **Add Environment Variables**
-   
+
    In Vercel Dashboard → Settings → Environment Variables:
    ```bash
    BETTER_AUTH_SECRET=<generated-secret>
@@ -189,7 +189,7 @@ OAuth providers require public URLs. Use ngrok to tunnel localhost during develo
    - AWS SES credentials
 
 4. **Set Up Database**
-   
+
    Choose one:
    - **Vercel Postgres**: Storage → Create Database → Postgres
    - **Neon**: https://neon.tech
