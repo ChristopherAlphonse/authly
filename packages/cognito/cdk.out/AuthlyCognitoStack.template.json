@@ -1,0 +1,1457 @@
+{
+ "Resources": {
+  "AuthlyUserPool0B74421D": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_phone_number",
+       "Priority": 1
+      },
+      {
+       "Name": "verified_email",
+       "Priority": 2
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "AutoVerifiedAttributes": [
+     "email"
+    ],
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "Schema": [
+     {
+      "Mutable": true,
+      "Name": "email",
+      "Required": true
+     }
+    ],
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolName": "authly-user-pool",
+    "UsernameAttributes": [
+     "email"
+    ],
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/AuthlyUserPool/Resource"
+   }
+  },
+  "AuthlyUserPoolCognitoDomain1CC605A7": {
+   "Type": "AWS::Cognito::UserPoolDomain",
+   "Properties": {
+    "Domain": "test-chris-domain-github",
+    "UserPoolId": {
+     "Ref": "AuthlyUserPool0B74421D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/AuthlyUserPool/CognitoDomain/Resource"
+   }
+  },
+  "AuthlyUserPoolClientEB98237F": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "openid",
+     "email",
+     "profile"
+    ],
+    "CallbackURLs": [
+     "http://localhost:5173/api/auth/callback/cognito"
+    ],
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": true,
+    "PreventUserExistenceErrors": "ENABLED",
+    "SupportedIdentityProviders": [
+     "COGNITO",
+     {
+      "Ref": "GitHubProviderA784964A"
+     }
+    ],
+    "UserPoolId": {
+     "Ref": "AuthlyUserPool0B74421D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/AuthlyUserPoolClient/Resource"
+   }
+  },
+  "GitHubProviderUserLambdaServiceRole62B4C622": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/UserLambda/ServiceRole/Resource"
+   }
+  },
+  "GitHubProviderUserLambdaCF259DA3": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "52122c84d59e16b022d5f94fae01aa7db451ae87b05168c49de608986d8266d2.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GitHubProviderUserLambdaServiceRole62B4C622",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "GitHubProviderUserLambdaServiceRole62B4C622"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/UserLambda/Resource",
+    "aws:asset:path": "asset.52122c84d59e16b022d5f94fae01aa7db451ae87b05168c49de608986d8266d2",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GitHubProviderTokenLambdaServiceRole9803FDCA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/ServiceRole/Resource"
+   }
+  },
+  "GitHubProviderTokenLambda6AFCA867": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "961620159d9b06d71b46915560f48fc88de2f9d5127c126711b2dfdb5a296eca.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GitHubProviderTokenLambdaServiceRole9803FDCA",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "GitHubProviderTokenLambdaServiceRole9803FDCA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/Resource",
+    "aws:asset:path": "asset.961620159d9b06d71b46915560f48fc88de2f9d5127c126711b2dfdb5a296eca",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GitHubProviderPrivateLambdaServiceRoleDE1B074C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/ServiceRole/Resource"
+   }
+  },
+  "GitHubProviderPrivateLambda826D5FEF": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "115840adeac1466e0b8e1928408092489835e45d1ed7bd69bd7ee858ec0421f9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "GitHubProviderPrivateLambdaServiceRoleDE1B074C",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "GitHubProviderPrivateLambdaServiceRoleDE1B074C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/Resource",
+    "aws:asset:path": "asset.115840adeac1466e0b8e1928408092489835e45d1ed7bd69bd7ee858ec0421f9",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "GitHubProviderAPIGateway1D8B291E": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "this is for GitHub API Login",
+    "EndpointConfiguration": {
+     "Types": [
+      "REGIONAL"
+     ]
+    },
+    "Name": "GitHub API Gateway"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayCloudWatchRole82359D77": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/CloudWatchRole/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayAccount40499E22": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "GitHubProviderAPIGatewayCloudWatchRole82359D77",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "GitHubProviderAPIGateway1D8B291E"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Account"
+   }
+  },
+  "GitHubProviderAPIGatewayDeploymentD85FF7FA9cf8c6ad311d7544ede1979c7fdaccc3": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "this is for GitHub API Login",
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "DependsOn": [
+    "GitHubProviderAPIGatewayOPTIONSD25A4B34",
+    "GitHubProviderAPIGatewayprivateGET838D9399",
+    "GitHubProviderAPIGatewayprivateOPTIONS821D9952",
+    "GitHubProviderAPIGatewayprivate0E219223",
+    "GitHubProviderAPIGatewaytokenOPTIONS83763E36",
+    "GitHubProviderAPIGatewaytokenPOST45A26F0E",
+    "GitHubProviderAPIGatewaytoken70B4B964",
+    "GitHubProviderAPIGatewayuserGETFBD839C9",
+    "GitHubProviderAPIGatewayuserOPTIONSEE42B2BC",
+    "GitHubProviderAPIGatewayuser06B32E35"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Deployment/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayDeploymentStageprodD316AD28": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "GitHubProviderAPIGatewayDeploymentD85FF7FA9cf8c6ad311d7544ede1979c7fdaccc3"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    },
+    "StageName": "prod"
+   },
+   "DependsOn": [
+    "GitHubProviderAPIGatewayAccount40499E22"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/DeploymentStage.prod/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayOPTIONSD25A4B34": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "GitHubProviderAPIGateway1D8B291E",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/OPTIONS/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayuser06B32E35": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "GitHubProviderAPIGateway1D8B291E",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "user",
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayuserOPTIONSEE42B2BC": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewayuser06B32E35"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/OPTIONS/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayuserGETApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETuserEA34413D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderUserLambdaCF259DA3",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/",
+       {
+        "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+       },
+       "/GET/user"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user"
+   }
+  },
+  "GitHubProviderAPIGatewayuserGETApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETuser5F9D3397": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderUserLambdaCF259DA3",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/test-invoke-stage/GET/user"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user"
+   }
+  },
+  "GitHubProviderAPIGatewayuserGETFBD839C9": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GitHubProviderUserLambdaCF259DA3",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewayuser06B32E35"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewaytoken70B4B964": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "GitHubProviderAPIGateway1D8B291E",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "token",
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewaytokenOPTIONS83763E36": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewaytoken70B4B964"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/OPTIONS/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewaytokenPOSTApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34POSTtokenDB398782": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderTokenLambda6AFCA867",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/",
+       {
+        "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+       },
+       "/POST/token"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token"
+   }
+  },
+  "GitHubProviderAPIGatewaytokenPOSTApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34POSTtokenC9B9D6A8": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderTokenLambda6AFCA867",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/test-invoke-stage/POST/token"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token"
+   }
+  },
+  "GitHubProviderAPIGatewaytokenPOST45A26F0E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GitHubProviderTokenLambda6AFCA867",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewaytoken70B4B964"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayprivate0E219223": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "GitHubProviderAPIGateway1D8B291E",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "private",
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayprivateOPTIONS821D9952": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewayprivate0E219223"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/OPTIONS/Resource"
+   }
+  },
+  "GitHubProviderAPIGatewayprivateGETApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETprivate01148B74": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderPrivateLambda826D5FEF",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/",
+       {
+        "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+       },
+       "/GET/private"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private"
+   }
+  },
+  "GitHubProviderAPIGatewayprivateGETApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETprivateE70A5F70": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GitHubProviderPrivateLambda826D5FEF",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "GitHubProviderAPIGateway1D8B291E"
+       },
+       "/test-invoke-stage/GET/private"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private"
+   }
+  },
+  "GitHubProviderAPIGatewayprivateGET838D9399": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "GitHubProviderUserPoolAuthorizerGithubE23A58EA"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GitHubProviderPrivateLambda826D5FEF",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "GitHubProviderAPIGatewayprivate0E219223"
+    },
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/Resource"
+   }
+  },
+  "GitHubProviderUserPoolAuthorizerGithubE23A58EA": {
+   "Type": "AWS::ApiGateway::Authorizer",
+   "Properties": {
+    "IdentitySource": "method.request.header.Authorization",
+    "Name": "UserPoolAuthorizer",
+    "ProviderARNs": [
+     {
+      "Fn::GetAtt": [
+       "AuthlyUserPool0B74421D",
+       "Arn"
+      ]
+     }
+    ],
+    "RestApiId": {
+     "Ref": "GitHubProviderAPIGateway1D8B291E"
+    },
+    "Type": "COGNITO_USER_POOLS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/UserPoolAuthorizerGithub"
+   }
+  },
+  "GitHubProviderA784964A": {
+   "Type": "AWS::Cognito::UserPoolIdentityProvider",
+   "Properties": {
+    "AttributeMapping": {
+     "email": "email",
+     "preferred_username": "name",
+     "picture": "avatar_url"
+    },
+    "ProviderDetails": {
+     "client_id": "Ov23liQCEJ7DcGJ9zOp0",
+     "client_secret": "b1e482527ce7af2ca561cd55c23e36e6a5b50621",
+     "authorize_scopes": "openid user",
+     "attributes_request_method": "GET",
+     "oidc_issuer": "https://github.com",
+     "authorize_url": "https://github.com/login/oauth/authorize",
+     "token_url": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Ref": "GitHubProviderAPIGateway1D8B291E"
+        },
+        ".execute-api.",
+        {
+         "Ref": "AWS::Region"
+        },
+        ".",
+        {
+         "Ref": "AWS::URLSuffix"
+        },
+        "/",
+        {
+         "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+        },
+        "/token"
+       ]
+      ]
+     },
+     "attributes_url": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Ref": "GitHubProviderAPIGateway1D8B291E"
+        },
+        ".execute-api.",
+        {
+         "Ref": "AWS::Region"
+        },
+        ".",
+        {
+         "Ref": "AWS::URLSuffix"
+        },
+        "/",
+        {
+         "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+        },
+        "/user"
+       ]
+      ]
+     },
+     "jwks_uri": {
+      "Fn::Join": [
+       "",
+       [
+        "https://",
+        {
+         "Ref": "GitHubProviderAPIGateway1D8B291E"
+        },
+        ".execute-api.",
+        {
+         "Ref": "AWS::Region"
+        },
+        ".",
+        {
+         "Ref": "AWS::URLSuffix"
+        },
+        "/",
+        {
+         "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+        },
+        "/token"
+       ]
+      ]
+     }
+    },
+    "ProviderName": "GitHub",
+    "ProviderType": "OIDC",
+    "UserPoolId": {
+     "Ref": "AuthlyUserPool0B74421D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/GitHubProvider/GitHubProvider/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11QwW7CMAz9Fu4l68ppx1I0aYcNVLQzCokphjauYgfEqv771NJCxem95+c820nUe/yh4pm+8tzY87zEvWq2os050lfeNYYKh0Kq+WXwG6Iyyg7uwUeyokqjm1pDZZRZieBk2jBURvllwQnKbePpghb8Gq2Ztr/6bVTqam/1zpGFE6ufHj6DM4LkItSVanIqocvosI14sdPMIKzSDiJeqGUwZ5ClZhjSVJMd3CMkO7gN+AqZkVwb6RoLLXDVN9XkwJLW2Kc/aWoMBSfRCuqSbtVw8URtRRf9SneSA1PwBvoNvkGOZDtzYKM7DHnwNMiRPP6Bb9tOr4PUQZ7t/XndAHTF69uMnEXpz+k+Tp347ZIkKolVPDsx4twHJ1iByu/4D9CoQeQfAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AuthlyCognitoStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "CognitoUserPoolId": {
+   "Description": "Cognito User Pool Id for Authly",
+   "Value": {
+    "Ref": "AuthlyUserPool0B74421D"
+   },
+   "Export": {
+    "Name": "AuthlyUserPoolId"
+   }
+  },
+  "CognitoUserPoolClientId": {
+   "Description": "Cognito User Pool Client Id for Authly",
+   "Value": {
+    "Ref": "AuthlyUserPoolClientEB98237F"
+   },
+   "Export": {
+    "Name": "AuthlyUserPoolClientId"
+   }
+  },
+  "Region": {
+   "Description": "AWS Region where the stack is deployed",
+   "Value": {
+    "Ref": "AWS::Region"
+   },
+   "Export": {
+    "Name": "AuthlyCognitoRegion"
+   }
+  },
+  "CognitoDomain": {
+   "Description": "Cognito Hosted UI Domain",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "test-chris-domain-github.auth.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".amazoncognito.com"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "AuthlyCognitoDomain"
+   }
+  },
+  "GitHubProviderAPIGatewayEndpointCCC62C06": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "GitHubProviderAPIGateway1D8B291E"
+      },
+      ".execute-api.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-2"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

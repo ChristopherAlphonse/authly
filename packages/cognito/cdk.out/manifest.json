@@ -1,0 +1,293 @@
+{
+  "version": "35.0.0",
+  "artifacts": {
+    "AuthlyCognitoStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "AuthlyCognitoStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "AuthlyCognitoStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "AuthlyCognitoStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f602fe12975ea0c6532c2a20781f97ccb9d1ce0a381a08b3d458247816846c10.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "AuthlyCognitoStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "AuthlyCognitoStack.assets"
+      ],
+      "metadata": {
+        "/AuthlyCognitoStack/AuthlyUserPool/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AuthlyUserPool0B74421D"
+          }
+        ],
+        "/AuthlyCognitoStack/AuthlyUserPool/CognitoDomain/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AuthlyUserPoolCognitoDomain1CC605A7"
+          }
+        ],
+        "/AuthlyCognitoStack/AuthlyUserPoolClient/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AuthlyUserPoolClientEB98237F"
+          }
+        ],
+        "/AuthlyCognitoStack/CognitoUserPoolId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CognitoUserPoolId"
+          }
+        ],
+        "/AuthlyCognitoStack/CognitoUserPoolClientId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CognitoUserPoolClientId"
+          }
+        ],
+        "/AuthlyCognitoStack/Region": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Region"
+          }
+        ],
+        "/AuthlyCognitoStack/CognitoDomain": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CognitoDomain"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/UserLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderUserLambdaServiceRole62B4C622"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/UserLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderUserLambdaCF259DA3"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/TokenLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderTokenLambdaServiceRole9803FDCA"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/TokenLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderTokenLambda6AFCA867"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/PrivateLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderPrivateLambdaServiceRoleDE1B074C"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/PrivateLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderPrivateLambda826D5FEF"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGateway1D8B291E"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/CloudWatchRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayCloudWatchRole82359D77"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Account": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayAccount40499E22"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Deployment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayDeploymentD85FF7FA9cf8c6ad311d7544ede1979c7fdaccc3"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/DeploymentStage.prod/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Endpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayEndpointCCC62C06"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayOPTIONSD25A4B34"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayuser06B32E35"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayuserOPTIONSEE42B2BC"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayuserGETApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETuserEA34413D"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayuserGETApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETuser5F9D3397"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayuserGETFBD839C9"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewaytoken70B4B964"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewaytokenOPTIONS83763E36"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewaytokenPOSTApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34POSTtokenDB398782"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewaytokenPOSTApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34POSTtokenC9B9D6A8"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewaytokenPOST45A26F0E"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayprivate0E219223"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayprivateOPTIONS821D9952"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayprivateGETApiPermissionAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETprivate01148B74"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayprivateGETApiPermissionTestAuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34GETprivateE70A5F70"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderAPIGatewayprivateGET838D9399"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/UserPoolAuthorizerGithub": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderUserPoolAuthorizerGithubE23A58EA"
+          }
+        ],
+        "/AuthlyCognitoStack/GitHubProvider/GitHubProvider/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GitHubProviderA784964A"
+          }
+        ],
+        "/AuthlyCognitoStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/AuthlyCognitoStack/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/AuthlyCognitoStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/AuthlyCognitoStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "AuthlyCognitoStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

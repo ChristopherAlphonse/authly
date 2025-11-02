@@ -1,0 +1,1743 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "AuthlyCognitoStack": {
+        "id": "AuthlyCognitoStack",
+        "path": "AuthlyCognitoStack",
+        "children": {
+          "AuthlyUserPool": {
+            "id": "AuthlyUserPool",
+            "path": "AuthlyCognitoStack/AuthlyUserPool",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "AuthlyCognitoStack/AuthlyUserPool/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Cognito::UserPool",
+                  "aws:cdk:cloudformation:props": {
+                    "accountRecoverySetting": {
+                      "recoveryMechanisms": [
+                        {
+                          "name": "verified_phone_number",
+                          "priority": 1
+                        },
+                        {
+                          "name": "verified_email",
+                          "priority": 2
+                        }
+                      ]
+                    },
+                    "adminCreateUserConfig": {
+                      "allowAdminCreateUserOnly": false
+                    },
+                    "autoVerifiedAttributes": [
+                      "email"
+                    ],
+                    "emailVerificationMessage": "The verification code to your new account is {####}",
+                    "emailVerificationSubject": "Verify your new account",
+                    "schema": [
+                      {
+                        "name": "email",
+                        "mutable": true,
+                        "required": true
+                      }
+                    ],
+                    "smsVerificationMessage": "The verification code to your new account is {####}",
+                    "usernameAttributes": [
+                      "email"
+                    ],
+                    "userPoolName": "authly-user-pool",
+                    "verificationMessageTemplate": {
+                      "defaultEmailOption": "CONFIRM_WITH_CODE",
+                      "emailMessage": "The verification code to your new account is {####}",
+                      "emailSubject": "Verify your new account",
+                      "smsMessage": "The verification code to your new account is {####}"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.CfnUserPool",
+                  "version": "2.109.0"
+                }
+              },
+              "CognitoDomain": {
+                "id": "CognitoDomain",
+                "path": "AuthlyCognitoStack/AuthlyUserPool/CognitoDomain",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/AuthlyUserPool/CognitoDomain/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolDomain",
+                      "aws:cdk:cloudformation:props": {
+                        "domain": "test-chris-domain-github",
+                        "userPoolId": {
+                          "Ref": "AuthlyUserPool0B74421D"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolDomain",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.UserPoolDomain",
+                  "version": "2.109.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.UserPool",
+              "version": "2.109.0"
+            }
+          },
+          "AuthlyUserPoolClient": {
+            "id": "AuthlyUserPoolClient",
+            "path": "AuthlyCognitoStack/AuthlyUserPoolClient",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "AuthlyCognitoStack/AuthlyUserPoolClient/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolClient",
+                  "aws:cdk:cloudformation:props": {
+                    "allowedOAuthFlows": [
+                      "code"
+                    ],
+                    "allowedOAuthFlowsUserPoolClient": true,
+                    "allowedOAuthScopes": [
+                      "openid",
+                      "email",
+                      "profile"
+                    ],
+                    "callbackUrLs": [
+                      "http://localhost:5173/api/auth/callback/cognito"
+                    ],
+                    "explicitAuthFlows": [
+                      "ALLOW_USER_PASSWORD_AUTH",
+                      "ALLOW_USER_SRP_AUTH",
+                      "ALLOW_REFRESH_TOKEN_AUTH"
+                    ],
+                    "generateSecret": true,
+                    "preventUserExistenceErrors": "ENABLED",
+                    "supportedIdentityProviders": [
+                      "COGNITO",
+                      {
+                        "Ref": "GitHubProviderA784964A"
+                      }
+                    ],
+                    "userPoolId": {
+                      "Ref": "AuthlyUserPool0B74421D"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolClient",
+                  "version": "2.109.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.UserPoolClient",
+              "version": "2.109.0"
+            }
+          },
+          "CognitoUserPoolId": {
+            "id": "CognitoUserPoolId",
+            "path": "AuthlyCognitoStack/CognitoUserPoolId",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.109.0"
+            }
+          },
+          "CognitoUserPoolClientId": {
+            "id": "CognitoUserPoolClientId",
+            "path": "AuthlyCognitoStack/CognitoUserPoolClientId",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.109.0"
+            }
+          },
+          "Region": {
+            "id": "Region",
+            "path": "AuthlyCognitoStack/Region",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.109.0"
+            }
+          },
+          "CognitoDomain": {
+            "id": "CognitoDomain",
+            "path": "AuthlyCognitoStack/CognitoDomain",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.109.0"
+            }
+          },
+          "GitHubProvider": {
+            "id": "GitHubProvider",
+            "path": "AuthlyCognitoStack/GitHubProvider",
+            "children": {
+              "UserLambda": {
+                "id": "UserLambda",
+                "path": "AuthlyCognitoStack/GitHubProvider/UserLambda",
+                "children": {
+                  "ServiceRole": {
+                    "id": "ServiceRole",
+                    "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/ServiceRole",
+                    "children": {
+                      "ImportServiceRole": {
+                        "id": "ImportServiceRole",
+                        "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/ServiceRole/ImportServiceRole",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/ServiceRole/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                          "aws:cdk:cloudformation:props": {
+                            "assumeRolePolicyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sts:AssumeRole",
+                                  "Effect": "Allow",
+                                  "Principal": {
+                                    "Service": "lambda.amazonaws.com"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "managedPolicyArns": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                                  ]
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Role",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Code": {
+                    "id": "Code",
+                    "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/Code",
+                    "children": {
+                      "Stage": {
+                        "id": "Stage",
+                        "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/Code/Stage",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "AssetBucket": {
+                        "id": "AssetBucket",
+                        "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/Code/AssetBucket",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/GitHubProvider/UserLambda/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                      "aws:cdk:cloudformation:props": {
+                        "code": {
+                          "s3Bucket": {
+                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+                          },
+                          "s3Key": "52122c84d59e16b022d5f94fae01aa7db451ae87b05168c49de608986d8266d2.zip"
+                        },
+                        "environment": {
+                          "variables": {
+                            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+                          }
+                        },
+                        "handler": "index.handler",
+                        "role": {
+                          "Fn::GetAtt": [
+                            "GitHubProviderUserLambdaServiceRole62B4C622",
+                            "Arn"
+                          ]
+                        },
+                        "runtime": "nodejs18.x"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+                  "version": "2.109.0"
+                }
+              },
+              "TokenLambda": {
+                "id": "TokenLambda",
+                "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda",
+                "children": {
+                  "ServiceRole": {
+                    "id": "ServiceRole",
+                    "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/ServiceRole",
+                    "children": {
+                      "ImportServiceRole": {
+                        "id": "ImportServiceRole",
+                        "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/ServiceRole/ImportServiceRole",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/ServiceRole/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                          "aws:cdk:cloudformation:props": {
+                            "assumeRolePolicyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sts:AssumeRole",
+                                  "Effect": "Allow",
+                                  "Principal": {
+                                    "Service": "lambda.amazonaws.com"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "managedPolicyArns": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                                  ]
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Role",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Code": {
+                    "id": "Code",
+                    "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/Code",
+                    "children": {
+                      "Stage": {
+                        "id": "Stage",
+                        "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/Code/Stage",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "AssetBucket": {
+                        "id": "AssetBucket",
+                        "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/Code/AssetBucket",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/GitHubProvider/TokenLambda/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                      "aws:cdk:cloudformation:props": {
+                        "code": {
+                          "s3Bucket": {
+                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+                          },
+                          "s3Key": "961620159d9b06d71b46915560f48fc88de2f9d5127c126711b2dfdb5a296eca.zip"
+                        },
+                        "environment": {
+                          "variables": {
+                            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+                          }
+                        },
+                        "handler": "index.handler",
+                        "role": {
+                          "Fn::GetAtt": [
+                            "GitHubProviderTokenLambdaServiceRole9803FDCA",
+                            "Arn"
+                          ]
+                        },
+                        "runtime": "nodejs18.x"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+                  "version": "2.109.0"
+                }
+              },
+              "PrivateLambda": {
+                "id": "PrivateLambda",
+                "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda",
+                "children": {
+                  "ServiceRole": {
+                    "id": "ServiceRole",
+                    "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/ServiceRole",
+                    "children": {
+                      "ImportServiceRole": {
+                        "id": "ImportServiceRole",
+                        "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/ServiceRole/ImportServiceRole",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/ServiceRole/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                          "aws:cdk:cloudformation:props": {
+                            "assumeRolePolicyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sts:AssumeRole",
+                                  "Effect": "Allow",
+                                  "Principal": {
+                                    "Service": "lambda.amazonaws.com"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "managedPolicyArns": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                                  ]
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Role",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Code": {
+                    "id": "Code",
+                    "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/Code",
+                    "children": {
+                      "Stage": {
+                        "id": "Stage",
+                        "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/Code/Stage",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "AssetBucket": {
+                        "id": "AssetBucket",
+                        "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/Code/AssetBucket",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/GitHubProvider/PrivateLambda/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                      "aws:cdk:cloudformation:props": {
+                        "code": {
+                          "s3Bucket": {
+                            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+                          },
+                          "s3Key": "115840adeac1466e0b8e1928408092489835e45d1ed7bd69bd7ee858ec0421f9.zip"
+                        },
+                        "environment": {
+                          "variables": {
+                            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+                          }
+                        },
+                        "handler": "index.handler",
+                        "role": {
+                          "Fn::GetAtt": [
+                            "GitHubProviderPrivateLambdaServiceRoleDE1B074C",
+                            "Arn"
+                          ]
+                        },
+                        "runtime": "nodejs18.x"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+                  "version": "2.109.0"
+                }
+              },
+              "APIGateway": {
+                "id": "APIGateway",
+                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::RestApi",
+                      "aws:cdk:cloudformation:props": {
+                        "description": "this is for GitHub API Login",
+                        "endpointConfiguration": {
+                          "types": [
+                            "REGIONAL"
+                          ]
+                        },
+                        "name": "GitHub API Gateway"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.CfnRestApi",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "CloudWatchRole": {
+                    "id": "CloudWatchRole",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/CloudWatchRole",
+                    "children": {
+                      "ImportCloudWatchRole": {
+                        "id": "ImportCloudWatchRole",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/CloudWatchRole/ImportCloudWatchRole",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/CloudWatchRole/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                          "aws:cdk:cloudformation:props": {
+                            "assumeRolePolicyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sts:AssumeRole",
+                                  "Effect": "Allow",
+                                  "Principal": {
+                                    "Service": "apigateway.amazonaws.com"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "managedPolicyArns": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+                                  ]
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Role",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Account": {
+                    "id": "Account",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Account",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::Account",
+                      "aws:cdk:cloudformation:props": {
+                        "cloudWatchRoleArn": {
+                          "Fn::GetAtt": [
+                            "GitHubProviderAPIGatewayCloudWatchRole82359D77",
+                            "Arn"
+                          ]
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.CfnAccount",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Deployment": {
+                    "id": "Deployment",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Deployment",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Deployment/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Deployment",
+                          "aws:cdk:cloudformation:props": {
+                            "description": "this is for GitHub API Login",
+                            "restApiId": {
+                              "Ref": "GitHubProviderAPIGateway1D8B291E"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnDeployment",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Deployment",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "DeploymentStage.prod": {
+                    "id": "DeploymentStage.prod",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/DeploymentStage.prod",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/DeploymentStage.prod/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
+                          "aws:cdk:cloudformation:props": {
+                            "deploymentId": {
+                              "Ref": "GitHubProviderAPIGatewayDeploymentD85FF7FA9cf8c6ad311d7544ede1979c7fdaccc3"
+                            },
+                            "restApiId": {
+                              "Ref": "GitHubProviderAPIGateway1D8B291E"
+                            },
+                            "stageName": "prod"
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnStage",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Stage",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Endpoint": {
+                    "id": "Endpoint",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Endpoint",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnOutput",
+                      "version": "2.109.0"
+                    }
+                  },
+                  "Default": {
+                    "id": "Default",
+                    "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default",
+                    "children": {
+                      "OPTIONS": {
+                        "id": "OPTIONS",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/OPTIONS",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/OPTIONS/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "apiKeyRequired": false,
+                                "authorizationType": "NONE",
+                                "httpMethod": "OPTIONS",
+                                "integration": {
+                                  "type": "MOCK",
+                                  "requestTemplates": {
+                                    "application/json": "{ statusCode: 200 }"
+                                  },
+                                  "integrationResponses": [
+                                    {
+                                      "statusCode": "204",
+                                      "responseParameters": {
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+                                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "methodResponses": [
+                                  {
+                                    "statusCode": "204",
+                                    "responseParameters": {
+                                      "method.response.header.Access-Control-Allow-Headers": true,
+                                      "method.response.header.Access-Control-Allow-Origin": true,
+                                      "method.response.header.Access-Control-Allow-Methods": true
+                                    }
+                                  }
+                                ],
+                                "resourceId": {
+                                  "Fn::GetAtt": [
+                                    "GitHubProviderAPIGateway1D8B291E",
+                                    "RootResourceId"
+                                  ]
+                                },
+                                "restApiId": {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.109.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "user": {
+                        "id": "user",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Fn::GetAtt": [
+                                    "GitHubProviderAPIGateway1D8B291E",
+                                    "RootResourceId"
+                                  ]
+                                },
+                                "pathPart": "user",
+                                "restApiId": {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewayuser06B32E35"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "GET": {
+                            "id": "GET",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET",
+                            "children": {
+                              "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user": {
+                                "id": "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderUserLambdaCF259DA3",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                          },
+                                          "/GET/user"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user": {
+                                "id": "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..user",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderUserLambdaCF259DA3",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/test-invoke-stage/GET/user"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/user/GET/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "GET",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":apigateway:",
+                                            {
+                                              "Ref": "AWS::Region"
+                                            },
+                                            ":lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "GitHubProviderUserLambdaCF259DA3",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewayuser06B32E35"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "token": {
+                        "id": "token",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Fn::GetAtt": [
+                                    "GitHubProviderAPIGateway1D8B291E",
+                                    "RootResourceId"
+                                  ]
+                                },
+                                "pathPart": "token",
+                                "restApiId": {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewaytoken70B4B964"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "POST": {
+                            "id": "POST",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST",
+                            "children": {
+                              "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token": {
+                                "id": "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderTokenLambda6AFCA867",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                          },
+                                          "/POST/token"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token": {
+                                "id": "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.POST..token",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderTokenLambda6AFCA867",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/test-invoke-stage/POST/token"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/token/POST/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "POST",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":apigateway:",
+                                            {
+                                              "Ref": "AWS::Region"
+                                            },
+                                            ":lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "GitHubProviderTokenLambda6AFCA867",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewaytoken70B4B964"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.109.0"
+                        }
+                      },
+                      "private": {
+                        "id": "private",
+                        "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Fn::GetAtt": [
+                                    "GitHubProviderAPIGateway1D8B291E",
+                                    "RootResourceId"
+                                  ]
+                                },
+                                "pathPart": "private",
+                                "restApiId": {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewayprivate0E219223"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          },
+                          "GET": {
+                            "id": "GET",
+                            "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET",
+                            "children": {
+                              "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private": {
+                                "id": "ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderPrivateLambda826D5FEF",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                          },
+                                          "/GET/private"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private": {
+                                "id": "ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/ApiPermission.Test.AuthlyCognitoStackGitHubProviderAPIGatewayECC9EB34.GET..private",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "GitHubProviderPrivateLambda826D5FEF",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:",
+                                          {
+                                            "Ref": "AWS::Partition"
+                                          },
+                                          ":execute-api:",
+                                          {
+                                            "Ref": "AWS::Region"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "AWS::AccountId"
+                                          },
+                                          ":",
+                                          {
+                                            "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                          },
+                                          "/test-invoke-stage/GET/private"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.109.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "AuthlyCognitoStack/GitHubProvider/APIGateway/Default/private/GET/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "COGNITO_USER_POOLS",
+                                    "authorizerId": {
+                                      "Ref": "GitHubProviderUserPoolAuthorizerGithubE23A58EA"
+                                    },
+                                    "httpMethod": "GET",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:",
+                                            {
+                                              "Ref": "AWS::Partition"
+                                            },
+                                            ":apigateway:",
+                                            {
+                                              "Ref": "AWS::Region"
+                                            },
+                                            ":lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "GitHubProviderPrivateLambda826D5FEF",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "GitHubProviderAPIGatewayprivate0E219223"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.109.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.109.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.109.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.ResourceBase",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.RestApi",
+                  "version": "2.109.0"
+                }
+              },
+              "UserPoolAuthorizerGithub": {
+                "id": "UserPoolAuthorizerGithub",
+                "path": "AuthlyCognitoStack/GitHubProvider/UserPoolAuthorizerGithub",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Authorizer",
+                  "aws:cdk:cloudformation:props": {
+                    "identitySource": "method.request.header.Authorization",
+                    "name": "UserPoolAuthorizer",
+                    "providerArns": [
+                      {
+                        "Fn::GetAtt": [
+                          "AuthlyUserPool0B74421D",
+                          "Arn"
+                        ]
+                      }
+                    ],
+                    "restApiId": {
+                      "Ref": "GitHubProviderAPIGateway1D8B291E"
+                    },
+                    "type": "COGNITO_USER_POOLS"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.CfnAuthorizer",
+                  "version": "2.109.0"
+                }
+              },
+              "GitHubProvider": {
+                "id": "GitHubProvider",
+                "path": "AuthlyCognitoStack/GitHubProvider/GitHubProvider",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "AuthlyCognitoStack/GitHubProvider/GitHubProvider/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolIdentityProvider",
+                      "aws:cdk:cloudformation:props": {
+                        "attributeMapping": {
+                          "email": "email",
+                          "preferred_username": "name",
+                          "picture": "avatar_url"
+                        },
+                        "providerDetails": {
+                          "client_id": "Ov23liQCEJ7DcGJ9zOp0",
+                          "client_secret": "b1e482527ce7af2ca561cd55c23e36e6a5b50621",
+                          "authorize_scopes": "openid user",
+                          "attributes_request_method": "GET",
+                          "oidc_issuer": "https://github.com",
+                          "authorize_url": "https://github.com/login/oauth/authorize",
+                          "token_url": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "https://",
+                                {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                },
+                                ".execute-api.",
+                                {
+                                  "Ref": "AWS::Region"
+                                },
+                                ".",
+                                {
+                                  "Ref": "AWS::URLSuffix"
+                                },
+                                "/",
+                                {
+                                  "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                },
+                                "/token"
+                              ]
+                            ]
+                          },
+                          "attributes_url": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "https://",
+                                {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                },
+                                ".execute-api.",
+                                {
+                                  "Ref": "AWS::Region"
+                                },
+                                ".",
+                                {
+                                  "Ref": "AWS::URLSuffix"
+                                },
+                                "/",
+                                {
+                                  "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                },
+                                "/user"
+                              ]
+                            ]
+                          },
+                          "jwks_uri": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "https://",
+                                {
+                                  "Ref": "GitHubProviderAPIGateway1D8B291E"
+                                },
+                                ".execute-api.",
+                                {
+                                  "Ref": "AWS::Region"
+                                },
+                                ".",
+                                {
+                                  "Ref": "AWS::URLSuffix"
+                                },
+                                "/",
+                                {
+                                  "Ref": "GitHubProviderAPIGatewayDeploymentStageprodD316AD28"
+                                },
+                                "/token"
+                              ]
+                            ]
+                          }
+                        },
+                        "providerName": "GitHub",
+                        "providerType": "OIDC",
+                        "userPoolId": {
+                          "Ref": "AuthlyUserPool0B74421D"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolIdentityProvider",
+                      "version": "2.109.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.UserPoolIdentityProviderOidc",
+                  "version": "2.109.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.4.2"
+            }
+          },
+          "CDKMetadata": {
+            "id": "CDKMetadata",
+            "path": "AuthlyCognitoStack/CDKMetadata",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "AuthlyCognitoStack/CDKMetadata/Default",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.109.0"
+                }
+              },
+              "Condition": {
+                "id": "Condition",
+                "path": "AuthlyCognitoStack/CDKMetadata/Condition",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnCondition",
+                  "version": "2.109.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.4.2"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "AuthlyCognitoStack/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.109.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "AuthlyCognitoStack/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.109.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.109.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.4.2"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.109.0"
+    }
+  }
+}
