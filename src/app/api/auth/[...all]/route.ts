@@ -5,19 +5,27 @@ import { toNextJsHandler } from "better-auth/next-js";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 
-// Allowed origins for CORS
-const getAllowedOrigins = () => [
-	"http://localhost:5173",
-	"http://127.0.0.1:5173",
-	process.env.BETTER_AUTH_URL,
-	process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-].filter(Boolean);
+// Normalize origin strings by removing trailing slashes
+const normalizeOrigin = (o: string | null | undefined) =>
+	typeof o === "string" && o.length ? o.replace(/\/+$|\s+/g, "") : o;
 
-// Check if origin is allowed
+// Allowed origins for CORS (normalized)
+const getAllowedOrigins = () =>
+	[
+		"http://localhost:5173",
+		"http://127.0.0.1:5173",
+		process.env.BETTER_AUTH_URL,
+		process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+	]
+		.filter(Boolean)
+		.map((s) => normalizeOrigin(s as string) as string);
+
+// Check if origin is allowed (compare normalized values)
 const isAllowedOrigin = (origin: string | null): boolean => {
 	if (!origin) return false;
+	const normalized = normalizeOrigin(origin) as string;
 	const allowedOrigins = getAllowedOrigins();
-	return allowedOrigins.some((allowed) => origin === allowed);
+	return allowedOrigins.some((allowed) => allowed === normalized);
 };
 
 // Add CORS headers to response
