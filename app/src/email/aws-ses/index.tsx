@@ -1,17 +1,24 @@
-import type { SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { render } from "@react-email/render";
+
 import { PasswordResetEmail } from "./password-reset-email";
+import type { SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { VerificationEmail } from "./verification-email";
 import { WelcomeEmail } from "./welcome-email";
+import { render } from "@react-email/render";
 
-const REGION = process.env.AWS_REGION || "";
-const FROM = process.env.AWS_SES_FROM || "";
+// Lazy initialization - only create SES client when actually needed (runtime, not build time)
+let sesClient: SESClient | null = null;
 
-const ses = new SESClient({
-	region: REGION,
-	// credentials: rely on SDK defaults (ENV, IAM role). If you must provide keys, set them in env vars.
-});
+function getSESClient(): SESClient {
+	if (!sesClient) {
+		const region = process.env.AWS_SES_REGION || process.env.AWS_REGION || "us-east-1";
+		sesClient = new SESClient({
+			region,
+			// credentials: rely on SDK defaults (ENV, IAM role). If you must provide keys, set them in env vars.
+		});
+	}
+	return sesClient;
+}
 
 type SendArgs = {
 	to: string;
@@ -21,8 +28,12 @@ type SendArgs = {
 };
 
 export async function sendRenderedEmail({ to, subject, html, text }: SendArgs) {
-	if (!FROM)
-		throw new Error("SES from address not configured (SES_FROM_ADDRESS)");
+	const from = process.env.AWS_SES_FROM || process.env.AWS_SES_FROM_ADDRESS || "";
+
+	if (!from) {
+		throw new Error("SES from address not configured (AWS_SES_FROM or AWS_SES_FROM_ADDRESS)");
+	}
+
 	const params: SendEmailCommandInput = {
 		Destination: { ToAddresses: [to] },
 		Message: {
@@ -32,9 +43,10 @@ export async function sendRenderedEmail({ to, subject, html, text }: SendArgs) {
 			},
 			Subject: { Data: subject, Charset: "UTF-8" },
 		},
-		Source: FROM,
+		Source: from,
 	};
 
+	const ses = getSESClient();
 	await ses.send(new SendEmailCommand(params));
 }
 
