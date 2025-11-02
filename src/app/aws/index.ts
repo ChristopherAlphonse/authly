@@ -47,10 +47,12 @@ export class CognitoStack extends cdk.Stack {
 						cognito.OAuthScope.EMAIL,
 						cognito.OAuthScope.PROFILE,
 					],
-					callbackUrls: [
-						process.env.BETTER_AUTH_CALLBACK_URL ||
-							"http://localhost:5173/api/auth/callback/cognito",
-					],
+				callbackUrls: [
+					"http://localhost:5173/api/auth/callback/cognito",
+					...(process.env.BETTER_AUTH_CALLBACK_URL
+						? [process.env.BETTER_AUTH_CALLBACK_URL]
+						: []),
+				],
 				},
 				preventUserExistenceErrors: true,
 			},
