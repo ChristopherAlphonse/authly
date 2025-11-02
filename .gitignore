@@ -1,9 +1,13 @@
-# Environment variables
+# Environment variables (NEVER commit these!)
 .env
+.env*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+!.env.example
+!.env.local.example
 
 # Dependencies
 node_modules/
@@ -29,9 +33,10 @@ next-env.d.ts
 # Vercel
 .vercel
 
-# AWS CDK
+# AWS CDK (NEVER commit build artifacts!)
 cdk.out/
 *.d.ts.map
+cdk.context.json
 
 # Database
 postgres_data/
@@ -60,6 +65,9 @@ tmp/
 temp/
 *.tmp
 
-# AWS credentials (extra safety)
+# AWS credentials (NEVER commit credentials!)
 .aws/
 credentials
+config
+*.pem
+*.key
