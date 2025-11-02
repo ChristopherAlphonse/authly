@@ -126,7 +126,7 @@ export class GitHubProvider extends Construct {
 					preferredUsername: cognito.ProviderAttribute.other("name"),
 					profilePicture: cognito.ProviderAttribute.other("avatar_url"),
 				},
-				scopes: ["openid", "user"],
+				scopes: ["openid", "email", "profile"],
 			},
 		);
 

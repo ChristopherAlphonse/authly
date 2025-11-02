@@ -3,6 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import type { Construct } from "constructs";
 import { GitHubProvider } from "./ghProvider";
+import { GoogleProvider } from "./googleProvider";
 import dotenv from "dotenv";
 import path from "node:path";
 
@@ -97,6 +98,16 @@ export class CognitoStack extends cdk.Stack {
 				userPool,
 				userPoolClient,
 				domain,
+			});
+		}
+
+		// Only add Google provider if credentials are provided
+		if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+			new GoogleProvider(this, "GoogleProvider", {
+				clientId: process.env.GOOGLE_CLIENT_ID,
+				clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+				userPool,
+				userPoolClient,
 			});
 		}
 	}

@@ -48,7 +48,7 @@ export const auth = betterAuth({
 					github: {
 						clientId: process.env.GITHUB_CLIENT_ID,
 						clientSecret: process.env.GITHUB_CLIENT_SECRET,
-						scopes: ["user:email", "read:user"],
+						scopes: ["openid", "email", "profile"],
 					},
 				}
 			: {}),
@@ -61,23 +61,16 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 	emailVerification: {
-		sendOnSignUp: !!process.env.AWS_SES_FROM, // Only enable if AWS SES is configured
+		sendOnSignUp: !!process.env.AWS_SES_FROM,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
-			// Only send email if AWS SES is configured
+
 			if (process.env.AWS_SES_FROM) {
 				await sendVerificationEmail(user.email, url, user.email);
 			}
 		},
 	},
-	session: {
-		accessTokenExpiresIn: SESSION_TIMEOUT.ACCESSTOKENEXPIRESIN,
-		refreshTokenExpiresIn: SESSION_TIMEOUT.REFRESHTOKENEXPIRESIN,
-		idleTimeout: SESSION_TIMEOUT.IDLETIMEOUT,
-		idleTimeoutWarn: SESSION_TIMEOUT.IDLETIMEOUTWARN,
-		expiresIn: SESSION_TIMEOUT.EXPIRESIN,
-		updateAge: SESSION_TIMEOUT.UPDATEAGE,
-	},
+
 	logger: {
 		disabled: process.env.NODE_ENV === "production",
 	},
