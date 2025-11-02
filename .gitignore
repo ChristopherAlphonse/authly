@@ -18,3 +18,7 @@ postgres_data/
 .DS_Store
 Thumbs.db
 
+.next/*
+.next/
+.next/cache/
+.next/cache/
