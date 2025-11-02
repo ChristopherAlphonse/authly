@@ -43,17 +43,26 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: true,
+		// DEV ONLY: Disable email verification requirement for local testing
+		// ⚠️ DO NOT disable in production for real users!
+		requireEmailVerification: process.env.NODE_ENV === "production",
 	},
 	magicLink: {
 		enabled: true,
 	},
 	emailVerification: {
-		sendOnSignUp: !!process.env.AWS_SES_FROM,
+		// In development: Auto-verify emails (skip sending verification email)
+		// In production: Send verification emails via SES
+		sendOnSignUp: process.env.NODE_ENV === "production" && !!process.env.AWS_SES_FROM,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
-			if (process.env.AWS_SES_FROM) {
+			// Only send emails in production with SES configured
+			if (process.env.NODE_ENV === "production" && process.env.AWS_SES_FROM) {
 				await sendVerificationEmail(user.email, url, user.email);
+			}
+			// In dev: Log verification URL instead of sending email
+			if (process.env.NODE_ENV !== "production") {
+				console.log(`[DEV] Email verification URL for ${user.email}: ${url}`);
 			}
 		},
 	},
