@@ -49,6 +49,7 @@ A Go service that:
 - [Node.js](https://nodejs.org/) (v20 or later)
 - [Go](https://golang.org/) (v1.21 or later)
 - [Docker](https://www.docker.com/) and Docker Compose
+- [ngrok](https://ngrok.com/) (for OAuth development with Cognito/GitHub) - Optional but recommended
 
 ### Quick Start - Full Setup
 
@@ -115,6 +116,58 @@ A Go service that:
 - `npm run dev:backend` - Run only the Go API backend
 - `npm run dev:frontend` - Run only the Next.js frontend
 - `npm run start` - Run both services in production mode
+
+### OAuth Development with ngrok
+
+OAuth providers like AWS Cognito and GitHub require public URLs for callbacks. Use ngrok to tunnel your localhost:
+
+**Quick Setup (5 minutes):**
+
+1. **Start your dev servers:**
+   ```bash
+   npm run dev
+   ```
+
+2. **Start ngrok in a new terminal:**
+   ```bash
+   ngrok http 5173
+   ```
+
+3. **Copy your ngrok URL** (e.g., `https://abc123.ngrok-free.app`)
+
+4. **Run the setup script:**
+   ```powershell
+   # Windows PowerShell
+   .\scripts\setup-ngrok.ps1 https://abc123.ngrok-free.app
+   ```
+   ```bash
+   # Mac/Linux
+   ./scripts/setup-ngrok.sh https://abc123.ngrok-free.app
+   ```
+
+5. **Update AWS Cognito** with your ngrok callback URL
+
+📖 **Full guide:** [NGROK_QUICK_START.md](./NGROK_QUICK_START.md) | [Detailed Setup](./ngrok-setup.md)
+
+### AWS Cognito Infrastructure
+
+Deploy authentication infrastructure with AWS CDK:
+
+```bash
+# Install Cognito CDK dependencies
+npm run cognito:install
+
+# Bootstrap CDK (first time only)
+npm run cognito:bootstrap
+
+# Deploy Cognito stack
+npm run cognito:deploy
+
+# Destroy Cognito stack (when done)
+npm run cognito:destroy
+```
+
+See [COGNITO_INTEGRATION.md](./COGNITO_INTEGRATION.md) for detailed setup.
 
 ### Individual Service Setup
 

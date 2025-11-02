@@ -4,7 +4,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 
 import { Construct } from "constructs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
-import path from "node:path";
+import * as path from "node:path";
 
 export type GitHubProviderProps = {
 	userPool: cognito.IUserPool;
@@ -25,20 +25,35 @@ export class GitHubProvider extends Construct {
 	constructor(scope: Construct, id: string, props: GitHubProviderProps) {
 		super(scope, id);
 
+		// Resolve lambda paths relative to this file's directory
+		const lambdaDir = path.resolve(__dirname, "..", "lambda");
+
+		// Common bundling options to fix esbuild 0.22+ breaking change
+		const bundlingOptions = {
+			esbuildArgs: {
+				"--packages": "bundle",
+			},
+		};
 
 		const userLambda = new lambda.NodejsFunction(this, "UserLambda", {
-			entry: path.join(__dirname, "../lambda", "user.ts"),
+			entry: path.join(lambdaDir, "user.ts"),
+			handler: "handler",
 			runtime: Runtime.NODEJS_18_X,
+			bundling: bundlingOptions,
 		});
 
 		const tokenLambda = new lambda.NodejsFunction(this, "TokenLambda", {
-			entry: path.join(__dirname, "../lambda", "token.ts"),
+			entry: path.join(lambdaDir, "token.ts"),
+			handler: "handler",
 			runtime: Runtime.NODEJS_18_X,
+			bundling: bundlingOptions,
 		});
 
 		const privateLambda = new lambda.NodejsFunction(this, "PrivateLambda", {
-			entry: path.join(__dirname, "../lambda", "private.ts"),
+			entry: path.join(lambdaDir, "private.ts"),
+			handler: "handler",
 			runtime: Runtime.NODEJS_18_X,
+			bundling: bundlingOptions,
 		});
 
 
