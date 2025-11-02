@@ -1,9 +1,10 @@
-import * as path from "node:path";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
+import * as path from "node:path";
+
 import { Construct } from "constructs";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
 
 export type GitHubProviderProps = {
 	userPool: cognito.IUserPool;

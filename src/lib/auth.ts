@@ -1,13 +1,12 @@
 // Auth configuration using better-auth as FE client, proxying to AWS Cognito for all user management and sessions.
 // Reference: https://www.better-auth.com/docs/installation
 
-import { apiKey, jwt, twoFactor } from "better-auth/plugins";
-
-import { SESSION_TIMEOUT } from "../constants/auth_constant";
 import { betterAuth } from "better-auth";
-import { db } from "../db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { sendVerificationEmail } from "@/email/aws-ses";
+import { SESSION_TIMEOUT } from "../constants/auth_constant";
+import { db } from "../db";
 
 // NOTE: All user management and session handling is proxied to AWS Cognito.
 
@@ -39,7 +38,7 @@ export const auth = betterAuth({
 					google: {
 						clientId: process.env.GOOGLE_CLIENT_ID,
 						clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-						scopes: ["openid", "email", "profile"],
+						scope: ["openid", "email", "profile"],
 					},
 				}
 			: {}),
@@ -48,7 +47,7 @@ export const auth = betterAuth({
 					github: {
 						clientId: process.env.GITHUB_CLIENT_ID,
 						clientSecret: process.env.GITHUB_CLIENT_SECRET,
-						scopes: ["openid", "email", "profile"],
+						scope: ["openid", "email", "profile"],
 					},
 				}
 			: {}),
@@ -64,13 +63,15 @@ export const auth = betterAuth({
 		sendOnSignUp: !!process.env.AWS_SES_FROM,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
-
 			if (process.env.AWS_SES_FROM) {
 				await sendVerificationEmail(user.email, url, user.email);
 			}
 		},
 	},
-
+	session: {
+		expiresIn: SESSION_TIMEOUT.EXPIRESIN,
+		updateAge: SESSION_TIMEOUT.UPDATEAGE,
+	},
 	logger: {
 		disabled: process.env.NODE_ENV === "production",
 	},
