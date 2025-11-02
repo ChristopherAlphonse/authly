@@ -1,6 +1,7 @@
 // Uses AWS SES with React Email for sending emails
 // Reference: https://react.email/docs/integrations/aws-ses
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+
 import { render } from "@react-email/render";
 
 export const sendEmail = async ({
@@ -34,7 +35,7 @@ export const sendEmail = async ({
 			},
 			Subject: { Data: subject },
 		},
-		Source: process.env.SES_FROM_ADDRESS || "",
+		Source: process.env.AWS_SES_FROM || "",
 	};
 
 	await ses.send(new SendEmailCommand(params));

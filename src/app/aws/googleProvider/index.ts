@@ -1,4 +1,5 @@
 import * as cognito from "aws-cdk-lib/aws-cognito";
+
 import { Construct } from "constructs";
 
 export type GoogleProviderProps = {
@@ -40,7 +41,7 @@ export class GoogleProvider extends Construct {
 			},
 		);
 
-		// Add Google as a supported identity provider to the user pool client
+
 		const userPoolClient = props.userPoolClient.node
 			.defaultChild as cognito.CfnUserPoolClient;
 		userPoolClient.supportedIdentityProviders = [

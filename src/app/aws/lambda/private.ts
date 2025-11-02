@@ -1,7 +1,7 @@
 import type { APIGatewayProxyWithCognitoAuthorizerHandler } from "aws-lambda";
 
 const AllowedOrigins = [
-	(process.env.FRONT_END_URL as string) || "http://localhost:5173",
+	process.env.BETTER_AUTH_URL || "http://localhost:5173",
 ];
 export const handler: APIGatewayProxyWithCognitoAuthorizerHandler = async () => {
 	return {

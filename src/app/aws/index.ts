@@ -50,8 +50,8 @@ export class CognitoStack extends cdk.Stack {
 					],
 				callbackUrls: [
 					"http://localhost:5173/api/auth/callback/cognito",
-					...(process.env.BETTER_AUTH_CALLBACK_URL
-						? [process.env.BETTER_AUTH_CALLBACK_URL]
+					...(process.env.BETTER_AUTH_URL
+						? [`${process.env.BETTER_AUTH_URL}/api/auth/callback/cognito`]
 						: []),
 				],
 				},
