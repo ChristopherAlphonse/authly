@@ -62,7 +62,7 @@ export const auth = betterAuth({
 		updateAge: SESSION_TIMEOUT.UPDATEAGE,
 	},
 	logger: {
-		disabled: process.env.NODE_ENV === "production",
+		disabled: false, // Enable logging to debug 403 errors
 	},
 	plugins: [jwt(), apiKey({ enableMetadata: true }), twoFactor()],
 	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5173",

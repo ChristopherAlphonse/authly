@@ -1,6 +1,7 @@
-import { toNextJsHandler } from "better-auth/next-js";
-import { auth } from "@/lib/auth";
 import type { NextRequest, NextResponse } from "next/server";
+
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 
@@ -25,14 +26,14 @@ const addCorsHeaders = (
 	origin: string | null,
 ): Response => {
 	const headers = new Headers(response.headers);
-	
+
 	if (origin && isAllowedOrigin(origin)) {
 		headers.set("Access-Control-Allow-Origin", origin);
 		headers.set("Access-Control-Allow-Credentials", "true");
 	} else {
 		headers.set("Access-Control-Allow-Origin", "http://localhost:5173");
 	}
-	
+
 	headers.set(
 		"Access-Control-Allow-Methods",
 		"GET, POST, OPTIONS, PUT, DELETE, PATCH",
@@ -70,13 +71,37 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(
 	request: NextRequest,
 ): Promise<NextResponse> {
-	const origin = request.headers.get("origin");
-	const response = await basePOST(request);
-	return addCorsHeaders(response, origin) as NextResponse;
+	try {
+		const origin = request.headers.get("origin");
+		const response = await basePOST(request);
+		return addCorsHeaders(response, origin) as NextResponse;
+	} catch (error) {
+		console.error("Better Auth POST error:", error);
+		const origin = request.headers.get("origin");
+		return addCorsHeaders(
+			new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			}),
+			origin,
+		) as NextResponse;
+	}
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-	const origin = request.headers.get("origin");
-	const response = await baseGET(request);
-	return addCorsHeaders(response, origin) as NextResponse;
+	try {
+		const origin = request.headers.get("origin");
+		const response = await baseGET(request);
+		return addCorsHeaders(response, origin) as NextResponse;
+	} catch (error) {
+		console.error("Better Auth GET error:", error);
+		const origin = request.headers.get("origin");
+		return addCorsHeaders(
+			new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			}),
+			origin,
+		) as NextResponse;
+	}
 }
