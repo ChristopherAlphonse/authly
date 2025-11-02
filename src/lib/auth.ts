@@ -9,14 +9,14 @@ import { db } from "../db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { sendVerificationEmail } from "@/email/aws-ses";
 
-// NOTE: All user management and session handling is proxied to AWS Cognito.
-
 export const auth = betterAuth({
 	appName: "main-app-poc",
 	database: drizzleAdapter(db, {
 		provider: "pg",
 	}),
 	socialProviders: {
+		// ALL OAuth MUST go through AWS Cognito
+		// Cognito provides SOC 2, ISO 27001, PCI DSS compliance certifications
 		...(process.env.COGNITO_CLIENT_ID &&
 		process.env.COGNITO_CLIENT_SECRET &&
 		process.env.COGNITO_DOMAIN &&
@@ -34,24 +34,12 @@ export const auth = betterAuth({
 					},
 				}
 			: {}),
-		...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-			? {
-					google: {
-						clientId: process.env.GOOGLE_CLIENT_ID,
-						clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-						scope: ["openid", "email", "profile"],
-					},
-				}
-			: {}),
-		...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
-			? {
-					github: {
-						clientId: process.env.GITHUB_CLIENT_ID,
-						clientSecret: process.env.GITHUB_CLIENT_SECRET,
-						scope: ["openid", "email", "profile"],
-					},
-				}
-			: {}),
+		// REMOVED: Direct Google/GitHub OAuth for finance app compliance
+		// All OAuth flows must go through Cognito Hosted UI to ensure:
+		// - Audit trails via CloudTrail
+		// - Compliance certifications (SOC 2, ISO, PCI)
+		// - Enterprise-grade security controls
+		// - Proper secret management via AWS Secrets Manager
 	},
 	emailAndPassword: {
 		enabled: true,
