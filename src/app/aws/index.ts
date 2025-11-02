@@ -7,9 +7,9 @@ import { GoogleProvider } from "./googleProvider";
 import dotenv from "dotenv";
 import path from "node:path";
 
-// Load package-local .env reliably regardless of cwd. The .env file is expected
-// to live at packages/cognito/.env relative to the repository root.
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Load .env file from project root (works regardless of cwd)
+// The .env file is expected to live at the repository root.
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 export interface CognitoStackProps extends cdk.StackProps {
 	domainPrefix?: string;
 }
