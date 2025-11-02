@@ -8,6 +8,8 @@ import { betterAuth } from "better-auth";
 import { db } from "../db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { sendVerificationEmail } from "@/email/aws-ses";
+import { user } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 export const auth = betterAuth({
 	appName: "main-app-poc",
@@ -55,14 +57,20 @@ export const auth = betterAuth({
 		// In production: Send verification emails via SES
 		sendOnSignUp: process.env.NODE_ENV === "production" && !!process.env.AWS_SES_FROM,
 		autoSignInAfterVerification: true,
-		sendVerificationEmail: async ({ user, url }) => {
+		sendVerificationEmail: async ({ user: authUser, url }) => {
 			// Only send emails in production with SES configured
 			if (process.env.NODE_ENV === "production" && process.env.AWS_SES_FROM) {
-				await sendVerificationEmail(user.email, url, user.email);
+				await sendVerificationEmail(authUser.email, url, authUser.email);
 			}
-			// In dev: Log verification URL instead of sending email
+			// In dev: Auto-verify email and log verification URL
 			if (process.env.NODE_ENV !== "production") {
-				console.log(`[DEV] Email verification URL for ${user.email}: ${url}`);
+				console.log(`[DEV] Auto-verifying email for ${authUser.email}`);
+				console.log(`[DEV] Email verification URL (not used): ${url}`);
+				// Auto-verify email in dev mode
+				await db
+					.update(user)
+					.set({ emailVerified: true })
+					.where(eq(user.id, authUser.id));
 			}
 		},
 	},
