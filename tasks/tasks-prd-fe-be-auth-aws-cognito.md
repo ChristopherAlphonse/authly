@@ -53,7 +53,7 @@
 
 - [ ] 7.0 Provide detailed error handling and user feedback (`feature/auth-error-handling`)
   - [ ] 7.1 Implement error messages for all auth flows in UI (`feature/auth-error-ui`)
-  - [ ] 7.2 Add logging for auth errors in backend (`feature/auth-error-logging`)
+  - [ ] 7.2 Add logging for auth errors in Better Auth (`feature/auth-error-logging`)
   - [ ] 7.3 Add tests for error handling (`feature/auth-error-tests`)
 
 - [ ] 8.0 Create detailed flow diagrams for all major auth flows (`feature/auth-flow-diagrams`)
