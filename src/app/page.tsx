@@ -48,9 +48,7 @@ export default async function Home() {
 									<div className="text-center">
 										<div className="text-2xl mb-2">🚀</div>
 										<h3 className="font-semibold text-white">Test API</h3>
-										<p className="text-zinc-400 text-sm">
-											Verify your API
-										</p>
+										<p className="text-zinc-400 text-sm">Verify your API</p>
 									</div>
 								</div>
 							</CardContent>

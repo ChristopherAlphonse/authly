@@ -1,10 +1,9 @@
+import * as path from "node:path";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
-import * as path from "node:path";
-
-import { Construct } from "constructs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
+import { Construct } from "constructs";
 
 export type GitHubProviderProps = {
 	userPool: cognito.IUserPool;
@@ -56,8 +55,6 @@ export class GitHubProvider extends Construct {
 			bundling: bundlingOptions,
 		});
 
-
-
 		const apiGithubGateway = new apigateway.RestApi(this, "APIGateway", {
 			restApiName: "GitHub API Gateway",
 			description: "this is for GitHub API Login",
@@ -81,7 +78,6 @@ export class GitHubProvider extends Construct {
 			},
 		});
 
-
 		const userResource = apiGithubGateway.root.addResource("user");
 		const userIntegration = new apigateway.LambdaIntegration(userLambda);
 		userResource.addMethod("GET", userIntegration);
@@ -102,7 +98,6 @@ export class GitHubProvider extends Construct {
 			},
 		);
 
-
 		const privateResource = apiGithubGateway.root.addResource("private");
 		const privateIntegration = new apigateway.LambdaIntegration(privateLambda);
 		privateResource.addMethod("GET", privateIntegration, {
@@ -110,12 +105,10 @@ export class GitHubProvider extends Construct {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 		});
 
-
 		const githubIdentityProvider = new cognito.UserPoolIdentityProviderOidc(
 			this,
 			"GitHubProvider",
 			{
-
 				clientId: props.clientId,
 				clientSecret: props.clientSecret,
 				userPool: props.userPool,
@@ -136,7 +129,6 @@ export class GitHubProvider extends Construct {
 				scopes: ["openid", "user"],
 			},
 		);
-
 
 		const userPoolClient = props.userPoolClient.node
 			.defaultChild as cognito.CfnUserPoolClient;

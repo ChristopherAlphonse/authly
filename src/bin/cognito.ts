@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
-import { CognitoStack } from "../src";
+import { CognitoStack } from "../app/aws";
 
 const app = new cdk.App();
 

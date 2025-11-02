@@ -10,8 +10,8 @@
 //   onRefresh: async () => { await authClient.refresh() }
 // })
 
-import { MIN_JWT_PARTS, MS_PER_SECOND } from "../constant/app_constants";
-import { SESSION_TIMEOUT } from "../constant/auth_contant";
+import { MIN_JWT_PARTS, MS_PER_SECOND } from "../constants/app_constants";
+import { SESSION_TIMEOUT } from "../constants/auth_constant";
 
 type Callbacks = {
 	onWarn?: (msLeft: number) => void;

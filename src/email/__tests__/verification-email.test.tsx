@@ -1,5 +1,5 @@
 import { render } from "@react-email/render";
-import { MIN_HTML_LENGTH } from "../../constant/app_constants";
+import { MIN_HTML_LENGTH } from "../../constants/app_constants";
 import VerificationEmail from "../aws-ses/verification-email";
 
 test("verification email renders and matches snapshot", async () => {
