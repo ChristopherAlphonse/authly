@@ -6,26 +6,25 @@ import {
 	AdminUpdateUserAttributesCommand,
 	CognitoIdentityProviderClient,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { account, user } from "../db/schema";
-import { apiKey, jwt, twoFactor } from "better-auth/plugins";
-
-import { SESSION_TIMEOUT } from "../constants/auth_constant";
 import { betterAuth } from "better-auth";
-import { db } from "../db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { sendVerificationEmail } from "@/email/aws-ses";
+import { SESSION_TIMEOUT } from "../constants/auth_constant";
+import { db } from "../db";
+import { account, user } from "../db/schema";
 
 // Initialize Cognito client for syncing OAuth users to maintain compliance
 const getCognitoClient = (): CognitoIdentityProviderClient | null => {
-	if (
-		!process.env.COGNITO_USER_POOL_ID ||
-		!process.env.AWS_REGION
-	) {
+	if (!process.env.COGNITO_USER_POOL_ID || !process.env.AWS_REGION) {
 		return null;
 	}
 	return new CognitoIdentityProviderClient({
-		region: process.env.AWS_REGION || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1",
+		region:
+			process.env.AWS_REGION ||
+			process.env.NEXT_PUBLIC_AWS_REGION ||
+			"us-east-1",
 	});
 };
 
@@ -58,7 +57,10 @@ const socialProviders = (() => {
 			clientId: process.env.COGNITO_CLIENT_ID,
 			clientSecret: process.env.COGNITO_CLIENT_SECRET,
 			domain: process.env.COGNITO_DOMAIN,
-			region: process.env.AWS_REGION || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1",
+			region:
+				process.env.AWS_REGION ||
+				process.env.NEXT_PUBLIC_AWS_REGION ||
+				"us-east-1",
 			userPoolId: process.env.COGNITO_USER_POOL_ID,
 		};
 	}
@@ -95,30 +97,32 @@ const syncUserToCognito = async (
 			Username: authUser.email,
 			UserAttributes: [
 				{ Name: "email", Value: authUser.email },
-				{ Name: "email_verified", Value: (authUser.emailVerified ? "true" : "false") },
+				{
+					Name: "email_verified",
+					Value: authUser.emailVerified ? "true" : "false",
+				},
 				...(authUser.name ? [{ Name: "name", Value: authUser.name }] : []),
-				...(authUser.image
-					? [{ Name: "picture", Value: authUser.image }]
+				...(authUser.image ? [{ Name: "picture", Value: authUser.image }] : []),
+				...(provider
+					? [{ Name: "custom:oauth_provider", Value: provider }]
 					: []),
-				...(provider ? [{ Name: "custom:oauth_provider", Value: provider }] : []),
 			],
 			MessageAction: "SUPPRESS", // Don't send welcome email
 		});
 
 		await cognitoClient.send(createCommand);
-		console.log(
-			`[Cognito Sync] Created user in Cognito: ${authUser.email}`,
-		);
+		console.log(`[Cognito Sync] Created user in Cognito: ${authUser.email}`);
 	} catch (error) {
 		// User might already exist, try to update instead
 		// Check for Cognito's UsernameExistsException
 		const isUsernameExistsError =
-			error instanceof Error &&
-			(error.name === "UsernameExistsException" ||
-				(error as { Code?: string }).Code === "UsernameExistsException") ||
+			(error instanceof Error &&
+				(error.name === "UsernameExistsException" ||
+					(error as { Code?: string }).Code === "UsernameExistsException")) ||
 			(typeof error === "object" &&
 				error !== null &&
-				("Code" in error && (error as { Code?: string }).Code === "UsernameExistsException"));
+				"Code" in error &&
+				(error as { Code?: string }).Code === "UsernameExistsException");
 
 		if (isUsernameExistsError) {
 			try {
@@ -126,10 +130,11 @@ const syncUserToCognito = async (
 					UserPoolId: userPoolId,
 					Username: authUser.email,
 					UserAttributes: [
-						{ Name: "email_verified", Value: (authUser.emailVerified ? "true" : "false") },
-						...(authUser.name
-							? [{ Name: "name", Value: authUser.name }]
-							: []),
+						{
+							Name: "email_verified",
+							Value: authUser.emailVerified ? "true" : "false",
+						},
+						...(authUser.name ? [{ Name: "name", Value: authUser.name }] : []),
 						...(authUser.image
 							? [{ Name: "picture", Value: authUser.image }]
 							: []),
@@ -150,10 +155,7 @@ const syncUserToCognito = async (
 				);
 			}
 		} else {
-			console.error(
-				"[Cognito Sync] Failed to sync user to Cognito:",
-				error,
-			);
+			console.error("[Cognito Sync] Failed to sync user to Cognito:", error);
 		}
 	}
 };
@@ -176,7 +178,8 @@ export const auth = betterAuth({
 	emailVerification: {
 		// In development: Auto-verify emails (skip sending verification email)
 		// In production: Send verification emails via SES
-		sendOnSignUp: process.env.NODE_ENV === "production" && !!process.env.AWS_SES_FROM,
+		sendOnSignUp:
+			process.env.NODE_ENV === "production" && !!process.env.AWS_SES_FROM,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user: authUser, url }) => {
 			// Only send emails in production with SES configured
@@ -282,7 +285,10 @@ export const auth = betterAuth({
 				}
 			} catch (error) {
 				// Log error but don't block signup
-				console.error("[Cognito Sync] Failed to sync user after signup:", error);
+				console.error(
+					"[Cognito Sync] Failed to sync user after signup:",
+					error,
+				);
 			}
 
 			return authUser;
@@ -324,9 +330,7 @@ export const auth = betterAuth({
 			? [process.env.NEXT_PUBLIC_BETTER_AUTH_URL]
 			: []),
 		// Add Vercel URL for preview deployments
-		...(process.env.VERCEL_URL
-			? [`https://${process.env.VERCEL_URL}`]
-			: []),
+		...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
 	],
 });
 
