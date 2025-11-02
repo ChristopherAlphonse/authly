@@ -65,9 +65,10 @@ export const auth = betterAuth({
 		disabled: process.env.NODE_ENV === "production",
 	},
 	plugins: [jwt(), apiKey({ enableMetadata: true }), twoFactor()],
-	baseURL: "http://localhost:5173",
+	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5173",
 	trustedOrigins: [
 		"http://localhost:5173",
+		"http://127.0.0.1:5173",
 		...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
 		...(process.env.NEXT_PUBLIC_BETTER_AUTH_URL
 			? [process.env.NEXT_PUBLIC_BETTER_AUTH_URL]

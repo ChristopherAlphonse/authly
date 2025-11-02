@@ -1,9 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,8 +7,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 function parseHttpError(err: unknown): { status?: number; message?: string } {
 	let status: number | undefined;

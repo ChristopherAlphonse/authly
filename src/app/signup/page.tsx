@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -10,8 +7,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
 
 export default function SignUpPage() {
 	const [email, setEmail] = useState("");
