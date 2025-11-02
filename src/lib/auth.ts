@@ -29,6 +29,43 @@ const getCognitoClient = (): CognitoIdentityProviderClient | null => {
 	});
 };
 
+// Compute social providers from env so we can both pass the config to
+// betterAuth and log what's actually registered at startup.
+const socialProviders = (() => {
+	const providers: Record<string, unknown> = {};
+
+	if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+		providers.github = {
+			clientId: process.env.GITHUB_CLIENT_ID,
+			clientSecret: process.env.GITHUB_CLIENT_SECRET,
+		};
+	}
+
+	if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+		providers.google = {
+			clientId: process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+		};
+	}
+
+	if (
+		process.env.COGNITO_CLIENT_ID &&
+		process.env.COGNITO_CLIENT_SECRET &&
+		process.env.COGNITO_DOMAIN &&
+		process.env.COGNITO_USER_POOL_ID
+	) {
+		providers.cognito = {
+			clientId: process.env.COGNITO_CLIENT_ID,
+			clientSecret: process.env.COGNITO_CLIENT_SECRET,
+			domain: process.env.COGNITO_DOMAIN,
+			region: process.env.AWS_REGION || process.env.NEXT_PUBLIC_AWS_REGION || "us-east-1",
+			userPoolId: process.env.COGNITO_USER_POOL_ID,
+		};
+	}
+
+	return providers;
+})();
+
 // Sync OAuth user to Cognito User Pool for SOC 2, ISO 27001, PCI DSS compliance
 // This ensures all user data is managed by Cognito even when using direct OAuth providers
 const syncUserToCognito = async (
@@ -108,13 +145,13 @@ const syncUserToCognito = async (
 				);
 			} catch (updateError) {
 				console.error(
-					`[Cognito Sync] Failed to update user in Cognito:`,
+					"[Cognito Sync] Failed to update user in Cognito:",
 					updateError,
 				);
 			}
 		} else {
 			console.error(
-				`[Cognito Sync] Failed to sync user to Cognito:`,
+				"[Cognito Sync] Failed to sync user to Cognito:",
 				error,
 			);
 		}
@@ -126,44 +163,7 @@ export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
 	}),
-	socialProviders: {
-		// GitHub OAuth - Direct integration (users see GitHub's native UI)
-		...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
-			? {
-					github: {
-						clientId: process.env.GITHUB_CLIENT_ID,
-						clientSecret: process.env.GITHUB_CLIENT_SECRET,
-					},
-				}
-			: {}),
-		// Google OAuth - Direct integration (users see Google's native UI)
-		...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-			? {
-					google: {
-						clientId: process.env.GOOGLE_CLIENT_ID,
-						clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-					},
-				}
-			: {}),
-		// Cognito for email/password authentication (managed by Cognito)
-		...(process.env.COGNITO_CLIENT_ID &&
-		process.env.COGNITO_CLIENT_SECRET &&
-		process.env.COGNITO_DOMAIN &&
-		process.env.COGNITO_USER_POOL_ID
-			? {
-					cognito: {
-						clientId: process.env.COGNITO_CLIENT_ID,
-						clientSecret: process.env.COGNITO_CLIENT_SECRET,
-						domain: process.env.COGNITO_DOMAIN,
-						region:
-							process.env.AWS_REGION ||
-							process.env.NEXT_PUBLIC_AWS_REGION ||
-							"us-east-1",
-						userPoolId: process.env.COGNITO_USER_POOL_ID,
-					},
-				}
-			: {}),
-	},
+	socialProviders: socialProviders,
 	emailAndPassword: {
 		enabled: true,
 		// DEV ONLY: Disable email verification requirement for local testing
@@ -194,7 +194,7 @@ export const auth = betterAuth({
 						.set({ emailVerified: true })
 						.where(eq(user.id, authUser.id));
 				} catch (error) {
-					console.error(`[DEV] Failed to auto-verify email:`, error);
+					console.error("[DEV] Failed to auto-verify email:", error);
 				}
 			}
 		},
@@ -277,7 +277,7 @@ export const auth = betterAuth({
 							`[DEV] Email verified successfully for ${authUser.email}`,
 						);
 					} catch (error) {
-						console.error(`[DEV] Failed to auto-verify email:`, error);
+						console.error("[DEV] Failed to auto-verify email:", error);
 					}
 				}
 			} catch (error) {
@@ -329,3 +329,10 @@ export const auth = betterAuth({
 			: []),
 	],
 });
+
+// Log which social providers were registered (non-sensitive keys only)
+try {
+	console.info("Registered social providers:", Object.keys(socialProviders));
+} catch (e) {
+	// Avoid crashing startup if logging fails
+}

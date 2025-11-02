@@ -4,11 +4,10 @@ import { auth } from "@/lib/auth";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 
-// Normalize origin strings by removing trailing slashes
+
 const normalizeOrigin = (o: string | null | undefined) =>
 	typeof o === "string" && o.length ? o.replace(/\/+$|\s+/g, "") : o;
 
-// Allowed origins for CORS (normalized)
 const getAllowedOrigins = () =>
 	[
 		"http://localhost:5173",
@@ -19,7 +18,7 @@ const getAllowedOrigins = () =>
 		.filter(Boolean)
 		.map((s) => normalizeOrigin(s as string) as string);
 
-// Check if origin is allowed (compare normalized values)
+
 const isAllowedOrigin = (origin: string | null): boolean => {
 	if (!origin) return false;
 	const normalized = normalizeOrigin(origin) as string;
@@ -27,7 +26,7 @@ const isAllowedOrigin = (origin: string | null): boolean => {
 	return allowedOrigins.some((allowed) => allowed === normalized);
 };
 
-// Add CORS headers to response
+
 const addCorsHeaders = (
 	response: Response,
 	origin: string | null,
@@ -57,7 +56,7 @@ const addCorsHeaders = (
 	});
 };
 
-// Handle OPTIONS for CORS preflight
+
 export async function OPTIONS(request: NextRequest) {
 	const origin = request.headers.get("origin");
 	const allowedOrigin =
@@ -75,11 +74,55 @@ export async function OPTIONS(request: NextRequest) {
 	});
 }
 
-// Wrap handlers to add CORS headers
 export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
-		const response = await basePOST(request);
+		// Read the body once so we can validate requested social provider
+		// before forwarding to the base handler. We create a new Request
+		// to pass to the underlying Better Auth handler because `request.text()`
+		// consumes the body stream.
+		const bodyText = await request.text();
+		let parsedBody: any = null;
+		try {
+			parsedBody = bodyText ? JSON.parse(bodyText) : null;
+		} catch (err) {
+			// Not JSON — fine, leave parsedBody null
+		}
+
+		const getRegisteredProviders = () => {
+			const p: string[] = [];
+			if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) p.push("google");
+			if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) p.push("github");
+			if (
+				process.env.COGNITO_CLIENT_ID &&
+				process.env.COGNITO_CLIENT_SECRET &&
+				process.env.COGNITO_DOMAIN &&
+				process.env.COGNITO_USER_POOL_ID
+			)
+				p.push("cognito");
+			return p;
+		};
+
+		const requestedProvider = parsedBody?.provider ?? null;
+		const registered = getRegisteredProviders();
+		if (requestedProvider && !registered.includes(requestedProvider)) {
+			console.warn("Requested social provider not configured:", requestedProvider, "available:", registered);
+			return addCorsHeaders(
+				new Response(JSON.stringify({ error: "Provider not configured", provider: requestedProvider, available: registered }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				}),
+				origin,
+			) as NextResponse;
+		}
+
+		const forwardRequest = new Request(request.url, {
+			method: request.method,
+			headers: request.headers as any,
+			body: bodyText,
+		});
+
+		const response = await basePOST(forwardRequest as any);
 		return addCorsHeaders(response, origin) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth POST error:", error);
