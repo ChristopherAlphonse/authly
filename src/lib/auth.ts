@@ -10,10 +10,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { apiKey, jwt, twoFactor } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
-import { sendVerificationEmail } from "@/email/aws-ses";
 import { SESSION_TIMEOUT } from "../constants/auth_constant";
 import { db } from "../db";
-import { account, user } from "../db/schema";
+import { account } from "../db/schema";
+import { sendEmail } from "./sesEmail";
 
 // Initialize Cognito client for syncing OAuth users to maintain compliance
 const getCognitoClient = (): CognitoIdentityProviderClient | null => {
@@ -67,6 +67,10 @@ const socialProviders = (() => {
 
 	return providers;
 })();
+
+// Export registration information so lightweight health checks can read which
+// providers were registered in this environment (keys only, non-sensitive).
+export const registeredSocialProviders = Object.keys(socialProviders);
 
 // Sync OAuth user to Cognito User Pool for SOC 2, ISO 27001, PCI DSS compliance
 // This ensures all user data is managed by Cognito even when using direct OAuth providers
@@ -168,37 +172,88 @@ export const auth = betterAuth({
 	socialProviders: socialProviders,
 	emailAndPassword: {
 		enabled: true,
-		// DEV ONLY: Disable email verification requirement for local testing
-		// ⚠️ DO NOT disable in production for real users!
-		requireEmailVerification: process.env.NODE_ENV === "production",
+		// Require email verification in all environments (production and development)
+		requireEmailVerification: true,
+		sendResetPassword: async ({ user, url }) => {
+			// Send emails if SES is configured (production or dev with SES setup)
+			const sesConfigured =
+				!!(process.env.AWS_SES_SENDER || process.env.AWS_SES_FROM) &&
+				!!process.env.AWS_REGION;
+
+			if (sesConfigured) {
+				try {
+					await sendEmail(
+						user.email,
+						"Reset your password",
+						`<p>Click the link to reset your password: <a href="${url}">${url}</a></p>`,
+					);
+				} catch (error) {
+					// If email send fails, log error but don't auto-verify
+					console.error(
+						`[Email] Failed to send password reset email to ${user.email}:`,
+						error,
+					);
+					// Log the URL so user can still reset manually in dev
+					if (process.env.NODE_ENV !== "production") {
+						console.log(`[DEV] Password reset URL for ${user.email}: ${url}`);
+					}
+					throw error; // Re-throw to let Better Auth handle the error
+				}
+			} else {
+				// In dev without SES: Log the password reset URL so user can reset manually
+				console.warn(
+					`[DEV] SES not configured. Password reset URL for ${user.email}: ${url}`,
+				);
+				console.warn(
+					"[DEV] To send emails, set AWS_SES_SENDER/AWS_SES_FROM and AWS_REGION",
+				);
+			}
+		},
+		resetPasswordTokenExpiresIn: 10 * 60, // 10 minutes
 	},
 	magicLink: {
 		enabled: true,
 	},
 	emailVerification: {
-		// In development: Auto-verify emails (skip sending verification email)
-		// In production: Send verification emails via SES
-		sendOnSignUp:
-			process.env.NODE_ENV === "production" && !!process.env.AWS_SES_FROM,
+		// Send verification emails in all environments when SES is configured
+		// In development, if SES is not configured, log the URL but don't auto-verify
+		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
+		expiresIn: 10 * 60, // 10 minutes
 		sendVerificationEmail: async ({ user: authUser, url }) => {
-			// Only send emails in production with SES configured
-			if (process.env.NODE_ENV === "production" && process.env.AWS_SES_FROM) {
-				await sendVerificationEmail(authUser.email, url, authUser.email);
-			}
-			// In dev: Auto-verify email and log verification URL
-			if (process.env.NODE_ENV !== "production") {
-				console.log(`[DEV] Auto-verifying email for ${authUser.email}`);
-				console.log(`[DEV] Email verification URL (not used): ${url}`);
-				// Auto-verify email in dev mode
+			// Send emails if SES is configured (production or dev with SES setup)
+			const sesConfigured =
+				!!(process.env.AWS_SES_SENDER || process.env.AWS_SES_FROM) &&
+				!!process.env.AWS_REGION;
+
+			if (sesConfigured) {
 				try {
-					await db
-						.update(user)
-						.set({ emailVerified: true })
-						.where(eq(user.id, authUser.id));
+					await sendEmail(
+						authUser.email,
+						"Verify your email",
+						`<p>Click the link to verify your email: <a href="${url}">${url}</a></p>`,
+					);
 				} catch (error) {
-					console.error("[DEV] Failed to auto-verify email:", error);
+					// If email send fails, log error but don't auto-verify
+					console.error(
+						`[Email] Failed to send verification email to ${authUser.email}:`,
+						error,
+					);
+					// Log the URL so user can still verify manually in dev
+					if (process.env.NODE_ENV !== "production") {
+						console.log(`[DEV] Verification URL for ${authUser.email}: ${url}`);
+					}
+					throw error; // Re-throw to let Better Auth handle the error
 				}
+			} else {
+				// In dev without SES: Log the verification URL so user can verify manually
+				console.warn(
+					`[DEV] SES not configured. Verification URL for ${authUser.email}: ${url}`,
+				);
+				console.warn(
+					"[DEV] To send emails, set AWS_SES_SENDER/AWS_SES_FROM and AWS_REGION",
+				);
+				// Don't auto-verify - user must click the URL or verify manually
 			}
 		},
 	},
@@ -266,23 +321,8 @@ export const auth = betterAuth({
 				// Sync user to Cognito User Pool for enterprise features and compliance
 				await syncUserToCognito(authUser, provider);
 
-				// DEV ONLY: Auto-verify emails after signup
-				if (process.env.NODE_ENV !== "production") {
-					console.log(
-						`[DEV] Auto-verifying email for ${authUser.email} after signup`,
-					);
-					try {
-						await db
-							.update(user)
-							.set({ emailVerified: true })
-							.where(eq(user.id, authUser.id));
-						console.log(
-							`[DEV] Email verified successfully for ${authUser.email}`,
-						);
-					} catch (error) {
-						console.error("[DEV] Failed to auto-verify email:", error);
-					}
-				}
+				// Email verification is required in all environments
+				// No auto-verification - user must verify via email link
 			} catch (error) {
 				// Log error but don't block signup
 				console.error(
@@ -337,6 +377,50 @@ export const auth = betterAuth({
 // Log which social providers were registered (non-sensitive keys only)
 try {
 	console.info("Registered social providers:", Object.keys(socialProviders));
-} catch (e) {
+} catch {
 	// Avoid crashing startup if logging fails
 }
+
+// Run a lightweight, non-sensitive environment sanity check at startup.
+// This warns when commonly-required production environment variables are
+// missing so deployment logs show actionable messages without printing secrets.
+(function envSanityCheck() {
+	try {
+		const warnings: string[] = [];
+
+		// Social providers (only warn in production to avoid noise in dev)
+		if (process.env.NODE_ENV === "production") {
+			if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+				warnings.push("Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET (google)");
+			}
+			if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+				warnings.push("Missing GITHUB_CLIENT_ID/GITHUB_CLIENT_SECRET (github)");
+			}
+		}
+
+		// SES related env vars
+		if (!process.env.AWS_SES_SENDER && !process.env.AWS_SES_FROM) {
+			warnings.push(
+				"Missing AWS_SES_SENDER or AWS_SES_FROM (SES sender address)",
+			);
+		}
+		if (!process.env.AWS_REGION) {
+			warnings.push("Missing AWS_REGION");
+		}
+		// Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are optional when using IAM roles
+		// (e.g., in Lambda, ECS, EC2), but may be needed for local development
+
+		if (warnings.length > 0) {
+			console.warn(
+				"[Env Check] Potentially missing environment variables:",
+				warnings,
+			);
+		} else {
+			console.info(
+				"[Env Check] Basic required environment variables appear present (non-sensitive check)",
+			);
+		}
+	} catch (err) {
+		console.warn("[Env Check] Failed to run environment sanity check", err);
+	}
+})();

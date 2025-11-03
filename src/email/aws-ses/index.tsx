@@ -1,10 +1,9 @@
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-
-import { PasswordResetEmail } from "./password-reset-email";
 import type { SendEmailCommandInput } from "@aws-sdk/client-ses";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { render } from "@react-email/render";
+import { PasswordResetEmail } from "./password-reset-email";
 import { VerificationEmail } from "./verification-email";
 import { WelcomeEmail } from "./welcome-email";
-import { render } from "@react-email/render";
 
 // Lazy initialization - only create SES client when actually needed (runtime, not build time)
 let sesClient: SESClient | null = null;
@@ -49,7 +48,25 @@ export async function sendRenderedEmail({ to, subject, html, text }: SendArgs) {
 	};
 
 	const ses = getSESClient();
-	await ses.send(new SendEmailCommand(params));
+	try {
+		await ses.send(new SendEmailCommand(params));
+	} catch (err) {
+		try {
+			console.error(
+				"SES send error",
+				{
+					to,
+					from: process.env.AWS_SES_FROM,
+					region: process.env.AWS_REGION || "us-east-1",
+				},
+				err,
+			);
+		} catch {
+			console.error("SES send error (failed to log context)", err);
+		}
+
+		throw err;
+	}
 }
 
 export async function sendPasswordResetEmail(
