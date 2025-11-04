@@ -1,6 +1,7 @@
-import { toNextJsHandler } from "better-auth/next-js";
 import type { NextRequest, NextResponse } from "next/server";
+
 import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 
@@ -8,15 +9,23 @@ const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
 const normalizeOrigin = (o: string | null | undefined) =>
 	typeof o === "string" && o.length ? o.replace(/\/+$|\s+/g, "") : o;
 
-const getAllowedOrigins = () =>
-	[
+const getAllowedOrigins = () => {
+	const origins: (string | undefined)[] = [
 		"http://localhost:5173",
 		"http://127.0.0.1:5173",
 		process.env.BETTER_AUTH_URL,
 		process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-	]
+	];
+
+
+	if (process.env.VERCEL_URL) {
+		origins.push(`https://${process.env.VERCEL_URL}`);
+	}
+
+	return origins
 		.filter(Boolean)
 		.map((s) => normalizeOrigin(s as string) as string);
+};
 
 
 const isAllowedOrigin = (origin: string | null): boolean => {
@@ -27,17 +36,47 @@ const isAllowedOrigin = (origin: string | null): boolean => {
 };
 
 
+const getDefaultOrigin = (): string => {
+	if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
+		return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+	}
+	if (process.env.VERCEL_URL) {
+		return `https://${process.env.VERCEL_URL}`;
+	}
+	return "http://localhost:5173";
+};
+
 const addCorsHeaders = (
 	response: Response,
 	origin: string | null,
+	requestUrl?: string,
 ): Response => {
 	const headers = new Headers(response.headers);
 
+	// In production, same-origin requests don't have an origin header
+	// We should allow the request to proceed with appropriate CORS headers
 	if (origin && isAllowedOrigin(origin)) {
 		headers.set("Access-Control-Allow-Origin", origin);
 		headers.set("Access-Control-Allow-Credentials", "true");
+	} else if (!origin) {
+		// Same-origin request (no origin header) - infer from request URL
+		// This is common in production when requests come from the same domain
+		if (requestUrl) {
+			try {
+				const url = new URL(requestUrl);
+				const inferredOrigin = `${url.protocol}//${url.host}`;
+				if (isAllowedOrigin(inferredOrigin)) {
+					headers.set("Access-Control-Allow-Origin", inferredOrigin);
+				}
+			} catch {
+				// Invalid URL, use default
+			}
+		}
+		headers.set("Access-Control-Allow-Credentials", "true");
 	} else {
-		headers.set("Access-Control-Allow-Origin", "http://localhost:5173");
+		// Origin not allowed - use default
+		headers.set("Access-Control-Allow-Origin", getDefaultOrigin());
+		headers.set("Access-Control-Allow-Credentials", "true");
 	}
 
 	headers.set(
@@ -59,8 +98,27 @@ const addCorsHeaders = (
 
 export async function OPTIONS(request: NextRequest) {
 	const origin = request.headers.get("origin");
-	const allowedOrigin =
-		origin && isAllowedOrigin(origin) ? origin : "http://localhost:5173";
+	let allowedOrigin: string;
+
+	if (origin && isAllowedOrigin(origin)) {
+		allowedOrigin = origin;
+	} else if (!origin) {
+		// Same-origin request - infer from request URL
+		try {
+			const url = new URL(request.url);
+			const inferredOrigin = `${url.protocol}//${url.host}`;
+			if (isAllowedOrigin(inferredOrigin)) {
+				allowedOrigin = inferredOrigin;
+			} else {
+				allowedOrigin = getDefaultOrigin();
+			}
+		} catch {
+			allowedOrigin = getDefaultOrigin();
+		}
+	} else {
+		// Use default
+		allowedOrigin = getDefaultOrigin();
+	}
 
 	return new Response(null, {
 		status: 204,
@@ -77,10 +135,7 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
-		// Read the body once so we can validate requested social provider
-		// before forwarding to the base handler. We create a new Request
-		// to pass to the underlying Better Auth handler because `request.text()`
-		// consumes the body stream.
+
 		const bodyText = await request.text();
 		let parsedBody: Record<string, unknown> | null = null;
 		try {
@@ -115,6 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 					headers: { "Content-Type": "application/json" },
 				}),
 				origin,
+				request.url,
 			) as NextResponse;
 		}
 
@@ -125,7 +181,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		});
 
 		const response = await basePOST(forwardRequest);
-		return addCorsHeaders(response, origin) as NextResponse;
+		return addCorsHeaders(response, origin, request.url) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth POST error:", error);
 		const origin = request.headers.get("origin");
@@ -135,6 +191,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 				headers: { "Content-Type": "application/json" },
 			}),
 			origin,
+			request.url,
 		) as NextResponse;
 	}
 }
@@ -143,7 +200,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
 		const response = await baseGET(request);
-		return addCorsHeaders(response, origin) as NextResponse;
+		return addCorsHeaders(response, origin, request.url) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth GET error:", error);
 		const origin = request.headers.get("origin");
@@ -153,6 +210,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 				headers: { "Content-Type": "application/json" },
 			}),
 			origin,
+			request.url,
 		) as NextResponse;
 	}
 }

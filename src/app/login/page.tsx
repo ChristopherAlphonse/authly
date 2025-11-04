@@ -87,7 +87,7 @@ export default function LoginPage() {
 	// Handle passkey sign-in
 	const handlePasskeySignIn = async () => {
 		setLoading(true);
-		setError("Failed to sign in with Passkey. Please try again.");
+		setError("");
 
 		try {
 			const result = await authClient.signIn.passkey();
@@ -105,7 +105,7 @@ export default function LoginPage() {
 				}
 			}
 
-			setError((error as unknown as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
+			setError("Failed to sign in with Passkey. Please try again.");
 		} catch (error: unknown) {
 			console.error("[Login] Passkey sign-in error:", error);
 			setError((error as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
