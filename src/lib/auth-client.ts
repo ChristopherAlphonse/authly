@@ -1,4 +1,4 @@
-import { jwtClient, passkeyClient } from "better-auth/client/plugins";
+import { jwtClient, magicLinkClient, passkeyClient } from "better-auth/client/plugins";
 
 import { createAuthClient } from "better-auth/react";
 
@@ -16,7 +16,7 @@ const getBaseURL = () => {
 
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),
-	plugins: [jwtClient(), passkeyClient()],
+	plugins: [jwtClient(), magicLinkClient(), passkeyClient()],
 	fetchOptions: {
 		onError: async (context) => {
 			const { response } = context;

@@ -51,7 +51,7 @@ export default function MagicLinkPage() {
 		try {
 			await authClient.signIn.magicLink({
 				email,
-				redirectTo: `${window.location.origin}/`,
+				callbackURL: `${window.location.origin}/`,
 			});
 
 			setSuccess(true);
