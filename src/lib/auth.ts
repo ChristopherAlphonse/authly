@@ -14,7 +14,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { passkey } from "better-auth/plugins/passkey";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const DEV_MODE = !IS_CLOUD;  // testing override with true
+const DEV_MODE = IS_CLOUD;  // testing override with true
 const SESSION_EXPIRES_IN = 60 * 60 * 12;
 const SESSION_UPDATE_AGE = 60 * 60 * 2;
 
