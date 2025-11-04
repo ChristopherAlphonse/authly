@@ -15,107 +15,15 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-function parseHttpError(err: unknown): { status?: number; message?: string } {
-	let status: number | undefined;
-	let message: string | undefined;
-
-	if (typeof err === "object" && err !== null) {
-		const maybe = err as { [k: string]: unknown };
-
-		const resp = maybe.response;
-		if (typeof resp === "object" && resp !== null) {
-			const r = resp as { [k: string]: unknown };
-			const s = r.status;
-			if (typeof s === "number") status = s;
-
-			const data = r.data;
-			if (typeof data === "object" && data !== null) {
-				const d = data as { [k: string]: unknown };
-				if (typeof d.message === "string") message = d.message;
-				else if (typeof d.error === "string") message = d.error;
-			}
-		}
-
-		if (status === undefined) {
-			const s2 = maybe.status;
-			if (typeof s2 === "number") status = s2;
-		}
-
-		if (status === undefined) {
-			const s3 = maybe.statusCode;
-			if (typeof s3 === "number") status = s3;
-		}
-
-		if (!message) {
-			const m = maybe.message;
-			if (typeof m === "string") message = m;
-		}
-	}
-
-	return { status, message };
-}
-
-function uiMessageFromError(err: unknown): string {
-	let rawMsg: string | undefined;
-
-	if (typeof err === "string") rawMsg = err;
-	else if (typeof err === "object" && err !== null) {
-		const maybe = err as { [k: string]: unknown };
-		if (typeof maybe.message === "string") rawMsg = maybe.message;
-		else {
-			const resp = maybe.response;
-			if (typeof resp === "object" && resp !== null) {
-				const r = resp as { [k: string]: unknown };
-				const data = r.data;
-				if (typeof data === "object" && data !== null) {
-					const d = data as { [k: string]: unknown };
-					if (typeof d.message === "string") rawMsg = d.message;
-				}
-			}
-		}
-	}
-
-	if (
-		typeof rawMsg === "string" &&
-		/network error|ECONNREFUSED|connect ECONNREFUSED|failed to fetch/i.test(
-			rawMsg,
-		)
-	) {
-		return "Network error — couldn't reach the auth server. Check your connection and try again.";
-	}
-
-	const { status, message } = parseHttpError(err);
-	const msg =
-		typeof message === "string" && message.trim().length
-			? message.trim()
-			: undefined;
-
-	if (status === 403)
-		return (
-			msg ??
-			"Access denied — your account may be blocked or require email verification. Check your email for a verification link."
-		);
-	if (status === 401)
-		return msg ?? "Incorrect email or password. Please try again.";
-	if (status === 404)
-		return (
-			msg ?? "No account found for that email. Would you like to register?"
-		);
-	if (status === 429)
-		return (
-			msg ?? "Too many attempts — please wait a few minutes and try again."
-		);
-	if (status && status >= 400 && status < 500)
-		return msg ?? "Sign in failed. Check your input and try again.";
-
-	return msg ?? "Sign in failed due to a server or network issue.";
-}
-
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [showResendVerification, setShowResendVerification] = useState(false);
+	const [resendLoading, setResendLoading] = useState(false);
+	const [resendSuccess, setResendSuccess] = useState(false);
+	const [resendError, setResendError] = useState("");
 
 	const router = useRouter();
 
@@ -134,11 +42,13 @@ export default function LoginPage() {
 					// Handle the error
 					if (ctx.error.status === 403) {
 						setError("Please verify your email address");
+						setShowResendVerification(true);
 					} else {
 						// Show the original error message
 						setError(
 							ctx.error.message || "Sign in failed. Please try again.",
 						);
+						setShowResendVerification(false);
 					}
 					setLoading(false);
 				},
@@ -170,14 +80,14 @@ export default function LoginPage() {
 				callbackURL: "/",
 			});
 		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
+			setError(err instanceof Error ? err.message : "Failed to sign in with Google. Please try again.");
 		}
 	};
 
 	// Handle passkey sign-in
 	const handlePasskeySignIn = async () => {
 		setLoading(true);
-		setError("");
+		setError("Failed to sign in with Passkey. Please try again.");
 
 		try {
 			const result = await authClient.signIn.passkey();
@@ -185,23 +95,51 @@ export default function LoginPage() {
 			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
 				if (r.user || r.session || r.data) {
-					// Success! Redirect to home
+
 					router.push("/");
 					return;
 				}
 				if (r.error) {
-					setError(uiMessageFromError(r.error));
+					setError(r.error instanceof Error ? r.error.message : "Failed to sign in with Passkey. Please try again.");
 					return;
 				}
 			}
 
-			// If we get here, sign-in failed
-			setError(uiMessageFromError(result as unknown));
-		} catch (err: unknown) {
-			console.error("[Login] Passkey sign-in error:", err);
-			setError(uiMessageFromError(err));
+			setError((error as unknown as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
+		} catch (error: unknown) {
+			console.error("[Login] Passkey sign-in error:", error);
+			setError((error as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handleResendVerification = async (): Promise<void> => {
+		if (!email) {
+			setResendError("Please enter your email address");
+			return;
+		}
+
+		setResendLoading(true);
+		setResendError("");
+		setResendSuccess(false);
+
+		try {
+			await authClient.sendVerificationEmail({
+				email,
+				callbackURL: "/",
+			});
+			setResendSuccess(true);
+			setResendError("");
+		} catch (err: unknown) {
+			const errorMessage =
+				err instanceof Error
+					? err.message
+					: "Failed to send verification email. Please try again.";
+			setResendError(errorMessage);
+			setResendSuccess(false);
+		} finally {
+			setResendLoading(false);
 		}
 	};
 
@@ -224,7 +162,12 @@ export default function LoginPage() {
 									type="email"
 									placeholder="Email"
 									value={email}
-									onChange={(e) => setEmail(e.target.value)}
+									onChange={(e) => {
+										setEmail(e.target.value);
+										setShowResendVerification(false);
+										setResendSuccess(false);
+										setResendError("");
+									}}
 									required
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
@@ -249,6 +192,41 @@ export default function LoginPage() {
 							</div>
 							{error && (
 								<div className="text-red-400 text-sm text-center">{error}</div>
+							)}
+							{showResendVerification && (
+								<div className="space-y-3 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+									<p className="text-zinc-300 text-sm text-center">
+										Your email address needs to be verified before you can sign in.
+									</p>
+									{resendSuccess && (
+										<div className="text-green-400 text-sm text-center">
+											Verification email sent! Please check your inbox.
+										</div>
+									)}
+									{resendError && (
+										<div className="text-red-400 text-sm text-center">
+											{resendError}
+										</div>
+									)}
+									<Button
+										type="button"
+										onClick={handleResendVerification}
+										disabled={resendLoading || loading}
+										className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium"
+									>
+										{resendLoading
+											? "Sending..."
+											: "Resend Verification Email"}
+									</Button>
+									<div className="text-center">
+										<Link
+											href="/resend-verification"
+											className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
+										>
+											Or use a different email address
+										</Link>
+									</div>
+								</div>
 							)}
 							<Button
 								type="submit"

@@ -11,6 +11,7 @@
 // })
 
 import { MIN_JWT_PARTS, MS_PER_SECOND } from "../constants/app_constants";
+
 import { SESSION_TIMEOUT } from "../constants/auth_constant";
 
 type Callbacks = {
@@ -59,14 +60,13 @@ export function scheduleSessionTimers(
 	const now = Date.now();
 	const msLeft = expMs - now;
 
-	// default to configured idle timeout warn seconds or the constant
 	const warnMs =
 		(options.warnSeconds ?? SESSION_TIMEOUT.IDLETIMEOUTWARN) * MS_PER_SECOND;
 	const warnAt = Math.max(0, msLeft - warnMs);
 	const expireAt = Math.max(0, msLeft);
 
 	if (warnAt <= 0) {
-		// If already within warn window, call onWarn immediately
+
 		callbacks.onWarn?.(msLeft);
 	} else {
 		_warnTimer = setTimeout(() => {
@@ -75,15 +75,15 @@ export function scheduleSessionTimers(
 	}
 
 	_expireTimer = setTimeout(async () => {
-		// When expired, try to refresh if onRefresh was provided, otherwise call onExpire
+
 		if (callbacks.onRefresh) {
 			try {
 				await callbacks.onRefresh();
-				// After refresh, reschedule timers based on new token
+
 				scheduleSessionTimers(tokenGetter, options, callbacks);
 				return;
 			} catch {
-				// fallthrough to expire
+
 			}
 		}
 		callbacks.onExpire?.();

@@ -1,20 +1,48 @@
 {
-	"version": "7",
-	"dialect": "postgresql",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "7",
-			"when": 1752165095860,
-			"tag": "0000_nice_bishop",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1762024414444,
-			"tag": "0001_ancient_bushwacker",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 0,
+      "tag": "0000_nice_bishop",
+      "when": 1752165095860
+    },
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 1,
+      "tag": "0001_ancient_bushwacker",
+      "when": 1762024414444
+    },
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 2,
+      "tag": "0002_add_two_factor_and_passkey",
+      "when": 1752165095861
+    },
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 3,
+      "tag": "0003_awesome_power_pack",
+      "when": 1762226534288
+    },
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 4,
+      "tag": "0004_orange_overlord",
+      "when": 1762228804057
+    },
+    {
+      "version": "7",
+      "breakpoints": true,
+      "idx": 5,
+      "tag": "0005_add_user_tracking_to_ratelimit",
+      "when": 1762230000000
+    }
+  ]
 }

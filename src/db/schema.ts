@@ -1,4 +1,5 @@
 import {
+	bigint,
 	boolean,
 	integer,
 	pgTable,
@@ -123,4 +124,14 @@ export const passkey = pgTable("passkey", {
 	transports: text("transports").notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	aaguid: text("aaguid"),
+});
+
+export const rateLimit = pgTable("rateLimit", {
+	id: text("id").primaryKey(),
+	key: text("key").notNull().unique(),
+	count: integer("count").notNull(),
+	lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+	userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
 });

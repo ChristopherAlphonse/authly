@@ -17,6 +17,17 @@ const getBaseURL = () => {
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),
 	plugins: [jwtClient(), passkeyClient()],
+	fetchOptions: {
+		onError: async (context) => {
+			const { response } = context;
+			if (response.status === 429) {
+				const retryAfter = response.headers.get("X-Retry-After");
+				console.warn(
+					`Rate limit exceeded. Retry after ${retryAfter} seconds`,
+				);
+			}
+		},
+	},
 });
 
 

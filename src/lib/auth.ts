@@ -14,11 +14,16 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { passkey } from "better-auth/plugins/passkey";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const DEV_MODE = !IS_CLOUD;  // testing override with true
+const SESSION_EXPIRES_IN = 60 * 60 * 12;
+const SESSION_UPDATE_AGE = 60 * 60 * 2;
+
 export const auth = betterAuth({
     appName: "main-app-poc",
     database: drizzleAdapter(db, {
         provider: "pg",
     }),
+
     socialProviders: {
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -27,8 +32,8 @@ export const auth = betterAuth({
     },
     emailAndPassword: {
         enabled: true,
-        autoSignIn: !IS_CLOUD,
-        requireEmailVerification: !IS_CLOUD, // testing override with true
+        autoSignIn: DEV_MODE,
+        requireEmailVerification: DEV_MODE,
         password: {
             async hash(password: string): Promise<string> {
                 return bcrypt.hashSync(password, 10);
@@ -83,60 +88,43 @@ export const auth = betterAuth({
             }
         },
     },
-    session: {
-        expiresIn: 60 * 60 * 24 * 3, // 3 days
-        updateAge: 60 * 60 * 24, // 1 day
-    },
+session: {
+  expiresIn: SESSION_EXPIRES_IN,
+  updateAge: SESSION_UPDATE_AGE,
+    cookie: {
+    name: "__Secure-session",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  },
+}
+,
     logger: {
         disabled: process.env.NODE_ENV === "production",
     },
     plugins: [
         jwt(),
         twoFactor(),
-        passkey({
-            rpID: (() => {
-
-                // For localhost, use 'localhost', otherwise extract domain
-                if (process.env.NODE_ENV === "development") {
-                    return "localhost";
-                }
-
-                const url =
-                    process.env.BETTER_AUTH_URL ||
-                    (process.env.VERCEL_URL
-                        ? `https://${process.env.VERCEL_URL}`
-                        : "http://localhost:5173");
-
-                try {
-                    const urlObj = new URL(url);
-                    return urlObj.hostname;
-                } catch {
-                    return "localhost";
-                }
-            })(),
-            rpName: "main-app-poc",
-            origin: (() => {
-
-                if (process.env.NODE_ENV === "development") {
-                    return "http://localhost:5173";
-                }
-
-                if (process.env.BETTER_AUTH_URL) {
-                    return process.env.BETTER_AUTH_URL.replace(/\/+$/, "");
-                }
-
-                if (process.env.VERCEL_URL) {
-                    return `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "");
-                }
-
-                return "http://localhost:5173";
-            })(),
-        }),
+        passkey(),
     ],
-    // Use dynamic baseURL based on environment:
-    // - For local testing (NODE_ENV=development): always use localhost
-    // - In production: use BETTER_AUTH_URL or VERCEL_URL
-    // - Priority for production: BETTER_AUTH_URL > VERCEL_URL
+      tokens: {
+    rotation: "always",
+    secret: process.env.BETTER_AUTH_SECRET!,
+  },
+    rateLimit: {
+        storage: "database",
+        modelName: "rateLimit",
+        window: 60,
+        max: 100,
+        customRules: {
+            "/sign-in/email": {
+                window: 10,
+                max: 3,
+            },
+        },
+    },
+
     baseURL: (() => {
         if (process.env.NODE_ENV === "development") {
             return "http://localhost:5173";
@@ -172,7 +160,7 @@ export const auth = betterAuth({
         const warnings: string[] = [];
         const errors: string[] = [];
 
-        // Check email configuration (required for all environments)
+
         if (!process.env.RESEND_API_KEY) {
             errors.push("Missing RESEND_API_KEY - Required for email sending");
         }
