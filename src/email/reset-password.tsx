@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import {
   Body,
   Button,
@@ -7,14 +6,13 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Section,
-  Tailwind,
   Text,
+  Tailwind,
 } from '@react-email/components';
-
-import { EmailFooter } from './email-footer';
 
 interface PasswordResetProps {
 
@@ -23,55 +21,65 @@ interface PasswordResetProps {
 
 const PasswordReset = (props:PasswordResetProps) => {
 const { resetUrl } = props;
-
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>Reset your password - secure link inside</Preview>
+      <Preview>Reset your Authly password</Preview>
       <Tailwind>
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white rounded-[8px] px-[32px] py-[40px] max-w-[600px] mx-auto">
+        <Body className="bg-[#F6F8FA] font-sans py-[40px]">
+          <Container className="bg-[#FFFFFF] rounded-[8px] mx-auto p-[40px] max-w-[600px]">
+            {/* Logo */}
+            <Section className="text-center mb-[32px]">
+              <Img
+                src="https://di867tnz6fwga.cloudfront.net/brand-kits/cb5b47f3-c6d5-4218-9d64-025bb9df4562/primary/f72511e4-84dd-4c60-b0c9-8d923de8836d.png"
+                alt="Authly"
+                className="w-[120px] h-auto mx-auto"
+              />
+            </Section>
+
+            {/* Main Content */}
             <Section>
-              <Heading className="text-[28px] font-bold text-gray-900 mb-[24px] text-center">
+              <Heading className="text-[#020304] text-[24px] font-bold mb-[16px] text-center">
                 Reset Your Password
               </Heading>
-
-
-
-              <Text className="text-[16px] text-gray-700 mb-[32px] leading-[24px]">
-                Click the button below to create a new password:
+              
+              <Text className="text-[#020304] text-[16px] leading-[24px] mb-[24px]">
+                We received a request to reset the password for your Authly account associated with {userEmail}.
               </Text>
 
+              <Text className="text-[#020304] text-[16px] leading-[24px] mb-[32px]">
+                Click the button below to create a new password. This link will expire in 24 hours for security purposes.
+              </Text>
+
+              {/* Reset Button */}
               <Section className="text-center mb-[32px]">
                 <Button
                   href={resetUrl}
-                  className="bg-red-600 text-white px-[32px] py-[16px] rounded-[8px] text-[16px] font-semibold no-underline box-border"
+                  className="bg-[#3A98D0] text-white px-[32px] py-[12px] rounded-[6px] text-[16px] font-medium no-underline box-border"
                 >
                   Reset Password
                 </Button>
               </Section>
 
+              <Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px]">
+                If the button doesn't work, copy and paste this link into your browser:
+              </Text>
 
-              <Text className="text-[14px] text-blue-600 mb-[32px] break-all">
-                <Link href={resetUrl} className="text-blue-600 no-underline">
+              <Text className="text-[#3A98D0] text-[14px] leading-[20px] mb-[24px] break-all">
+                <Link href={resetUrl} className="text-[#3A98D0] underline">
                   {resetUrl}
                 </Link>
               </Text>
 
-              <Section className="bg-yellow-50 border border-yellow-200 rounded-[8px] p-[16px] mb-[24px]">
-                <Text className="text-[14px] text-yellow-800 m-0 leading-[20px]">
-                  <strong>Security Notice:</strong> This password reset link will expire in 1 hour for your security.
-                  If you didn&apos;t request this password reset, please ignore this email or contact our support team.
-                </Text>
-              </Section>
+              <Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px]">
+                If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+              </Text>
 
-              <Text className="text-[14px] text-gray-600 leading-[20px]">
-                For your account security, never share this link with anyone. If you continue to have trouble,
-                please contact our support team for assistance.
+              <Text className="text-[#020304] text-[14px] leading-[20px]">
+                For security questions or assistance, contact our support team.
               </Text>
             </Section>
 
-          <EmailFooter />
           </Container>
         </Body>
       </Tailwind>
