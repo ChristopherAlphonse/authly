@@ -61,7 +61,7 @@ const { resetUrl } = props;
               <Section className="bg-yellow-50 border border-yellow-200 rounded-[8px] p-[16px] mb-[24px]">
                 <Text className="text-[14px] text-yellow-800 m-0 leading-[20px]">
                   <strong>Security Notice:</strong> This password reset link will expire in 1 hour for your security.
-                  If you didn't request this password reset, please ignore this email or contact our support team.
+                  If you didn&apos;t request this password reset, please ignore this email or contact our support team.
                 </Text>
               </Section>
 

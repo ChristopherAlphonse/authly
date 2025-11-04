@@ -82,10 +82,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		// to pass to the underlying Better Auth handler because `request.text()`
 		// consumes the body stream.
 		const bodyText = await request.text();
-		let parsedBody: any = null;
+		let parsedBody: Record<string, unknown> | null = null;
 		try {
-			parsedBody = bodyText ? JSON.parse(bodyText) : null;
-		} catch (err) {
+			parsedBody = bodyText ? JSON.parse(bodyText) as Record<string, unknown> : null;
+		} catch {
 			// Not JSON — fine, leave parsedBody null
 		}
 
@@ -103,7 +103,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 			return p;
 		};
 
-		const requestedProvider = parsedBody?.provider ?? null;
+		const requestedProvider = parsedBody?.provider && typeof parsedBody.provider === "string"
+			? parsedBody.provider
+			: null;
 		const registered = getRegisteredProviders();
 		if (requestedProvider && !registered.includes(requestedProvider)) {
 			console.warn("Requested social provider not configured:", requestedProvider, "available:", registered);
@@ -118,11 +120,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
 		const forwardRequest = new Request(request.url, {
 			method: request.method,
-			headers: request.headers as any,
+			headers: request.headers as HeadersInit,
 			body: bodyText,
 		});
 
-		const response = await basePOST(forwardRequest as any);
+		const response = await basePOST(forwardRequest);
 		return addCorsHeaders(response, origin) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth POST error:", error);
