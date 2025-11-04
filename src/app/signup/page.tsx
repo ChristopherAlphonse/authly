@@ -211,13 +211,18 @@ export default function SignUpPage() {
 												callbackURL: "/",
 											});
 										} catch (err: unknown) {
-											setError(
-												typeof err === "string"
-													? err
-													: err instanceof Error
-														? err.message
-														: "Failed to sign in with Google",
-											);
+											let errorMessage = "Failed to sign in with Google. Please try again.";
+											if (err instanceof Error) {
+												errorMessage = err.message;
+											} else if (typeof err === "object" && err !== null) {
+												const errorObj = err as { error?: string; message?: string; provider?: string };
+												if (errorObj.error === "Provider not configured") {
+													errorMessage = "Google sign-in is not configured. Please contact support or use email/password.";
+												} else if (errorObj.message) {
+													errorMessage = errorObj.message;
+												}
+											}
+											setError(errorMessage);
 										}
 									}}
 									disabled={loading}
