@@ -146,7 +146,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		const getRegisteredProviders = () => {
 			const p: string[] = [];
 			if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) p.push("google");
-			if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) p.push("github");
 			if (
 				process.env.COGNITO_CLIENT_ID &&
 				process.env.COGNITO_CLIENT_SECRET &&
