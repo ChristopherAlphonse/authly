@@ -1,9 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,8 +7,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 function parseHttpError(err: unknown): { status?: number; message?: string } {
 	let status: number | undefined;
@@ -123,53 +124,45 @@ export default function LoginPage() {
 		setLoading(true);
 		setError("");
 
-		try {
-			const result = await authClient.signIn.email({
+		const result = await authClient.signIn.email(
+			{
 				email,
 				password,
-			});
+			},
+			{
+				onError: (ctx) => {
+					// Handle the error
+					if (ctx.error.status === 403) {
+						setError("Please verify your email address");
+					} else {
+						// Show the original error message
+						setError(
+							ctx.error.message || "Sign in failed. Please try again.",
+						);
+					}
+					setLoading(false);
+				},
+			},
+		);
 
-			// Better Auth's signIn.email returns an object with user/session on success
-			if (result && typeof result === "object") {
-				const r = result as { [k: string]: unknown };
-				// Sign-in succeeded if we have user or session
-				if (r.user || r.session || r.data) {
-					// Success! Redirect to home
-					router.push("/");
-					return;
-				}
-				// Check for error in response
-				if (r.error) {
-					setError(uiMessageFromError(r.error));
-					return;
-				}
+		// Better Auth's signIn.email returns an object with user/session on success
+		if (result && typeof result === "object") {
+			const r = result as { [k: string]: unknown };
+			// Sign-in succeeded if we have user or session
+			if (r.user || r.session || r.data) {
+				// Success! Redirect to home
+				router.push("/");
+				setLoading(false);
+				return;
 			}
-
-			// If we get here, sign-in failed (no user/session/error)
-			setError(uiMessageFromError(result as unknown));
-		} catch (err: unknown) {
-			console.error("[Login] Sign-in error:", err);
-			setError(uiMessageFromError(err));
-		} finally {
-			setLoading(false);
 		}
-	};
 
-	// Use Better Auth's social sign-in for direct GitHub OAuth
-	// Users will see GitHub's native OAuth UI, not Cognito Hosted UI
-	const handleGitHubSignIn = async () => {
-		try {
-			await authClient.signIn.social({
-				provider: "github",
-				callbackURL: "/",
-			});
-		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
-		}
+		// If we get here and no error was set in onError, something unexpected happened
+		// This shouldn't happen if onError is called for all errors, but handle it just in case
+		setLoading(false);
 	};
 
 	// Use Better Auth's social sign-in for direct Google OAuth
-	// Users will see Google's native OAuth UI, not Cognito Hosted UI
 	const handleGoogleSignIn = async () => {
 		try {
 			await authClient.signIn.social({
@@ -178,6 +171,37 @@ export default function LoginPage() {
 			});
 		} catch (err: unknown) {
 			setError(uiMessageFromError(err));
+		}
+	};
+
+	// Handle passkey sign-in
+	const handlePasskeySignIn = async () => {
+		setLoading(true);
+		setError("");
+
+		try {
+			const result = await authClient.signIn.passkey();
+
+			if (result && typeof result === "object") {
+				const r = result as { [k: string]: unknown };
+				if (r.user || r.session || r.data) {
+					// Success! Redirect to home
+					router.push("/");
+					return;
+				}
+				if (r.error) {
+					setError(uiMessageFromError(r.error));
+					return;
+				}
+			}
+
+			// If we get here, sign-in failed
+			setError(uiMessageFromError(result as unknown));
+		} catch (err: unknown) {
+			console.error("[Login] Passkey sign-in error:", err);
+			setError(uiMessageFromError(err));
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -247,27 +271,34 @@ export default function LoginPage() {
 								</div>
 							</div>
 
-							<div className="mt-6 grid grid-cols-2 gap-3">
+							<div className="mt-6 space-y-3">
 								<Button
 									type="button"
 									variant="outline"
-									onClick={handleGitHubSignIn}
-									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+									onClick={handlePasskeySignIn}
+									disabled={loading}
+									className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
 								>
 									<svg
 										className="w-4 h-4 mr-2"
 										viewBox="0 0 24 24"
-										fill="currentColor"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
 									>
-										<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+										<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+										<path d="M9 12l2 2 4-4" />
 									</svg>
-									GitHub
+									{loading ? "Signing In..." : "Sign in with Passkey"}
 								</Button>
 								<Button
 									type="button"
 									variant="outline"
 									onClick={handleGoogleSignIn}
-									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+									disabled={loading}
+									className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
 								>
 									<svg
 										className="w-4 h-4 mr-2"

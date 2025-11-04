@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -7,14 +10,33 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 
-export default function ForgotPasswordPage() {
+function uiMessageFromError(err: unknown): string {
+	let rawMsg: string | undefined;
+
+	if (typeof err === "string") rawMsg = err;
+	else if (typeof err === "object" && err !== null) {
+		const maybe = err as { [k: string]: unknown };
+		if (typeof maybe.message === "string") rawMsg = maybe.message;
+		else {
+			const resp = maybe.response;
+			if (typeof resp === "object" && resp !== null) {
+				const r = resp as { [k: string]: unknown };
+				const data = r.data;
+				if (typeof data === "object" && data !== null) {
+					const d = data as { [k: string]: unknown };
+					if (typeof d.message === "string") rawMsg = d.message;
+				}
+			}
+		}
+	}
+
+	return rawMsg ?? "Failed to send magic link. Please try again.";
+}
+
+export default function MagicLinkPage() {
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -26,15 +48,18 @@ export default function ForgotPasswordPage() {
 		setError("");
 		setSuccess(false);
 
-		const { error}= await authClient.forgetPassword({
-			email,
-			redirectTo: '/reset-password',
-		});
+		try {
+			await authClient.signIn.magicLink({
+				email,
+				redirectTo: `${window.location.origin}/`,
+			});
 
-		if (error) {
-			setError(error.message || "Failed to send password reset email. Please try again.");
-		} else {
 			setSuccess(true);
+		} catch (err: unknown) {
+			console.error("[Magic Link] Error:", err);
+			setError(uiMessageFromError(err));
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -45,25 +70,27 @@ export default function ForgotPasswordPage() {
 					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
 						<CardHeader className="text-center">
 							<CardTitle className="text-2xl font-bold text-white">
-								Check Your Email
+								Check your email
 							</CardTitle>
 							<CardDescription className="text-zinc-400">
-								We&apos;ve sent a password reset link to {email}
+								We&apos;ve sent a magic link to {email}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<p className="text-zinc-300 text-sm mb-6">
-								Click the link in the email to reset your password. If you
-								don&apos;t see it, check your spam folder.
-							</p>
-							<Link href="/login">
-								<Button
-									type="button"
-									className="w-full bg-white text-zinc-900 hover:bg-zinc-100 font-medium"
-								>
-									Back to Sign In
-								</Button>
-							</Link>
+							<div className="space-y-4">
+								<p className="text-zinc-300 text-sm text-center">
+									Click the link in the email to sign in. The link will expire
+									in 10 minutes.
+								</p>
+								<div className="text-center">
+									<Link
+										href="/login"
+										className="text-sm text-zinc-400 hover:text-white hover:underline"
+									>
+										Back to login
+									</Link>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 				</div>
@@ -77,11 +104,10 @@ export default function ForgotPasswordPage() {
 				<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
 					<CardHeader className="text-center">
 						<CardTitle className="text-2xl font-bold text-white">
-							Forgot Password
+							Magic Link
 						</CardTitle>
 						<CardDescription className="text-zinc-400">
-							Enter your email address and we&apos;ll send you a link to reset
-							your password
+							Enter your email and we&apos;ll send you a sign-in link
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -104,7 +130,7 @@ export default function ForgotPasswordPage() {
 								disabled={loading}
 								className="w-full bg-white text-zinc-900 hover:bg-zinc-100 font-medium"
 							>
-								{loading ? "Sending..." : "Send Reset Link"}
+								{loading ? "Sending..." : "Send Magic Link"}
 							</Button>
 						</form>
 

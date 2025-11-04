@@ -1,9 +1,10 @@
-import { jwtClient } from "better-auth/client/plugins";
+import { jwtClient, passkeyClient } from "better-auth/client/plugins";
+
 import { createAuthClient } from "better-auth/react";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {
-		return ""; // relative URLs => same origin (e.g. https://authly-red.vercel.app)
+		return "";
 	}
 
 	const envUrl =
@@ -15,7 +16,9 @@ const getBaseURL = () => {
 
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),
-	plugins: [jwtClient()],
+	plugins: [jwtClient(), passkeyClient()],
 });
+
+
 
 export default authClient;
