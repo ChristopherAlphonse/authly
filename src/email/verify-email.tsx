@@ -7,7 +7,6 @@ import {
   Heading,
   Html,
   Img,Hr ,
-  Link,
   Preview,
   Section,
   Text,
@@ -46,16 +45,19 @@ const EmailVerification = (props:EmailVerificationProps) => {
 
             {/* Main Content */}
             <Section className="mb-[32px]">
-              <Heading className="text-[#020304] text-[24px] font-bold text-center mb-[16px] m-0">
-                Verify Your Email Address {userName},
-              </Heading>
 
 
-              
-              <Text className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
-                Welcome to Authly! We're excited to help you transform document chaos into actionable lending intelligence.
+                          <Heading className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
+                              Welcome to Authly! We&apos;re excited to help you transform document chaos into actionable lending intelligence.
+                          </Heading>
+
+              <Text className="text-[#020304] text-[24px] font-bold text-center mb-[16px] m-0">
+                Verify Your Email Address {userName.toUpperCase()},
               </Text>
-              
+
+
+
+
               <Text className="text-[#020304] text-[16px] leading-[24px] mb-[32px] m-0">
                 To complete your account setup and start leveraging our AI-powered lending solutions, please verify your email address by clicking the button below:
               </Text>
@@ -64,16 +66,16 @@ const EmailVerification = (props:EmailVerificationProps) => {
               <Section className="text-center mb-[32px]">
                 <Button
                   href={verificationUrl}
-                  className="bg-[#3A98D0] text-white text-[16px] font-semibold py-[12px] px-[24px] rounded-[6px] no-underline box-border inline-block"
+                  className="bg-[#3A98D0] text-white text-[14px] font-semibold py-[10px] px-[22px] rounded-[4px] no-underline box-border inline-block"
                 >
                   Verify Email Address
                 </Button>
               </Section>
 
               <Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px] m-0">
-                If the button above doesn't work, you can also verify your email by copying and pasting this link into your browser:
+                If the button above doesn&apos;t work, you can also verify your email by copying and pasting this link into your browser:
               </Text>
-              
+
               <Text className="text-[#3A98D0] text-[14px] leading-[20px] mb-[24px] m-0 break-all">
                 {props.verificationUrl}
               </Text>
@@ -83,11 +85,11 @@ const EmailVerification = (props:EmailVerificationProps) => {
               </Text>
 
               <Text className="text-[#020304] text-[16px] leading-[24px] mb-[0px] m-0">
-                If you didn't create an account with Authly, please ignore this email or contact our support team.
+                If you didn&apos;t create an account with Authly, please ignore this email or contact our support team.
               </Text>
             </Section>
 
-           
+
           </Container>
         </Body>
       </Tailwind>

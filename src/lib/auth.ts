@@ -24,7 +24,7 @@ export const auth = betterAuth({
         provider: "pg",
     }),
 
- socialProviders: {
+    socialProviders: {
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
@@ -51,7 +51,7 @@ export const auth = betterAuth({
                     from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
                     to: user.email,
                     subject: "Reset your password",
-                    react: PasswordReset({resetUrl: url})
+                    react: PasswordReset({ userEmail: user.email, resetUrl: url })
                 });
 
                 console.log("[Email] Password reset email sent successfully:", result);
@@ -77,7 +77,7 @@ export const auth = betterAuth({
                     from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
                     to: user.email,
                     subject: "Verify your email",
-                    react: EmailVerification({userName: user.name, verificationUrl: url})
+                    react: EmailVerification({ userName: user.name, verificationUrl: url })
                 });
 
                 console.log("[Email] Verification email sent successfully:", result);
@@ -88,18 +88,18 @@ export const auth = betterAuth({
             }
         },
     },
-session: {
-  expiresIn: SESSION_EXPIRES_IN,
-  updateAge: SESSION_UPDATE_AGE,
-    cookie: {
-    name: "__Secure-session",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-  },
-}
-,
+    session: {
+        expiresIn: SESSION_EXPIRES_IN,
+        updateAge: SESSION_UPDATE_AGE,
+        cookie: {
+            name: "__Secure-session",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        },
+    }
+    ,
     logger: {
         disabled: process.env.NODE_ENV === "production",
     },
@@ -108,10 +108,10 @@ session: {
         twoFactor(),
         passkey(),
     ],
-      tokens: {
-    rotation: "always",
-    secret: process.env.BETTER_AUTH_SECRET!,
-  },
+    tokens: {
+        rotation: "always",
+        secret: process.env.BETTER_AUTH_SECRET!,
+    },
     rateLimit: {
         storage: "database",
         modelName: "rateLimit",
