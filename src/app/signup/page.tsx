@@ -266,14 +266,8 @@ export default function SignUpPage() {
 								</Link>
 							</p>
 							<p className="text-zinc-400 text-xs">
-								After signing up, you can{" "}
-								<Link
-									href="/passkey/register"
-									className="text-white hover:underline font-medium"
-								>
-									register a passkey
-								</Link>
-								{" "}for passwordless authentication
+								After signing up, you can register a passkey for passwordless
+								authentication
 							</p>
 						</div>
 					</CardContent>
