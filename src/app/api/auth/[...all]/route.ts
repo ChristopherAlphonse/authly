@@ -183,12 +183,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		return addCorsHeaders(response, origin, request.url) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth POST error:", error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		const errorStack = error instanceof Error ? error.stack : undefined;
+		console.error("Error details:", {
+			message: errorMessage,
+			stack: errorStack,
+			url: request.url,
+		});
 		const origin = request.headers.get("origin");
 		return addCorsHeaders(
-			new Response(JSON.stringify({ error: "Internal server error" }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			}),
+			new Response(
+				JSON.stringify({
+					error: "Internal server error",
+					message: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+				}),
+				{
+					status: 500,
+					headers: { "Content-Type": "application/json" },
+				},
+			),
 			origin,
 			request.url,
 		) as NextResponse;
@@ -202,12 +215,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 		return addCorsHeaders(response, origin, request.url) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth GET error:", error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		const errorStack = error instanceof Error ? error.stack : undefined;
+		console.error("Error details:", {
+			message: errorMessage,
+			stack: errorStack,
+			url: request.url,
+		});
 		const origin = request.headers.get("origin");
 		return addCorsHeaders(
-			new Response(JSON.stringify({ error: "Internal server error" }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			}),
+			new Response(
+				JSON.stringify({
+					error: "Internal server error",
+					message: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+				}),
+				{
+					status: 500,
+					headers: { "Content-Type": "application/json" },
+				},
+			),
 			origin,
 			request.url,
 		) as NextResponse;
