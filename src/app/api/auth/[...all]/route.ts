@@ -65,12 +65,15 @@ const addCorsHeaders = (
 			try {
 				const url = new URL(requestUrl);
 				const inferredOrigin = `${url.protocol}//${url.host}`;
-				if (isAllowedOrigin(inferredOrigin)) {
-					headers.set("Access-Control-Allow-Origin", inferredOrigin);
-				}
+				// For same-origin requests, always allow the origin
+				// This is safe because same-origin requests don't trigger CORS
+				headers.set("Access-Control-Allow-Origin", inferredOrigin);
 			} catch {
 				// Invalid URL, use default
+				headers.set("Access-Control-Allow-Origin", getDefaultOrigin());
 			}
+		} else {
+			headers.set("Access-Control-Allow-Origin", getDefaultOrigin());
 		}
 		headers.set("Access-Control-Allow-Credentials", "true");
 	} else {
@@ -104,19 +107,15 @@ export async function OPTIONS(request: NextRequest) {
 		allowedOrigin = origin;
 	} else if (!origin) {
 		// Same-origin request - infer from request URL
+		// For same-origin requests, always allow the origin
 		try {
 			const url = new URL(request.url);
-			const inferredOrigin = `${url.protocol}//${url.host}`;
-			if (isAllowedOrigin(inferredOrigin)) {
-				allowedOrigin = inferredOrigin;
-			} else {
-				allowedOrigin = getDefaultOrigin();
-			}
+			allowedOrigin = `${url.protocol}//${url.host}`;
 		} catch {
 			allowedOrigin = getDefaultOrigin();
 		}
 	} else {
-		// Use default
+		// Origin not allowed - use default
 		allowedOrigin = getDefaultOrigin();
 	}
 
