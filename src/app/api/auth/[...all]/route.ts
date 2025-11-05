@@ -134,8 +134,9 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
-		const url = new URL(request.url);
-		console.log("[Better Auth] POST request to:", url.pathname);
+		const requestUrl = new URL(request.url);
+		console.log("[Better Auth] POST request to:", requestUrl.pathname);
+		console.log("[Better Auth] Full URL:", requestUrl.toString());
 
 		const bodyText = await request.text();
 		let parsedBody: Record<string, unknown> | null = null;
@@ -181,6 +182,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		});
 
 		const response = await basePOST(forwardRequest);
+
+		console.log("[Better Auth] Response status:", response.status);
+		console.log("[Better Auth] Response statusText:", response.statusText);
+
+
+		const clonedResponse = response.clone();
+		const responseText = await clonedResponse.text();
+		console.log("[Better Auth] Response body:", responseText);
+
 		return addCorsHeaders(response, origin, request.url) as NextResponse;
 	} catch (error) {
 		console.error("Better Auth POST error:", error);
