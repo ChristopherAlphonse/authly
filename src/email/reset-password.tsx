@@ -31,7 +31,7 @@ const PasswordReset = (props: PasswordResetProps) => {
 						{/* Logo */}
 						<Section className="text-center mb-[32px]">
 							<Img
-								src="./authly_logo.png"
+								src="/authly_logo.png"
 								alt="Authly"
 								className="w-[120px] h-auto mx-auto"
 							/>
