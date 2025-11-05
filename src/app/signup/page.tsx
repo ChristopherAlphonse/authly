@@ -200,7 +200,12 @@ export default function SignUpPage() {
 								</div>
 							</div>
 
-							<div className="mt-6">
+							<div className="mt-6 space-y-3">
+								<div className="p-3 bg-zinc-800 border border-zinc-700 rounded-md text-center">
+									<p className="text-sm text-zinc-300">
+										Want to avoid passwords? <Link href="/magic-link" className="text-white underline">Use a Magic Link instead</Link>
+									</p>
+								</div>
 								<Button
 									type="button"
 									variant="outline"

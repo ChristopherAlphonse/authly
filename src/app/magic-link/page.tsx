@@ -1,19 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-
-
+import { useState } from "react";
 
 export default function MagicLinkPage() {
 	const [email, setEmail] = useState("");
@@ -51,12 +49,12 @@ export default function MagicLinkPage() {
 							<CardTitle className="text-2xl font-bold text-white">
 								Check your email
 							</CardTitle>
-							<CardDescription className="text-zinc-400">
-								We&apos;ve sent a magic link to {email}
-							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-4">
+								<p className="text-zinc-400 text-center">
+									We&apos;ve sent a magic link to {email}
+								</p>
 								<p className="text-zinc-300 text-sm text-center">
 									Click the link in the email to sign in. The link will expire
 									in 10 minutes.
@@ -79,15 +77,18 @@ export default function MagicLinkPage() {
 
 	return (
 		<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-			<div className="w-full max-w-md">
+			<div className="w-full max-w-md space-y-6">
+				<div className="text-center space-y-2">
+					<h1 className="text-2xl font-bold text-white">
+						Passwordless sign in
+					</h1>
+					<p className="text-zinc-400">
+						Getting tired of remembering passwords? Sign in with just your email — we&apos;ll send a magic link.
+					</p>
+				</div>
 				<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
 					<CardHeader className="text-center">
-						<CardTitle className="text-2xl font-bold text-white">
-							Magic Link
-						</CardTitle>
-						<CardDescription className="text-zinc-400">
-							Enter your email and we&apos;ll send you a sign-in link
-						</CardDescription>
+
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
@@ -101,6 +102,20 @@ export default function MagicLinkPage() {
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
 							</div>
+							<div className="flex justify-between items-center">
+								<Link
+									href="/login"
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Sign in with password
+								</Link>
+								<Link
+									href="/forgot-password"
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Forgot password?
+								</Link>
+							</div>
 							{error && (
 								<div className="text-red-400 text-sm text-center">{error}</div>
 							)}
@@ -113,17 +128,7 @@ export default function MagicLinkPage() {
 							</Button>
 						</form>
 
-						<div className="mt-6 text-center">
-							<p className="text-zinc-400 text-sm">
-								Remember your password?{" "}
-								<Link
-									href="/login"
-									className="text-white hover:underline font-medium"
-								>
-									Sign in
-								</Link>
-							</p>
-						</div>
+						{/* intentional: password-based flows removed on this branch (passwordless by default) */}
 					</CardContent>
 				</Card>
 			</div>

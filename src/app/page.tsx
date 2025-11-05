@@ -5,6 +5,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 import { AuthStatus } from "@/components/auth-status";
 
@@ -48,14 +49,16 @@ export default async function Home() {
 										</p>
 									</div>
 									<div className="text-center">
-										<div className="text-2xl mb-2">🔑</div>
-										<h3 className="font-semibold text-white text-sm sm:text-base">
-											Sign In
-										</h3>
-										<p className="text-zinc-400 text-xs sm:text-sm">
-											Access your account
-										</p>
-									</div>
+											<Link href="/magic-link" className="block">
+												<div className="text-2xl mb-2">🔑</div>
+												<h3 className="font-semibold text-white text-sm sm:text-base">
+													Magic Link
+												</h3>
+												<p className="text-zinc-400 text-xs sm:text-sm">
+													Passwordless sign-in with just your email
+												</p>
+											</Link>
+										</div>
 									<div className="text-center">
 										<div className="text-2xl mb-2">🚀</div>
 										<h3 className="font-semibold text-white text-sm sm:text-base">

@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+import { Geist, Geist_Mono } from "next/font/google";
+
+import type { Metadata } from "next";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -15,6 +17,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "Authly",
 	description: "Authly - Authentication demo with Better Auth and Drizzle",
+	viewport: {
+		width: "device-width",
+		initialScale: 1,
+		maximumScale: 1,
+		userScalable: false,
+	},
 	icons: {
 		icon: [
 			{ url: '/favicon_io/favicon.ico' },
@@ -36,7 +44,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" className="bg-zinc-950">
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>

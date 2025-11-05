@@ -193,7 +193,13 @@ export default function LoginPage() {
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
 							</div>
-							<div className="text-right">
+							<div className="flex justify-between items-center">
+								<Link
+									href="/magic-link"
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Passwordless sign in
+								</Link>
 								<Link
 									href="/forgot-password"
 									className="text-sm text-zinc-400 hover:text-white hover:underline"
