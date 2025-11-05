@@ -13,28 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-function uiMessageFromError(err: unknown): string {
-	let rawMsg: string | undefined;
 
-	if (typeof err === "string") rawMsg = err;
-	else if (typeof err === "object" && err !== null) {
-		const maybe = err as { [k: string]: unknown };
-		if (typeof maybe.message === "string") rawMsg = maybe.message;
-		else {
-			const resp = maybe.response;
-			if (typeof resp === "object" && resp !== null) {
-				const r = resp as { [k: string]: unknown };
-				const data = r.data;
-				if (typeof data === "object" && data !== null) {
-					const d = data as { [k: string]: unknown };
-					if (typeof d.message === "string") rawMsg = d.message;
-				}
-			}
-		}
-	}
-
-	return rawMsg ?? "Failed to send magic link. Please try again.";
-}
 
 export default function MagicLinkPage() {
 	const [email, setEmail] = useState("");
@@ -57,7 +36,7 @@ export default function MagicLinkPage() {
 			setSuccess(true);
 		} catch (err: unknown) {
 			console.error("[Magic Link] Error:", err);
-			setError(uiMessageFromError(err));
+			setError((err as Error).message);
 		} finally {
 			setLoading(false);
 		}

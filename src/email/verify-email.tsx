@@ -17,10 +17,12 @@ import * as React from "react";
 interface EmailVerificationProps {
 	userName: string;
 	verificationUrl: string;
+
+	expiryText?: string;
 }
 
 const EmailVerification = (props: EmailVerificationProps) => {
-	const { userName, verificationUrl } = props;
+	const { userName, verificationUrl, expiryText } = props;
 
 	return (
 		<Html lang="en" dir="ltr">
@@ -46,13 +48,8 @@ const EmailVerification = (props: EmailVerificationProps) => {
 						{/* Main Content */}
 						<Section className="mb-[32px]">
 							<Heading className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
-								Welcome to Authly! We&apos;re excited to help you transform
-								document chaos into actionable lending intelligence.
+								Welcome to Authly! {userName.toUpperCase()},
 							</Heading>
-
-							<Text className="text-[#020304] text-[14px] font-bold text-center mb-[16px] m-0">
-								Verify Your Email Address {userName.toUpperCase()},
-							</Text>
 
 							<Text className="text-[#020304] text-[16px] leading-[24px] mb-[32px] m-0">
 								To complete your account setup and start leveraging our
@@ -80,7 +77,7 @@ const EmailVerification = (props: EmailVerificationProps) => {
 							</Text>
 
 							<Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px] m-0">
-								This verification link will expire in 1 hour for security
+								This verification link will expire in {expiryText ?? "5 mins"} for security
 								purposes.
 							</Text>
 

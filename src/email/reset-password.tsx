@@ -17,10 +17,11 @@ import * as React from "react";
 interface PasswordResetProps {
 	userEmail: string;
 	resetUrl: string;
+	expiryText?: string;
 }
 
 const PasswordReset = (props: PasswordResetProps) => {
-	const { resetUrl, userEmail } = props;
+	const { resetUrl, userEmail, expiryText } = props;
 	return (
 		<Html lang="en" dir="ltr">
 			<Head />
@@ -45,12 +46,14 @@ const PasswordReset = (props: PasswordResetProps) => {
 
 							<Text className="text-[#020304] text-[16px] leading-[24px] mb-[24px]">
 								We received a request to reset the password for your Authly
-								account associated with {userEmail}.
+								account associated with.
+                                {/* */}
+                                <strong> {userEmail} </strong>
 							</Text>
 
 							<Text className="text-[#020304] text-[16px] leading-[24px] mb-[32px]">
 								Click the button below to create a new password. This link will
-								expire in 24 hours for security purposes.
+								expire in {expiryText ?? "5 minutes"} for security purposes.
 							</Text>
 
 							{/* Reset Button */}
