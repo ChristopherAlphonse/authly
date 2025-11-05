@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import {
 	Body,
 	Button,
@@ -12,7 +14,6 @@ import {
 	Tailwind,
 	Text,
 } from "@react-email/components";
-import * as React from "react";
 
 interface PasswordResetProps {
 	userEmail: string;
@@ -22,6 +23,7 @@ interface PasswordResetProps {
 
 const PasswordReset = (props: PasswordResetProps) => {
 	const { resetUrl, userEmail, expiryText } = props;
+	const logoUrl = 'https://authly-red.vercel.app/authly_logo.png';
 	return (
 		<Html lang="en" dir="ltr">
 			<Head />
@@ -32,7 +34,7 @@ const PasswordReset = (props: PasswordResetProps) => {
 						{/* Logo */}
 						<Section className="text-center mb-[32px]">
 							<Img
-								src="/authly_logo.png"
+								src={logoUrl}
 								alt="Authly"
 								className="w-[120px] h-auto mx-auto"
 							/>

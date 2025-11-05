@@ -1,8 +1,7 @@
 import "./globals.css";
 
 import { Geist, Geist_Mono } from "next/font/google";
-
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -14,15 +13,16 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 1,
+	userScalable: false,
+};
+
 export const metadata: Metadata = {
 	title: "Authly",
 	description: "Authly - Authentication demo with Better Auth and Drizzle",
-	viewport: {
-		width: "device-width",
-		initialScale: 1,
-		maximumScale: 1,
-		userScalable: false,
-	},
 	icons: {
 		icon: [
 			{ url: '/favicon_io/favicon.ico' },

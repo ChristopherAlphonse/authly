@@ -1,24 +1,26 @@
 import * as bcrypt from "bcrypt";
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { jwt, twoFactor } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
-// Auth configuration using better-auth without AWS dependencies
-// Reference: https://www.better-auth.com/docs/installation
-import { Resend } from "resend";
 
-import { db } from "../db";
-import PasswordReset from "../email/reset-password";
-import EmailVerification from "../email/verify-email";
 import {
 	DEV_MODE,
 	EMAIL_VERIFICATION_EXPIRES_IN,
-	formatExpiry,
 	RESET_PASSWORD_EXPIRES_IN,
 	SESSION_EXPIRES_IN,
 	SESSION_UPDATE_AGE,
 	TELEMETRY_ENABLED,
+	formatExpiry,
 } from "./utils";
+import { jwt, magicLink, twoFactor } from "better-auth/plugins";
+
+import EmailVerification from "../email/verify-email";
+import MagicLinkEmail from "../email/magic-link";
+import PasswordReset from "../email/reset-password";
+// Auth configuration using better-auth without AWS dependencies
+// Reference: https://www.better-auth.com/docs/installation
+import { Resend } from "resend";
+import { betterAuth } from "better-auth";
+import { db } from "../db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { passkey } from "better-auth/plugins/passkey";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -93,9 +95,6 @@ export const auth = betterAuth({
 			}
 		},
 	},
-	magicLink: {
-		enabled: true,
-	},
 	emailVerification: {
 		expiresIn: EMAIL_VERIFICATION_EXPIRES_IN,
 		sendOnSignUp: true,
@@ -150,7 +149,49 @@ export const auth = betterAuth({
 	logger: {
 		disabled: process.env.NODE_ENV === "production",
 	},
-	plugins: [jwt(), twoFactor(), passkey()],
+	plugins: [
+		jwt(),
+		twoFactor(),
+		passkey(),
+		magicLink({
+			expiresIn: 600, // 10 minutes
+			sendMagicLink: async ({ email, url }) => {
+				try {
+					console.log(
+						"[Email] Attempting to send magic link email to:",
+						email,
+					);
+					console.log(
+						"[Email] From:",
+						`${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+					);
+
+					const result = await resend.emails.send({
+						from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+						to: email,
+						subject: "Sign in to your Authly account",
+						react: MagicLinkEmail({
+							userEmail: email,
+							magicLinkUrl: url,
+							expiryText: "10 minutes",
+						}),
+					});
+
+					console.log("[Email] Magic link email sent successfully:", result);
+				} catch (error) {
+					console.error(
+						"[Email Error] Failed to send magic link email:",
+						error,
+					);
+					console.error(
+						"[Email Error] Error details:",
+						JSON.stringify(error, null, 2),
+					);
+					throw error;
+				}
+			},
+		}),
+	],
 	tokens: {
 		rotation: "always",
 		secret: process.env.BETTER_AUTH_SECRET!,

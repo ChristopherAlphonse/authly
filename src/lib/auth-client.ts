@@ -4,7 +4,25 @@ import { createAuthClient } from "better-auth/react";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {
-		return "";
+
+		const isLocalhost = window.location.hostname === "localhost" ||
+			window.location.hostname === "127.0.0.1" ||
+			window.location.hostname === "";
+
+		if (isLocalhost) {
+
+			return "";
+		}
+
+
+		const envUrl =
+			process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL;
+		if (envUrl && typeof envUrl === "string") {
+			return envUrl.replace(/\/+$/, "");
+		}
+
+
+		return `${window.location.protocol}//${window.location.host}`;
 	}
 
 	const envUrl =

@@ -134,6 +134,8 @@ export async function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest): Promise<NextResponse> {
 	try {
 		const origin = request.headers.get("origin");
+		const url = new URL(request.url);
+		console.log("[Better Auth] POST request to:", url.pathname);
 
 		const bodyText = await request.text();
 		let parsedBody: Record<string, unknown> | null = null;

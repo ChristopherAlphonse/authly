@@ -15,21 +15,22 @@ import {
 	Text,
 } from "@react-email/components";
 
-interface EmailVerificationProps {
-	userName: string;
-	verificationUrl: string;
-
+interface MagicLinkProps {
+	userEmail: string;
+	magicLinkUrl: string;
 	expiryText?: string;
+	baseURL?: string;
 }
 
-const EmailVerification = (props: EmailVerificationProps) => {
-	const { userName, verificationUrl, expiryText } = props;
-    const logoUrl = 'https://authly-red.vercel.app/authly_logo.png';
+const MagicLink = (props: MagicLinkProps) => {
+	const { userEmail, magicLinkUrl, expiryText, } = props;
+	const logoUrl = 'https://authly-red.vercel.app/authly_logo.png';
+
 	return (
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
-				<Preview>Verify your email to activate your Authly account</Preview>
+				<Preview>Sign in to your Authly account</Preview>
 
 				<Hr className="my-[16px]" />
 
@@ -49,42 +50,47 @@ const EmailVerification = (props: EmailVerificationProps) => {
 						{/* Main Content */}
 						<Section className="mb-[32px]">
 							<Heading className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
-								Welcome to Authly! {userName.toUpperCase()},
+								Sign in to your account
 							</Heading>
 
 							<Text className="text-[#020304] text-[16px] leading-[24px] mb-[32px] m-0">
-								To complete your account setup and start leveraging our
-								AI-powered lending solutions, please verify your email address
-								by clicking the button below:
+								We received a request to sign in to your Authly account
+								associated with <strong>{userEmail}</strong>. Click the button
+								below to sign in securely without a password.
 							</Text>
 
-							{/* Verification Button */}
+							{/* Magic Link Button */}
 							<Section className="text-center mb-[32px]">
 								<Button
-									href={verificationUrl}
+									href={magicLinkUrl}
 									className="bg-[#3A98D0] text-white text-[14px] font-semibold py-[10px] px-[22px] rounded-[4px] no-underline box-border inline-block"
 								>
-									Verify Email Address
+									Sign In
 								</Button>
 							</Section>
 
 							<Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px] m-0">
-								If the button above doesn&apos;t work, you can also verify your
-								email by copying and pasting this link into your browser:
+								If the button above doesn&apos;t work, you can also sign in by
+								copying and pasting this link into your browser:
 							</Text>
 
 							<Text className="text-[#3A98D0] text-[14px] leading-[20px] mb-[24px] m-0 break-all">
-								{props.verificationUrl}
+								{magicLinkUrl}
 							</Text>
 
 							<Text className="text-[#020304] text-[14px] leading-[20px] mb-[16px] m-0">
-								This verification link will expire in {expiryText ?? "5 mins"} for security
-								purposes.
+								This link will expire in {expiryText ?? "10 minutes"} for
+								security purposes. If you didn&apos;t request this sign-in link,
+								you can safely ignore this email.
 							</Text>
+						</Section>
 
-							<Text className="text-[#020304] text-[16px] leading-[24px] mb-[0px] m-0">
-								If you didn&apos;t create an account with Authly, please ignore
-								this email or contact our support team.
+						<Hr className="my-[16px]" />
+
+						{/* Footer */}
+						<Section className="text-center">
+							<Text className="text-[#6B7280] text-[12px] leading-[16px] m-0">
+								© {new Date().getFullYear()} Authly. All rights reserved.
 							</Text>
 						</Section>
 					</Container>
@@ -93,4 +99,6 @@ const EmailVerification = (props: EmailVerificationProps) => {
 		</Html>
 	);
 };
-export default EmailVerification;
+
+export default MagicLink;
+
