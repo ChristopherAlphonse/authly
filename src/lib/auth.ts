@@ -1,26 +1,24 @@
 import * as bcrypt from "bcrypt";
-
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { jwt, magicLink, twoFactor } from "better-auth/plugins";
+import { passkey } from "better-auth/plugins/passkey";
+// Auth configuration using better-auth without AWS dependencies
+// Reference: https://www.better-auth.com/docs/installation
+import { Resend } from "resend";
+import { db } from "../db";
+import MagicLinkEmail from "../email/magic-link";
+import PasswordReset from "../email/reset-password";
+import EmailVerification from "../email/verify-email";
 import {
 	DEV_MODE,
 	EMAIL_VERIFICATION_EXPIRES_IN,
+	formatExpiry,
 	RESET_PASSWORD_EXPIRES_IN,
 	SESSION_EXPIRES_IN,
 	SESSION_UPDATE_AGE,
 	TELEMETRY_ENABLED,
-	formatExpiry,
 } from "./utils";
-import { jwt, magicLink, twoFactor } from "better-auth/plugins";
-
-import EmailVerification from "../email/verify-email";
-import MagicLinkEmail from "../email/magic-link";
-import PasswordReset from "../email/reset-password";
-// Auth configuration using better-auth without AWS dependencies
-// Reference: https://www.better-auth.com/docs/installation
-import { Resend } from "resend";
-import { betterAuth } from "better-auth";
-import { db } from "../db";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { passkey } from "better-auth/plugins/passkey";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -71,7 +69,7 @@ export const auth = betterAuth({
 				);
 
 				const result = await resend.emails.send({
-					from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+					from: `Authly Password Reset <${process.env.EMAIL_SENDER_ADDRESS}>`,
 					to: user.email,
 					subject: "Reset your password",
 					react: PasswordReset({
@@ -111,7 +109,7 @@ export const auth = betterAuth({
 				);
 
 				const result = await resend.emails.send({
-					from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+					from: `Authly Email Verification <${process.env.EMAIL_SENDER_ADDRESS}>`,
 					to: user.email,
 					subject: "Verify your email",
 					react: EmailVerification({
@@ -157,17 +155,14 @@ export const auth = betterAuth({
 			expiresIn: 600, // 10 minutes
 			sendMagicLink: async ({ email, url }) => {
 				try {
-					console.log(
-						"[Email] Attempting to send magic link email to:",
-						email,
-					);
+					console.log("[Email] Attempting to send magic link email to:", email);
 					console.log(
 						"[Email] From:",
 						`${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
 					);
 
 					const result = await resend.emails.send({
-						from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+						from: `Authly Single Sign-On <${process.env.EMAIL_SENDER_ADDRESS}>`,
 						to: email,
 						subject: "Sign in to your Authly account",
 						react: MagicLinkEmail({

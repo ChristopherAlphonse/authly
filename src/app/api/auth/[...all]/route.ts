@@ -17,11 +17,9 @@ const getAllowedOrigins = () => {
 		process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
 	];
 
-
 	if (process.env.VERCEL_URL) {
 		origins.push(`https://${process.env.VERCEL_URL}`);
 	}
-
 	return origins
 		.filter(Boolean)
 		.map((s) => normalizeOrigin(s as string) as string);
@@ -53,23 +51,19 @@ const addCorsHeaders = (
 ): Response => {
 	const headers = new Headers(response.headers);
 
-	// In production, same-origin requests don't have an origin header
-	// We should allow the request to proceed with appropriate CORS headers
+
 	if (origin && isAllowedOrigin(origin)) {
 		headers.set("Access-Control-Allow-Origin", origin);
 		headers.set("Access-Control-Allow-Credentials", "true");
 	} else if (!origin) {
-		// Same-origin request (no origin header) - infer from request URL
-		// This is common in production when requests come from the same domain
+
 		if (requestUrl) {
 			try {
 				const url = new URL(requestUrl);
 				const inferredOrigin = `${url.protocol}//${url.host}`;
-				// For same-origin requests, always allow the origin
-				// This is safe because same-origin requests don't trigger CORS
+
 				headers.set("Access-Control-Allow-Origin", inferredOrigin);
 			} catch {
-				// Invalid URL, use default
 				headers.set("Access-Control-Allow-Origin", getDefaultOrigin());
 			}
 		} else {
@@ -77,7 +71,7 @@ const addCorsHeaders = (
 		}
 		headers.set("Access-Control-Allow-Credentials", "true");
 	} else {
-		// Origin not allowed - use default
+
 		headers.set("Access-Control-Allow-Origin", getDefaultOrigin());
 		headers.set("Access-Control-Allow-Credentials", "true");
 	}
@@ -106,8 +100,7 @@ export async function OPTIONS(request: NextRequest) {
 	if (origin && isAllowedOrigin(origin)) {
 		allowedOrigin = origin;
 	} else if (!origin) {
-		// Same-origin request - infer from request URL
-		// For same-origin requests, always allow the origin
+
 		try {
 			const url = new URL(request.url);
 			allowedOrigin = `${url.protocol}//${url.host}`;
@@ -115,7 +108,7 @@ export async function OPTIONS(request: NextRequest) {
 			allowedOrigin = getDefaultOrigin();
 		}
 	} else {
-		// Origin not allowed - use default
+
 		allowedOrigin = getDefaultOrigin();
 	}
 

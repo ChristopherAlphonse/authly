@@ -7,19 +7,25 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+
+const PREVIOUS_LOGIN_EMAIL_KEY = "authly_previous_login_email";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [showPasskeyButton, setShowPasskeyButton] = useState(false);
+	const [showOnlyPasskey, setShowOnlyPasskey] = useState(false);
+	const [checkingPreviousLogin, setCheckingPreviousLogin] = useState(true);
+	const debounceRef = useRef<number | null>(null);
 	const [showResendVerification, setShowResendVerification] = useState(false);
 	const [resendLoading, setResendLoading] = useState(false);
 	const [resendSuccess, setResendSuccess] = useState(false);
@@ -60,6 +66,10 @@ export default function LoginPage() {
 			const r = result as { [k: string]: unknown };
 			// Sign-in succeeded if we have user or session
 			if (r.user || r.session || r.data) {
+				// Store email for future login page visits
+				if (typeof window !== "undefined" && email) {
+					localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, email);
+				}
 				// Success! Redirect to home
 				router.push("/");
 				setLoading(false);
@@ -106,7 +116,15 @@ export default function LoginPage() {
 			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
 				if (r.user || r.session || r.data) {
-
+					// Store email for future login page visits
+					if (typeof window !== "undefined") {
+						const userEmail = typeof r.user === "object" && r.user !== null && "email" in r.user
+							? String(r.user.email)
+							: email;
+						if (userEmail) {
+							localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, userEmail);
+						}
+					}
 					router.push("/");
 					return;
 				}
@@ -154,6 +172,179 @@ export default function LoginPage() {
 		}
 	};
 
+	// Check for previous login and passkey on mount
+	useEffect(() => {
+		const checkPreviousLogin = async (): Promise<void> => {
+			if (typeof window === "undefined") {
+				setCheckingPreviousLogin(false);
+				return;
+			}
+
+			try {
+				// First, try to check via secure session cookie (most secure)
+				const sessionRes = await fetch("/api/passkey/check-returning-user", {
+					method: "GET",
+					credentials: "include", // Important: include cookies
+				});
+
+				if (sessionRes.ok) {
+					const sessionData = await sessionRes.json();
+					if (
+						sessionData &&
+						typeof sessionData === "object" &&
+						Boolean(sessionData.isReturningUser) &&
+						Boolean(sessionData.hasPasskey)
+					) {
+						// User has active session and passkey - show only passkey button
+						setShowOnlyPasskey(true);
+						if (sessionData.user?.email) {
+							setEmail(sessionData.user.email);
+						}
+						setCheckingPreviousLogin(false);
+						return;
+					}
+				}
+
+				// Fallback: check localStorage email (for users who logged out)
+				const previousEmail = localStorage.getItem(PREVIOUS_LOGIN_EMAIL_KEY);
+				if (!previousEmail) {
+					setCheckingPreviousLogin(false);
+					return;
+				}
+
+				// Check if this user has a passkey
+				const res = await fetch("/api/passkey/has-passkeys", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email: previousEmail }),
+				});
+
+				if (res.ok) {
+					const data = await res.json();
+					if (data && typeof data === "object" && Boolean(data.hasPasskey)) {
+						// User has logged in before and has a passkey - show only passkey button
+						setShowOnlyPasskey(true);
+						setEmail(previousEmail);
+					}
+				}
+			} catch (err) {
+				console.error("Failed to check previous login passkey:", err);
+			} finally {
+				setCheckingPreviousLogin(false);
+			}
+		};
+
+		checkPreviousLogin();
+
+		return () => {
+			if (debounceRef.current) window.clearTimeout(debounceRef.current);
+		};
+	}, []);
+
+	async function checkPasskeyForEmail(emailToCheck: string) {
+		if (!emailToCheck || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailToCheck)) {
+			setShowPasskeyButton(false);
+			return;
+		}
+
+		try {
+			const res = await fetch("/api/passkey/has-passkeys", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email: emailToCheck }),
+			});
+			if (!res.ok) {
+				setShowPasskeyButton(false);
+				return;
+			}
+			const data = await res.json();
+			if (data && typeof data === "object") {
+				setShowPasskeyButton(Boolean(data.hasPasskey));
+			} else {
+				setShowPasskeyButton(false);
+			}
+		} catch (err) {
+			console.error("Failed to check passkey availability:", err);
+			setShowPasskeyButton(false);
+		}
+	}
+
+	// Show loading state while checking previous login
+	if (checkingPreviousLogin) {
+		return (
+			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+				<div className="w-full max-w-md">
+					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+						<CardContent className="p-6">
+							<div className="text-center text-zinc-400">Loading...</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
+
+	// Show only passkey button if user has logged in before and has a passkey
+	if (showOnlyPasskey) {
+		return (
+			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+				<div className="w-full max-w-md">
+					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+						<CardHeader className="text-center">
+							<CardTitle className="text-2xl font-bold text-white">
+								Welcome Back
+							</CardTitle>
+							<CardDescription className="text-zinc-400">
+								Sign in with your passkey
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							{error && (
+								<div className="text-red-400 text-sm text-center mb-4">{error}</div>
+							)}
+							<Button
+								type="button"
+								variant="outline"
+								onClick={handlePasskeySignIn}
+								disabled={loading}
+								className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+							>
+								<svg
+									className="w-4 h-4 mr-2"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+									<path d="M9 12l2 2 4-4" />
+								</svg>
+								{loading ? "Signing In..." : "Sign in with Passkey"}
+							</Button>
+							<div className="mt-4 text-center">
+								<button
+									type="button"
+									onClick={() => {
+										if (typeof window !== "undefined") {
+											localStorage.removeItem(PREVIOUS_LOGIN_EMAIL_KEY);
+										}
+										setShowOnlyPasskey(false);
+										setEmail("");
+									}}
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Use a different account
+								</button>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
 			<div className="w-full max-w-md">
@@ -169,16 +360,22 @@ export default function LoginPage() {
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="space-y-2">
-								<Input
+                                <Input
 									type="email"
 									placeholder="Email"
 									value={email}
-									onChange={(e) => {
-										setEmail(e.target.value);
-										setShowResendVerification(false);
-										setResendSuccess(false);
-										setResendError("");
-									}}
+				onChange={(e) => {
+					const next = e.target.value;
+					setEmail(next);
+					setShowResendVerification(false);
+					setResendSuccess(false);
+					setResendError("");
+
+					if (debounceRef.current) window.clearTimeout(debounceRef.current);
+					debounceRef.current = window.setTimeout(() => {
+						checkPasskeyForEmail(next);
+					}, 400);
+				}}
 									required
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
@@ -267,27 +464,29 @@ export default function LoginPage() {
 							</div>
 
 							<div className="mt-6 space-y-3">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={handlePasskeySignIn}
-									disabled={loading}
-									className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-								>
-									<svg
-										className="w-4 h-4 mr-2"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-										<path d="M9 12l2 2 4-4" />
-									</svg>
-									{loading ? "Signing In..." : "Sign in with Passkey"}
-								</Button>
+								{showPasskeyButton && (
+									<Button
+										type="button"
+										variant="outline"
+										onClick={handlePasskeySignIn}
+										disabled={loading}
+										className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+										>
+										<svg
+											className="w-4 h-4 mr-2"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											>
+												<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+												<path d="M9 12l2 2 4-4" />
+											</svg>
+											{loading ? "Signing In..." : "Sign in with Passkey"}
+										</Button>
+								)}
 								<Button
 									type="button"
 									variant="outline"
