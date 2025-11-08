@@ -123,11 +123,7 @@ Complete reference of all environment variables:
 | `GOOGLE_CLIENT_ID` | ⚠️ Production | Google OAuth client ID | `xxxxx.apps.googleusercontent.com` |
 | `GOOGLE_CLIENT_SECRET` | ⚠️ Production | Google OAuth client secret | `xxxxx` |
 | `TELEMETRY_ENABLED` | ❌ No | Enable Better Auth telemetry (default: `true` in dev) | `true` or `false` |
-| `RESET_PASSWORD_EXPIRES_IN` | ❌ No | Password reset token expiration in seconds (default: `300`) | `300` |
-| `EMAIL_VERIFICATION_EXPIRES_IN` | ❌ No | Email verification token expiration in seconds (default: `900`) | `900` |
-| `PASSKEY_ADMIN_TOKEN` | ❌ No | Admin token for passkey management endpoints | `your-secure-token` |
-| `NODE_ENV` | ❌ No | Environment mode (`development` or `production`) | `development` |
-| `VERCEL_URL` | ❌ No | Auto-set by Vercel, used for trusted origins | Auto-set |
+
 
 ### Getting Your Better Auth Secret
 
