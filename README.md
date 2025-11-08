@@ -74,29 +74,7 @@ This will start a PostgreSQL container on port `5433` with:
 
 Create a `.env` file in the root directory with the following variables:
 
-```env
-# Better Auth Configuration
-BETTER_AUTH_SECRET=your-secret-key-here
-# Generate a secure secret: openssl rand -base64 32
 
-# Database Configuration
-DATABASE_URL=postgresql://authly:authly_dev_password@localhost:5433/authly
-
-# Email Configuration (Resend)
-RESEND_API_KEY=re_your_api_key_here
-EMAIL_SENDER_NAME=Authly
-EMAIL_SENDER_ADDRESS=noreply@yourdomain.com
-
-# Google OAuth (Optional - for production)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Optional Configuration
-TELEMETRY_ENABLED=true
-RESET_PASSWORD_EXPIRES_IN=300
-EMAIL_VERIFICATION_EXPIRES_IN=900
-PASSKEY_ADMIN_TOKEN=your-admin-token-here
-```
 
 **Important:** Replace placeholder values with your actual credentials. See [Environment Variables](#environment-variables) for detailed descriptions.
 
