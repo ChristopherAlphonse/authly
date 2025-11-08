@@ -1,25 +1,26 @@
 import * as bcrypt from "bcrypt";
-import { type Auth, betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { jwt, magicLink } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 
-// Reference: https://www.better-auth.com/docs/installation
-import { Resend } from "resend";
-import { db } from "../db";
-import MagicLinkEmail from "../email/magic-link";
-import PasswordReset from "../email/reset-password";
-import EmailVerification from "../email/verify-email";
 import {
 	DEV_MODE,
 	EMAIL_VERIFICATION_EXPIRES_IN,
-	formatExpiry,
 	RESET_PASSWORD_EXPIRES_IN,
 	SESSION_EXPIRES_IN,
 	SESSION_UPDATE_AGE,
 	TELEMETRY_ENABLED,
-    TRUSTED_ORIGINS,
+	TRUSTED_ORIGINS,
+	formatExpiry,
 } from "./utils";
+import { jwt, magicLink } from "better-auth/plugins";
+
+import EmailVerification from "../email/verify-email";
+import MagicLinkEmail from "../email/magic-link";
+import PasswordReset from "../email/reset-password";
+// Reference: https://www.better-auth.com/docs/installation
+import { Resend } from "resend";
+import { betterAuth } from "better-auth";
+import { db } from "../db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { passkey } from "better-auth/plugins/passkey";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -27,8 +28,19 @@ type EmailType = {
 	user: { name: string; email: string };
 	url: string;
 };
+const getBaseURL = (): string => {
+	if (process.env.NODE_ENV === "development") {
+		return "http://localhost:5173";
+	}
+	const firstValidOrigin = TRUSTED_ORIGINS.find(
+		(origin) => origin && origin.trim() !== "" && origin !== "undefined",
+	);
+	return firstValidOrigin?.replace(/\/+$/, "") ?? "http://localhost:5173";
+};
+
 export const auth = betterAuth({
 	appName: "main-app-poc",
+	baseURL: getBaseURL(),
 	database: drizzleAdapter(db, {
 		provider: "pg",
 	}),
@@ -90,75 +102,61 @@ export const auth = betterAuth({
 				});
 			},
 		},
-		session: {
-			expiresIn: SESSION_EXPIRES_IN,
-			updateAge: SESSION_UPDATE_AGE,
-			cookie: {
-				name: "__Secure-session",
-				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "strict",
-				path: "/",
-			},
-		},
-		logger: {
-			disabled: process.env.NODE_ENV === "production",
-		},
-		plugins: [
-			jwt(),
-			passkey(),
-			magicLink({
-				expiresIn: 600, // 10 minutes
-				sendMagicLink: async ({ email, url }) => {
-					await resend.emails.send({
-						from: `Authly Single Sign-On <${process.env.EMAIL_SENDER_ADDRESS}>`,
-						to: email,
-						subject: "Sign in to your Authly account",
-						react: MagicLinkEmail({
-							userEmail: email,
-							magicLinkUrl: url,
-							expiryText: "10 minutes",
-						}),
-					});
-				},
-			}),
-		],
-		tokens: {
-			rotation: "always",
-			secret: process.env.BETTER_AUTH_SECRET!,
-		},
-		rateLimit: {
-			storage: "database",
-			modelName: "rateLimit",
-			window: 60,
-			max: 100,
-			customRules: {
-				"/sign-in/email": {
-					window: 10,
-					max: 3,
-				},
-			},
-		},
-
-		trustedOrigins: TRUSTED_ORIGINS,
-
 	},
+
+	session: {
+		expiresIn: SESSION_EXPIRES_IN,
+		updateAge: SESSION_UPDATE_AGE,
+		cookie: {
+			name: "__Secure-session",
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			path: "/",
+		},
+	},
+	logger: {
+		disabled: process.env.NODE_ENV === "production",
+	},
+	plugins: [
+		jwt(),
+		passkey(),
+		magicLink({
+			expiresIn: 600, // 10 minutes
+			sendMagicLink: async ({ email, url }) => {
+				await resend.emails.send({
+					from: `Authly Single Sign-On <${process.env.EMAIL_SENDER_ADDRESS}>`,
+					to: email,
+					subject: "Sign in to your Authly account",
+					react: MagicLinkEmail({
+						userEmail: email,
+						magicLinkUrl: url,
+						expiryText: "10 minutes",
+					}),
+				});
+			},
+		}),
+	],
+	tokens: {
+		rotation: "always",
+		secret: process.env.BETTER_AUTH_SECRET!,
+	},
+	rateLimit: {
+		storage: "database",
+		modelName: "rateLimit",
+		window: 60,
+		max: 100,
+		customRules: {
+			"/sign-in/email": {
+				window: 10,
+				max: 3,
+			},
+		},
+	},
+	trustedOrigins: TRUSTED_ORIGINS,
 });
 
-try {
-	const cfg = (auth as Auth)?.options || (auth as unknown);
-	const trusted = cfg?.trustedOrigins ?? null;
-	console.info("[Better Auth] configured trustedOrigins:", trusted);
-	console.info(
-		"[Better Auth] configured baseURL:",
-		cfg?.baseURL ??
-			TRUSTED_ORIGINS.find((origin) => origin && origin.trim() !== "" && origin !== "undefined")?.replace(/\/+$/, "") ??
-			process.env.VERCEL_URL ??
-			"(unknown)",
-	);
-} catch (err) {
-	console.warn("[Better Auth] failed to log trustedOrigins:", err);
-}
+
 
 (function envSanityCheck() {
 	try {

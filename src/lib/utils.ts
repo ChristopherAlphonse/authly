@@ -6,8 +6,21 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export const TRUSTED_ORIGINS=[	"http://localhost:5173/",
-			"https://authly-red.vercel.app/", String(process.env.VERCEL_URL )]
+export const TRUSTED_ORIGINS = [
+	"http://localhost:5173",
+	"http://127.0.0.1:5173",
+	"https://authly-red.vercel.app",
+	...(process.env.VERCEL_URL
+		? [`https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`]
+		: []),
+].filter((origin): origin is string => {
+	return (
+		typeof origin === "string" &&
+		origin.trim() !== "" &&
+		origin !== "undefined" &&
+		origin !== "null"
+	);
+});
 
 export const DEV_MODE = IS_CLOUD;
 

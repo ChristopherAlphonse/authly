@@ -1,4 +1,6 @@
 import type { NextRequest, NextResponse } from "next/server";
+
+import { TRUSTED_ORIGINS } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
@@ -8,19 +10,7 @@ const normalizeOrigin = (o: string | null | undefined) =>
 	typeof o === "string" && o.length ? o.replace(/\/+$|\s+/g, "") : o;
 
 const getAllowedOrigins = () => {
-	const origins: (string | undefined)[] = [
-		"http://localhost:5173",
-		"http://127.0.0.1:5173",
-		process.env.BETTER_AUTH_URL,
-		process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-	];
-
-	if (process.env.VERCEL_URL) {
-		origins.push(`https://${process.env.VERCEL_URL}`);
-	}
-	return origins
-		.filter(Boolean)
-		.map((s) => normalizeOrigin(s as string) as string);
+	return TRUSTED_ORIGINS.map((s) => normalizeOrigin(s) as string);
 };
 
 
@@ -32,11 +22,8 @@ const isAllowedOrigin = (origin: string | null): boolean => {
 };
 
 const getDefaultOrigin = (): string => {
-	if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
-		return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
-	}
-	if (process.env.VERCEL_URL) {
-		return `https://${process.env.VERCEL_URL}`;
+	if (TRUSTED_ORIGINS.length > 0) {
+		return normalizeOrigin(TRUSTED_ORIGINS[0]) as string;
 	}
 	return "http://localhost:5173";
 };

@@ -1,6 +1,7 @@
 import { jwtClient, magicLinkClient, passkeyClient } from "better-auth/client/plugins";
 
 import { createAuthClient } from "better-auth/react";
+import { TRUSTED_ORIGINS } from "./utils";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {
@@ -15,19 +16,19 @@ const getBaseURL = () => {
 		}
 
 
-		const envUrl =
-			process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL;
-		if (envUrl && typeof envUrl === "string") {
-			return envUrl.replace(/\/+$/, "");
+		const firstValidOrigin = TRUSTED_ORIGINS.find((origin) => origin && origin.trim() !== "" && origin !== "undefined");
+		if (firstValidOrigin) {
+			return firstValidOrigin.replace(/\/+$/, "");
 		}
 
 
 		return `${window.location.protocol}//${window.location.host}`;
 	}
 
-	const envUrl =
-		process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL;
-	if (envUrl && typeof envUrl === "string") return envUrl.replace(/\/+$/, "");
+	const firstValidOrigin = TRUSTED_ORIGINS.find((origin) => origin && origin.trim() !== "" && origin !== "undefined");
+	if (firstValidOrigin) {
+		return firstValidOrigin.replace(/\/+$/, "");
+	}
 
 	return "http://localhost:5173";
 };
