@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/
+
+# Well-behaved crawlers should respect this file. If you are a partner
+# API consumer that needs indexable endpoints, contact the site owner.

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -14,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -65,7 +66,7 @@ export default function ResetPasswordPage() {
 			});
 
 			setSuccess(true);
-			// Redirect to login after 2 seconds
+
 			setTimeout(() => {
 				router.push("/login");
 			}, 2000);
@@ -173,5 +174,27 @@ export default function ResetPasswordPage() {
 				</Card>
 			</div>
 		</div>
+	);
+}
+
+export default function ResetPasswordPage() {
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+					<div className="w-full max-w-md">
+						<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+							<CardHeader className="text-center">
+								<CardTitle className="text-2xl font-bold text-white">
+									Loading...
+								</CardTitle>
+							</CardHeader>
+						</Card>
+					</div>
+				</div>
+			}
+		>
+			<ResetPasswordForm />
+		</Suspense>
 	);
 }

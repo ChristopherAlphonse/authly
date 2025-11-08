@@ -1,9 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,110 +7,29 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
-function parseHttpError(err: unknown): { status?: number; message?: string } {
-	let status: number | undefined;
-	let message: string | undefined;
-
-	if (typeof err === "object" && err !== null) {
-		const maybe = err as { [k: string]: unknown };
-
-		const resp = maybe.response;
-		if (typeof resp === "object" && resp !== null) {
-			const r = resp as { [k: string]: unknown };
-			const s = r.status;
-			if (typeof s === "number") status = s;
-
-			const data = r.data;
-			if (typeof data === "object" && data !== null) {
-				const d = data as { [k: string]: unknown };
-				if (typeof d.message === "string") message = d.message;
-				else if (typeof d.error === "string") message = d.error;
-			}
-		}
-
-		if (status === undefined) {
-			const s2 = maybe.status;
-			if (typeof s2 === "number") status = s2;
-		}
-
-		if (status === undefined) {
-			const s3 = maybe.statusCode;
-			if (typeof s3 === "number") status = s3;
-		}
-
-		if (!message) {
-			const m = maybe.message;
-			if (typeof m === "string") message = m;
-		}
-	}
-
-	return { status, message };
-}
-
-function uiMessageFromError(err: unknown): string {
-	let rawMsg: string | undefined;
-
-	if (typeof err === "string") rawMsg = err;
-	else if (typeof err === "object" && err !== null) {
-		const maybe = err as { [k: string]: unknown };
-		if (typeof maybe.message === "string") rawMsg = maybe.message;
-		else {
-			const resp = maybe.response;
-			if (typeof resp === "object" && resp !== null) {
-				const r = resp as { [k: string]: unknown };
-				const data = r.data;
-				if (typeof data === "object" && data !== null) {
-					const d = data as { [k: string]: unknown };
-					if (typeof d.message === "string") rawMsg = d.message;
-				}
-			}
-		}
-	}
-
-	if (
-		typeof rawMsg === "string" &&
-		/network error|ECONNREFUSED|connect ECONNREFUSED|failed to fetch/i.test(
-			rawMsg,
-		)
-	) {
-		return "Network error — couldn't reach the auth server. Check your connection and try again.";
-	}
-
-	const { status, message } = parseHttpError(err);
-	const msg =
-		typeof message === "string" && message.trim().length
-			? message.trim()
-			: undefined;
-
-	if (status === 403)
-		return (
-			msg ??
-			"Access denied — your account may be blocked or require email verification. Check your email for a verification link."
-		);
-	if (status === 401)
-		return msg ?? "Incorrect email or password. Please try again.";
-	if (status === 404)
-		return (
-			msg ?? "No account found for that email. Would you like to register?"
-		);
-	if (status === 429)
-		return (
-			msg ?? "Too many attempts — please wait a few minutes and try again."
-		);
-	if (status && status >= 400 && status < 500)
-		return msg ?? "Sign in failed. Check your input and try again.";
-
-	return msg ?? "Sign in failed due to a server or network issue.";
-}
+const PREVIOUS_LOGIN_EMAIL_KEY = "authly_previous_login_email";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [showPasskeyButton, setShowPasskeyButton] = useState(false);
+	const [showOnlyPasskey, setShowOnlyPasskey] = useState(false);
+	const [checkingPreviousLogin, setCheckingPreviousLogin] = useState(true);
+	const debounceRef = useRef<number | null>(null);
+	const [showResendVerification, setShowResendVerification] = useState(false);
+	const [resendLoading, setResendLoading] = useState(false);
+	const [resendSuccess, setResendSuccess] = useState(false);
+	const [resendError, setResendError] = useState("");
 
 	const router = useRouter();
 
@@ -123,53 +38,47 @@ export default function LoginPage() {
 		setLoading(true);
 		setError("");
 
-		try {
-			const result = await authClient.signIn.email({
+		const result = await authClient.signIn.email(
+			{
 				email,
 				password,
-			});
+			},
+			{
+				onError: (ctx) => {
 
-			// Better Auth's signIn.email returns an object with user/session on success
-			if (result && typeof result === "object") {
-				const r = result as { [k: string]: unknown };
-				// Sign-in succeeded if we have user or session
-				if (r.user || r.session || r.data) {
-					// Success! Redirect to home
-					router.push("/");
-					return;
+					if (ctx.error.status === 403) {
+						setError("Please verify your email address");
+						setShowResendVerification(true);
+					} else {
+
+						setError(
+							ctx.error.message || "Sign in failed. Please try again.",
+						);
+						setShowResendVerification(false);
+					}
+					setLoading(false);
+				},
+			},
+		);
+
+
+		if (result && typeof result === "object") {
+			const r = result as { [k: string]: unknown };
+			if (r.user || r.session || r.data) {
+
+				if (typeof window !== "undefined" && email) {
+					localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, email);
 				}
-				// Check for error in response
-				if (r.error) {
-					setError(uiMessageFromError(r.error));
-					return;
-				}
+
+				router.push("/");
+				setLoading(false);
+				return;
 			}
-
-			// If we get here, sign-in failed (no user/session/error)
-			setError(uiMessageFromError(result as unknown));
-		} catch (err: unknown) {
-			console.error("[Login] Sign-in error:", err);
-			setError(uiMessageFromError(err));
-		} finally {
-			setLoading(false);
 		}
+		setLoading(false);
 	};
 
-	// Use Better Auth's social sign-in for direct GitHub OAuth
-	// Users will see GitHub's native OAuth UI, not Cognito Hosted UI
-	const handleGitHubSignIn = async () => {
-		try {
-			await authClient.signIn.social({
-				provider: "github",
-				callbackURL: "/",
-			});
-		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
-		}
-	};
 
-	// Use Better Auth's social sign-in for direct Google OAuth
-	// Users will see Google's native OAuth UI, not Cognito Hosted UI
 	const handleGoogleSignIn = async () => {
 		try {
 			await authClient.signIn.social({
@@ -177,9 +86,256 @@ export default function LoginPage() {
 				callbackURL: "/",
 			});
 		} catch (err: unknown) {
-			setError(uiMessageFromError(err));
+			let errorMessage = "Failed to sign in with Google. Please try again.";
+			if (err instanceof Error) {
+				errorMessage = err.message;
+			} else if (typeof err === "object" && err !== null) {
+				const errorObj = err as { error?: string; message?: string; provider?: string };
+				if (errorObj.error === "Provider not configured") {
+					errorMessage = "Google sign-in is not configured. Please contact support or use email/password.";
+				} else if (errorObj.message) {
+					errorMessage = errorObj.message;
+				}
+			}
+			setError(errorMessage);
 		}
 	};
+
+
+	const handlePasskeySignIn = async () => {
+		setLoading(true);
+		setError("");
+
+		try {
+			const result = await authClient.signIn.passkey();
+
+			if (result && typeof result === "object") {
+				const r = result as { [k: string]: unknown };
+				if (r.user || r.session || r.data) {
+
+					if (typeof window !== "undefined") {
+						const userEmail = typeof r.user === "object" && r.user !== null && "email" in r.user
+							? String(r.user.email)
+							: email;
+						if (userEmail) {
+							localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, userEmail);
+						}
+					}
+					router.push("/");
+					return;
+				}
+				if (r.error) {
+					setError(r.error instanceof Error ? r.error.message : "Failed to sign in with Passkey. Please try again.");
+					return;
+				}
+			}
+
+			setError("Failed to sign in with Passkey. Please try again.");
+		} catch (error: unknown) {
+			console.error("[Login] Passkey sign-in error:", error);
+			setError((error as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleResendVerification = async (): Promise<void> => {
+		if (!email) {
+			setResendError("Please enter your email address");
+			return;
+		}
+
+		setResendLoading(true);
+		setResendError("");
+		setResendSuccess(false);
+
+		try {
+			await authClient.sendVerificationEmail({
+				email,
+				callbackURL: "/",
+			});
+			setResendSuccess(true);
+			setResendError("");
+		} catch (err: unknown) {
+			const errorMessage =
+				err instanceof Error
+					? err.message
+					: "Failed to send verification email. Please try again.";
+			setResendError(errorMessage);
+			setResendSuccess(false);
+		} finally {
+			setResendLoading(false);
+		}
+	};
+
+
+	useEffect(() => {
+		const checkPreviousLogin = async (): Promise<void> => {
+			if (typeof window === "undefined") {
+				setCheckingPreviousLogin(false);
+				return;
+			}
+
+			try {
+				const sessionRes = await fetch("/api/passkey/check-returning-user", {
+					method: "GET",
+					credentials: "include",
+				});
+
+				if (sessionRes.ok) {
+					const sessionData = await sessionRes.json();
+					if (
+						sessionData &&
+						typeof sessionData === "object" &&
+						Boolean(sessionData.isReturningUser) &&
+						Boolean(sessionData.hasPasskey)
+					) {
+						setShowOnlyPasskey(true);
+						if (sessionData.user?.email) {
+							setEmail(sessionData.user.email);
+						}
+						setCheckingPreviousLogin(false);
+						return;
+					}
+				}
+
+				const previousEmail = localStorage.getItem(PREVIOUS_LOGIN_EMAIL_KEY);
+				if (!previousEmail) {
+					setCheckingPreviousLogin(false);
+					return;
+				}
+
+
+				const res = await fetch("/api/passkey/has-passkeys", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email: previousEmail }),
+				});
+
+				if (res.ok) {
+					const data = await res.json();
+					if (data && typeof data === "object" && Boolean(data.hasPasskey)) {
+						setShowOnlyPasskey(true);
+						setEmail(previousEmail);
+					}
+				}
+			} catch (err) {
+				console.error("Failed to check previous login passkey:", err);
+			} finally {
+				setCheckingPreviousLogin(false);
+			}
+		};
+
+		checkPreviousLogin();
+
+		return () => {
+			if (debounceRef.current) window.clearTimeout(debounceRef.current);
+		};
+	}, []);
+
+	async function checkPasskeyForEmail(emailToCheck: string) {
+		if (!emailToCheck || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailToCheck)) {
+			setShowPasskeyButton(false);
+			return;
+		}
+
+		try {
+			const res = await fetch("/api/passkey/has-passkeys", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email: emailToCheck }),
+			});
+			if (!res.ok) {
+				setShowPasskeyButton(false);
+				return;
+			}
+			const data = await res.json();
+			if (data && typeof data === "object") {
+				setShowPasskeyButton(Boolean(data.hasPasskey));
+			} else {
+				setShowPasskeyButton(false);
+			}
+		} catch (err) {
+			console.error("Failed to check passkey availability:", err);
+			setShowPasskeyButton(false);
+		}
+	}
+
+
+	if (checkingPreviousLogin) {
+		return (
+			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+				<div className="w-full max-w-md">
+					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+						<CardContent className="p-6">
+							<div className="text-center text-zinc-400">Loading...</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
+
+
+	if (showOnlyPasskey) {
+		return (
+			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+				<div className="w-full max-w-md">
+					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+						<CardHeader className="text-center">
+							<CardTitle className="text-2xl font-bold text-white">
+								Welcome Back
+							</CardTitle>
+							<CardDescription className="text-zinc-400">
+								Sign in with your passkey
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							{error && (
+								<div className="text-red-400 text-sm text-center mb-4">{error}</div>
+							)}
+							<Button
+								type="button"
+								variant="outline"
+								onClick={handlePasskeySignIn}
+								disabled={loading}
+								className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+							>
+								<svg
+									className="w-4 h-4 mr-2"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+									<path d="M9 12l2 2 4-4" />
+								</svg>
+								{loading ? "Signing In..." : "Sign in with Passkey"}
+							</Button>
+							<div className="mt-4 text-center">
+								<button
+									type="button"
+									onClick={() => {
+										if (typeof window !== "undefined") {
+											localStorage.removeItem(PREVIOUS_LOGIN_EMAIL_KEY);
+										}
+										setShowOnlyPasskey(false);
+										setEmail("");
+									}}
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Use a different account
+								</button>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
@@ -196,11 +352,22 @@ export default function LoginPage() {
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="space-y-2">
-								<Input
+                                <Input
 									type="email"
 									placeholder="Email"
 									value={email}
-									onChange={(e) => setEmail(e.target.value)}
+				onChange={(e) => {
+					const next = e.target.value;
+					setEmail(next);
+					setShowResendVerification(false);
+					setResendSuccess(false);
+					setResendError("");
+
+					if (debounceRef.current) window.clearTimeout(debounceRef.current);
+					debounceRef.current = window.setTimeout(() => {
+						checkPasskeyForEmail(next);
+					}, 400);
+				}}
 									required
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
@@ -215,7 +382,13 @@ export default function LoginPage() {
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
 							</div>
-							<div className="text-right">
+							<div className="flex justify-between items-center">
+								<Link
+									href="/magic-link"
+									className="text-sm text-zinc-400 hover:text-white hover:underline"
+								>
+									Passwordless sign in
+								</Link>
 								<Link
 									href="/forgot-password"
 									className="text-sm text-zinc-400 hover:text-white hover:underline"
@@ -225,6 +398,41 @@ export default function LoginPage() {
 							</div>
 							{error && (
 								<div className="text-red-400 text-sm text-center">{error}</div>
+							)}
+							{showResendVerification && (
+								<div className="space-y-3 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+									<p className="text-zinc-300 text-sm text-center">
+										Your email address needs to be verified before you can sign in.
+									</p>
+									{resendSuccess && (
+										<div className="text-green-400 text-sm text-center">
+											Verification email sent! Please check your inbox.
+										</div>
+									)}
+									{resendError && (
+										<div className="text-red-400 text-sm text-center">
+											{resendError}
+										</div>
+									)}
+									<Button
+										type="button"
+										onClick={handleResendVerification}
+										disabled={resendLoading || loading}
+										className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium"
+									>
+										{resendLoading
+											? "Sending..."
+											: "Resend Verification Email"}
+									</Button>
+									<div className="text-center">
+										<Link
+											href="/resend-verification"
+											className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
+										>
+											Or use a different email address
+										</Link>
+									</div>
+								</div>
 							)}
 							<Button
 								type="submit"
@@ -247,27 +455,36 @@ export default function LoginPage() {
 								</div>
 							</div>
 
-							<div className="mt-6 grid grid-cols-2 gap-3">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={handleGitHubSignIn}
-									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-								>
-									<svg
-										className="w-4 h-4 mr-2"
-										viewBox="0 0 24 24"
-										fill="currentColor"
-									>
-										<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-									</svg>
-									GitHub
-								</Button>
+							<div className="mt-6 space-y-3">
+								{showPasskeyButton && (
+									<Button
+										type="button"
+										variant="outline"
+										onClick={handlePasskeySignIn}
+										disabled={loading}
+										className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+										>
+										<svg
+											className="w-4 h-4 mr-2"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											>
+												<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+												<path d="M9 12l2 2 4-4" />
+											</svg>
+											{loading ? "Signing In..." : "Sign in with Passkey"}
+										</Button>
+								)}
 								<Button
 									type="button"
 									variant="outline"
 									onClick={handleGoogleSignIn}
-									className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
+									disabled={loading}
+									className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
 								>
 									<svg
 										className="w-4 h-4 mr-2"

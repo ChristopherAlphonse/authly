@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -10,8 +7,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
 
 export default function ForgotPasswordPage() {
 	const [email, setEmail] = useState("");
@@ -25,22 +26,15 @@ export default function ForgotPasswordPage() {
 		setError("");
 		setSuccess(false);
 
-		try {
-			await authClient.forgetPassword({
-				email,
-				redirectTo: `${window.location.origin}/reset-password`,
-			});
+		const { error}= await authClient.forgetPassword({
+			email,
+			redirectTo: '/reset-password',
+		});
 
+		if (error) {
+			setError(error.message || "Failed to send password reset email. Please try again.");
+		} else {
 			setSuccess(true);
-		} catch (err: unknown) {
-			console.error("[Forgot Password] Error:", err);
-			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to send password reset email. Please try again.",
-			);
-		} finally {
-			setLoading(false);
 		}
 	};
 
@@ -131,3 +125,4 @@ export default function ForgotPasswordPage() {
 		</div>
 	);
 }
+
