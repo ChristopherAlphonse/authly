@@ -16,7 +16,55 @@ bun dev
 
 Open [:5173](http://localhost:5173/) with your browser to see the result.
 
-![alt text](image.png)
+sequenceDiagram
+    participant User
+    participant Client as Client/UI
+    participant Middleware as API Middleware
+    participant Route as Auth Route
+    participant BetterAuth as Better Auth
+    participant DB as Database
+    participant Resend as Resend Email
+
+    rect rgb(200, 220, 255)
+    note over User,Resend: Sign-Up with Email Verification (New Flow)
+    User->>Client: Enter email & password
+    Client->>Route: POST /api/auth/signup
+    Middleware->>Middleware: Check rate limit & bot
+    Middleware->>Route: Allow request
+    Route->>BetterAuth: Sign up with email/password
+    BetterAuth->>DB: Create user, generate token
+    BetterAuth->>Resend: Send verification email
+    Resend->>User: Verification link email
+    Client->>Client: Show "Check your email"
+    end
+
+    rect rgb(220, 240, 220)
+    note over User,Resend: Passkey Registration (New Flow)
+    User->>Client: Click "Register Passkey"
+    Client->>Route: GET /api/passkey/check-returning-user
+    Middleware->>Middleware: Check IP rate limit
+    Route->>DB: Query session & user
+    Route->>Client: Return { hasPasskey, user }
+    Client->>BetterAuth: Add passkey
+    BetterAuth->>DB: Store passkey credentials
+    Client->>Client: Redirect to home
+    end
+
+    rect rgb(255, 240, 200)
+    note over User,Middleware: Rate Limit & Bot Detection (New Middleware)
+    User->>Client: Make API request
+    Middleware->>Middleware: Extract user-agent
+    Middleware->>Middleware: Check against bot patterns
+    alt Bot detected
+        Middleware->>Client: Return 403 Forbidden
+    else Rate limit exceeded
+        Middleware->>Client: Return 429 Too Many Requests
+    else Allowed
+        Middleware->>Route: Add headers, forward
+        Route->>Client: Response + x-ratelimit-remaining
+    end
+    end
+
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
