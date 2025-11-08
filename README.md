@@ -74,8 +74,6 @@ This will start a PostgreSQL container on port `5433` with:
 
 Create a `.env` file in the root directory with the following variables:
 
-
-
 **Important:** Replace placeholder values with your actual credentials. See [Environment Variables](#environment-variables) for detailed descriptions.
 
 ### 5. Run Database Migrations
@@ -123,7 +121,6 @@ Complete reference of all environment variables:
 | `GOOGLE_CLIENT_ID` | ⚠️ Production | Google OAuth client ID | `xxxxx.apps.googleusercontent.com` |
 | `GOOGLE_CLIENT_SECRET` | ⚠️ Production | Google OAuth client secret | `xxxxx` |
 | `TELEMETRY_ENABLED` | ❌ No | Enable Better Auth telemetry (default: `true` in dev) | `true` or `false` |
-
 
 ### Getting Your Better Auth Secret
 
@@ -520,7 +517,7 @@ sequenceDiagram
     participant DB as Database
     participant Resend as Resend Email
 
-    rect rgb(200, 220, 255)
+    rect rgb(0, 0, 0)
     note over User,Resend: Sign-Up with Email Verification (New Flow)
     User->>Client: Enter email & password
     Client->>Route: POST /api/auth/signup
@@ -533,7 +530,7 @@ sequenceDiagram
     Client->>Client: Show "Check your email"
     end
 
-    rect rgb(220, 240, 220)
+    rect rgb(0, 0, 0)
     note over User,Resend: Passkey Registration (New Flow)
     User->>Client: Click "Register Passkey"
     Client->>Route: GET /api/passkey/check-returning-user
@@ -545,7 +542,7 @@ sequenceDiagram
     Client->>Client: Redirect to home
     end
 
-    rect rgb(255, 240, 200)
+    rect rgb(0, 0, 0)
     note over User,Middleware: Rate Limit & Bot Detection (New Middleware)
     User->>Client: Make API request
     Middleware->>Middleware: Extract user-agent
@@ -629,7 +626,6 @@ sequenceDiagram
 - Log bot detection events
 - Monitor email delivery rates
 - Set up alerts for database connection issues
-
 
 ## Additional Resources
 
