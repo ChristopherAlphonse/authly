@@ -517,8 +517,7 @@ sequenceDiagram
     participant DB as Database
     participant Resend as Resend Email
 
-    rect rgb(0, 0, 0)
-    note over User,Resend: Sign-Up with Email Verification (New Flow)
+    note over User,Resend: Sign-Up with Email Verification
     User->>Client: Enter email & password
     Client->>Route: POST /api/auth/signup
     Middleware->>Middleware: Check rate limit & bot
@@ -528,10 +527,8 @@ sequenceDiagram
     BetterAuth->>Resend: Send verification email
     Resend->>User: Verification link email
     Client->>Client: Show "Check your email"
-    end
 
-    rect rgb(0, 0, 0)
-    note over User,Resend: Passkey Registration (New Flow)
+    note over User,Resend: Passkey Registration
     User->>Client: Click "Register Passkey"
     Client->>Route: GET /api/passkey/check-returning-user
     Middleware->>Middleware: Check IP rate limit
@@ -540,10 +537,8 @@ sequenceDiagram
     Client->>BetterAuth: Add passkey
     BetterAuth->>DB: Store passkey credentials
     Client->>Client: Redirect to home
-    end
 
-    rect rgb(0, 0, 0)
-    note over User,Middleware: Rate Limit & Bot Detection (New Middleware)
+    note over User,Middleware: Rate Limit & Bot Detection
     User->>Client: Make API request
     Middleware->>Middleware: Extract user-agent
     Middleware->>Middleware: Check against bot patterns
@@ -554,7 +549,6 @@ sequenceDiagram
     else Allowed
         Middleware->>Route: Add headers, forward
         Route->>Client: Response + x-ratelimit-remaining
-    end
     end
 ```
 
