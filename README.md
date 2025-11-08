@@ -16,6 +16,9 @@ bun dev
 
 Open [:5173](http://localhost:5173/) with your browser to see the result.
 
+## Sequence Diagram(s)
+
+```mermaid
 sequenceDiagram
     participant User
     participant Client as Client/UI
@@ -64,7 +67,7 @@ sequenceDiagram
         Route->>Client: Response + x-ratelimit-remaining
     end
     end
-
+```
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
