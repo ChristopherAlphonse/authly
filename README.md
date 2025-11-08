@@ -46,7 +46,7 @@ Follow these steps to get Authly up and running:
 ### 1. Clone the Repository
 
 ```bash
-git clone [<repository](https://github.com/ChristopherAlphonse/authly.git)
+git clone [repository](https://github.com/ChristopherAlphonse/authly.git)
 cd authly
 ```
 
