@@ -4,6 +4,53 @@
 
 A comprehensive authentication system built with Next.js and Better Auth, featuring email/password authentication, passkeys (WebAuthn), magic links, OAuth integration, and robust security features.
 
+### Authentication Flows
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client as Client/UI
+    participant Middleware as API Middleware
+    participant Route as Auth Route
+    participant BetterAuth as Better Auth
+    participant DB as Database
+    participant Resend as Resend Email
+
+    note over User,Resend: Sign-Up with Email Verification
+    User->>Client: Enter email & password
+    Client->>Route: POST /api/auth/signup
+    Middleware->>Middleware: Check rate limit & bot
+    Middleware->>Route: Allow request
+    Route->>BetterAuth: Sign up with email/password
+    BetterAuth->>DB: Create user, generate token
+    BetterAuth->>Resend: Send verification email
+    Resend->>User: Verification link email
+    Client->>Client: Show "Check your email"
+
+    note over User,Resend: Passkey Registration
+    User->>Client: Click "Register Passkey"
+    Client->>Route: GET /api/passkey/check-returning-user
+    Middleware->>Middleware: Check IP rate limit
+    Route->>DB: Query session & user
+    Route->>Client: Return { hasPasskey, user }
+    Client->>BetterAuth: Add passkey
+    BetterAuth->>DB: Store passkey credentials
+    Client->>Client: Redirect to home
+
+    note over User,Middleware: Rate Limit & Bot Detection
+    User->>Client: Make API request
+    Middleware->>Middleware: Extract user-agent
+    Middleware->>Middleware: Check against bot patterns
+    alt Bot detected
+        Middleware->>Client: Return 403 Forbidden
+    else Rate limit exceeded
+        Middleware->>Client: Return 429 Too Many Requests
+    else Allowed
+        Middleware->>Route: Add headers, forward
+        Route->>Client: Response + x-ratelimit-remaining
+    end
+```
+
 ## Features
 
 - **Email/Password Authentication** - Secure user registration and login with bcrypt password hashing
@@ -505,52 +552,7 @@ Authly uses a layered architecture:
 4. **Database Layer** - PostgreSQL with Drizzle ORM
 5. **Email Layer** - Resend for transactional emails
 
-### Authentication Flows
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Client as Client/UI
-    participant Middleware as API Middleware
-    participant Route as Auth Route
-    participant BetterAuth as Better Auth
-    participant DB as Database
-    participant Resend as Resend Email
-
-    note over User,Resend: Sign-Up with Email Verification
-    User->>Client: Enter email & password
-    Client->>Route: POST /api/auth/signup
-    Middleware->>Middleware: Check rate limit & bot
-    Middleware->>Route: Allow request
-    Route->>BetterAuth: Sign up with email/password
-    BetterAuth->>DB: Create user, generate token
-    BetterAuth->>Resend: Send verification email
-    Resend->>User: Verification link email
-    Client->>Client: Show "Check your email"
-
-    note over User,Resend: Passkey Registration
-    User->>Client: Click "Register Passkey"
-    Client->>Route: GET /api/passkey/check-returning-user
-    Middleware->>Middleware: Check IP rate limit
-    Route->>DB: Query session & user
-    Route->>Client: Return { hasPasskey, user }
-    Client->>BetterAuth: Add passkey
-    BetterAuth->>DB: Store passkey credentials
-    Client->>Client: Redirect to home
-
-    note over User,Middleware: Rate Limit & Bot Detection
-    User->>Client: Make API request
-    Middleware->>Middleware: Extract user-agent
-    Middleware->>Middleware: Check against bot patterns
-    alt Bot detected
-        Middleware->>Client: Return 403 Forbidden
-    else Rate limit exceeded
-        Middleware->>Client: Return 429 Too Many Requests
-    else Allowed
-        Middleware->>Route: Add headers, forward
-        Route->>Client: Response + x-ratelimit-remaining
-    end
-```
 
 ### Security Features
 
