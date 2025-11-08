@@ -21,7 +21,7 @@ sequenceDiagram
     participant DB as Database
     participant Resend as Resend Email
 
-    rect rgb(200, 220, 255)
+
     note over User,Resend: Sign-Up with Email Verification (New Flow)
     User->>Client: Enter email & password
     Client->>Route: POST /api/auth/signup
@@ -34,7 +34,6 @@ sequenceDiagram
     Client->>Client: Show "Check your email"
     end
 
-    rect rgb(220, 240, 220)
     note over User,Resend: Passkey Registration (New Flow)
     User->>Client: Click "Register Passkey"
     Client->>Route: GET /api/passkey/check-returning-user
@@ -46,7 +45,6 @@ sequenceDiagram
     Client->>Client: Redirect to home
     end
 
-    rect rgb(255, 240, 200)
     note over User,Middleware: Rate Limit & Bot Detection (New Middleware)
     User->>Client: Make API request
     Middleware->>Middleware: Extract user-agent
@@ -63,10 +61,10 @@ sequenceDiagram
 ```
 
 # Checklist
+
 rename .env.example to .env and add values
 
-to get a better auth secret : https://www.better-auth.com/docs/installation#set-environment-variables
+to get a better auth secret : <https://www.better-auth.com/docs/installation#set-environment-variables>
 BASE URL IS ALREADY configured
-go to for google social : https://console.cloud.google.com/auth/
-go here for resend api key : https://resend.com/api-keys must setup a domain first https://resend.com/domains
-
+go to for google social : <https://console.cloud.google.com/auth/>
+go here for resend api key : <https://resend.com/api-keys> must setup a domain first <https://resend.com/domains>
