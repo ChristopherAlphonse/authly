@@ -1,6 +1,5 @@
 import { defineConfig } from "drizzle-kit";
 
-// Use production database URL if NODE_ENV is production and DATABASE_URL_PROD is set
 const getDatabaseUrl = (): string => {
 	if (process.env.NODE_ENV === "production" && process.env.DATABASE_URL_PROD) {
 		return process.env.DATABASE_URL_PROD;

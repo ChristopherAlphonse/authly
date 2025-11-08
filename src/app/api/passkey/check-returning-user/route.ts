@@ -51,7 +51,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 		const sessionCookie = cookieStore.get("__Secure-session")?.value;
 
 		if (!sessionCookie) {
-			// No session cookie - user hasn't logged in recently
 			return NextResponse.json({
 				hasPasskey: false,
 				isReturningUser: false,
@@ -59,9 +58,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 			});
 		}
 
-		// Find the session in the database
-		// Better Auth might use session.id or session.token as the cookie value
-		// Try both to be safe
+
 		const [sessionRecord] = await db
 			.select()
 			.from(session)
@@ -69,7 +66,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 				eq(session.id, sessionCookie)
 			)
 			.limit(1);
-// If not found by ID, try by token
 		let foundSession = sessionRecord;
 		if (!foundSession) {
 			const [tokenSession] = await db
@@ -111,7 +107,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 		const hasPasskey = passkeys.length > 0;
 
-		// Get user info
+
 		const [userRecord] = await db
 			.select()
 			.from(user)

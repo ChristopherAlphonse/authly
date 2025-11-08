@@ -1,9 +1,9 @@
 import * as bcrypt from "bcrypt";
-import { betterAuth } from "better-auth";
+import { type Auth, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { jwt, magicLink, twoFactor } from "better-auth/plugins";
+import { jwt, magicLink } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
-// Auth configuration using better-auth without AWS dependencies
+
 // Reference: https://www.better-auth.com/docs/installation
 import { Resend } from "resend";
 import { db } from "../db";
@@ -18,10 +18,15 @@ import {
 	SESSION_EXPIRES_IN,
 	SESSION_UPDATE_AGE,
 	TELEMETRY_ENABLED,
+    TRUSTED_ORIGINS,
 } from "./utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+type EmailType = {
+	user: { name: string; email: string };
+	url: string;
+};
 export const auth = betterAuth({
 	appName: "main-app-poc",
 	database: drizzleAdapter(db, {
@@ -30,7 +35,6 @@ export const auth = betterAuth({
 	telemetry: {
 		enabled: TELEMETRY_ENABLED,
 	},
-
 	socialProviders: {
 		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -55,113 +59,58 @@ export const auth = betterAuth({
 				return bcrypt.compareSync(password, hash);
 			},
 		},
-
 		resetPasswordTokenExpiresIn: RESET_PASSWORD_EXPIRES_IN,
-		sendResetPassword: async ({ user, url }) => {
-			try {
-				console.log(
-					"[Email] Attempting to send password reset email to:",
-					user.email,
-				);
-				console.log(
-					"[Email] From:",
-					`${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-				);
-
-				const result = await resend.emails.send({
-					from: `Authly Password Reset <${process.env.EMAIL_SENDER_ADDRESS}>`,
-					to: user.email,
-					subject: "Reset your password",
-					react: PasswordReset({
-						userEmail: user.email,
-						resetUrl: url,
-						expiryText: formatExpiry(RESET_PASSWORD_EXPIRES_IN),
-					}),
-				});
-
-				console.log("[Email] Password reset email sent successfully:", result);
-			} catch (error) {
-				console.error(
-					"[Email Error] Failed to send password reset email:",
-					error,
-				);
-				console.error(
-					"[Email Error] Error details:",
-					JSON.stringify(error, null, 2),
-				);
-				throw error;
-			}
+		sendResetPassword: async ({ user, url }: EmailType) => {
+			await resend.emails.send({
+				from: `Authly Password Reset <${process.env.EMAIL_SENDER_ADDRESS}>`,
+				to: user.email,
+				subject: "Reset your password",
+				react: PasswordReset({
+					userEmail: user.email,
+					resetUrl: url,
+					expiryText: formatExpiry(RESET_PASSWORD_EXPIRES_IN),
+				}),
+			});
 		},
-	},
-	emailVerification: {
-		expiresIn: EMAIL_VERIFICATION_EXPIRES_IN,
-		sendOnSignUp: true,
-		autoSignInAfterVerification: true,
-		sendVerificationEmail: async ({ user, url }) => {
-			try {
-				console.log(
-					"[Email] Attempting to send verification email to:",
-					user.email,
-				);
-				console.log(
-					"[Email] From:",
-					`${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-				);
-
-				const result = await resend.emails.send({
+		emailVerification: {
+			expiresIn: EMAIL_VERIFICATION_EXPIRES_IN,
+			sendOnSignUp: true,
+			autoSignInAfterVerification: true,
+			sendVerificationEmail: async ({ user, url }: EmailType) => {
+				const { name, email } = user;
+				await resend.emails.send({
 					from: `Authly Email Verification <${process.env.EMAIL_SENDER_ADDRESS}>`,
-					to: user.email,
+					to: email,
 					subject: "Verify your email",
 					react: EmailVerification({
-						userName: user.name,
+						userName: name,
 						verificationUrl: url,
 						expiryText: formatExpiry(EMAIL_VERIFICATION_EXPIRES_IN),
 					}),
 				});
-
-				console.log("[Email] Verification email sent successfully:", result);
-			} catch (error) {
-				console.error(
-					"[Email Error] Failed to send verification email:",
-					error,
-				);
-				console.error(
-					"[Email Error] Error details:",
-					JSON.stringify(error, null, 2),
-				);
-				throw error;
-			}
+			},
 		},
-	},
-	session: {
-		expiresIn: SESSION_EXPIRES_IN,
-		updateAge: SESSION_UPDATE_AGE,
-		cookie: {
-			name: "__Secure-session",
-			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
-			sameSite: "strict",
-			path: "/",
+		session: {
+			expiresIn: SESSION_EXPIRES_IN,
+			updateAge: SESSION_UPDATE_AGE,
+			cookie: {
+				name: "__Secure-session",
+				httpOnly: true,
+				secure: process.env.NODE_ENV === "production",
+				sameSite: "strict",
+				path: "/",
+			},
 		},
-	},
-	logger: {
-		disabled: process.env.NODE_ENV === "production",
-	},
-	plugins: [
-		jwt(),
-		twoFactor(),
-		passkey(),
-		magicLink({
-			expiresIn: 600, // 10 minutes
-			sendMagicLink: async ({ email, url }) => {
-				try {
-					console.log("[Email] Attempting to send magic link email to:", email);
-					console.log(
-						"[Email] From:",
-						`${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-					);
-
-					const result = await resend.emails.send({
+		logger: {
+			disabled: process.env.NODE_ENV === "production",
+		},
+		plugins: [
+			jwt(),
+			passkey(),
+			magicLink({
+				expiresIn: 600, // 10 minutes
+				sendMagicLink: async ({ email, url }) => {
+					await resend.emails.send({
 						from: `Authly Single Sign-On <${process.env.EMAIL_SENDER_ADDRESS}>`,
 						to: email,
 						subject: "Sign in to your Authly account",
@@ -171,69 +120,46 @@ export const auth = betterAuth({
 							expiryText: "10 minutes",
 						}),
 					});
-
-					console.log("[Email] Magic link email sent successfully:", result);
-				} catch (error) {
-					console.error(
-						"[Email Error] Failed to send magic link email:",
-						error,
-					);
-					console.error(
-						"[Email Error] Error details:",
-						JSON.stringify(error, null, 2),
-					);
-					throw error;
-				}
-			},
-		}),
-	],
-	tokens: {
-		rotation: "always",
-		secret: process.env.BETTER_AUTH_SECRET!,
-	},
-	rateLimit: {
-		storage: "database",
-		modelName: "rateLimit",
-		window: 60,
-		max: 100,
-		customRules: {
-			"/sign-in/email": {
-				window: 10,
-				max: 3,
+				},
+			}),
+		],
+		tokens: {
+			rotation: "always",
+			secret: process.env.BETTER_AUTH_SECRET!,
+		},
+		rateLimit: {
+			storage: "database",
+			modelName: "rateLimit",
+			window: 60,
+			max: 100,
+			customRules: {
+				"/sign-in/email": {
+					window: 10,
+					max: 3,
+				},
 			},
 		},
+
+		trustedOrigins: TRUSTED_ORIGINS,
+
 	},
-
-	baseURL: (() => {
-		if (process.env.NODE_ENV === "development") {
-			return "http://localhost:5173";
-		}
-
-		if (process.env.BETTER_AUTH_URL) {
-			return process.env.BETTER_AUTH_URL;
-		}
-
-		if (process.env.VERCEL_URL) {
-			return `https://${process.env.VERCEL_URL}`;
-		}
-
-		return "http://localhost:5173";
-	})(),
-	trustedOrigins: [
-		"http://localhost:5173",
-		"http://127.0.0.1:5173",
-		...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
-		...(process.env.NEXT_PUBLIC_BETTER_AUTH_URL
-			? [process.env.NEXT_PUBLIC_BETTER_AUTH_URL]
-			: []),
-
-		...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-	],
 });
 
-// Run a lightweight, non-sensitive environment sanity check at startup.
-// This warns when commonly-required production environment variables are
-// missing so deployment logs show actionable messages without printing secrets.
+try {
+	const cfg = (auth as Auth)?.options || (auth as unknown);
+	const trusted = cfg?.trustedOrigins ?? null;
+	console.info("[Better Auth] configured trustedOrigins:", trusted);
+	console.info(
+		"[Better Auth] configured baseURL:",
+		cfg?.baseURL ??
+			TRUSTED_ORIGINS.find((origin) => origin && origin.trim() !== "" && origin !== "undefined")?.replace(/\/+$/, "") ??
+			process.env.VERCEL_URL ??
+			"(unknown)",
+	);
+} catch (err) {
+	console.warn("[Better Auth] failed to log trustedOrigins:", err);
+}
+
 (function envSanityCheck() {
 	try {
 		const warnings: string[] = [];

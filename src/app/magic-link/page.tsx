@@ -1,17 +1,11 @@
 "use client";
 
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export default function MagicLinkPage() {
 	const [email, setEmail] = useState("");
@@ -83,13 +77,12 @@ export default function MagicLinkPage() {
 						Passwordless sign in
 					</h1>
 					<p className="text-zinc-400">
-						Getting tired of remembering passwords? Sign in with just your email — we&apos;ll send a magic link.
+						Getting tired of remembering passwords? Sign in with just your email
+						— we&apos;ll send a magic link.
 					</p>
 				</div>
 				<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
-					<CardHeader className="text-center">
-
-					</CardHeader>
+                    <div className="p-2.5 " />
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="space-y-2">
@@ -127,12 +120,9 @@ export default function MagicLinkPage() {
 								{loading ? "Sending..." : "Send Magic Link"}
 							</Button>
 						</form>
-
-						{/* intentional: password-based flows removed on this branch (passwordless by default) */}
 					</CardContent>
 				</Card>
 			</div>
 		</div>
 	);
 }
-

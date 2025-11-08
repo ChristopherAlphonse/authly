@@ -6,6 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export const TRUSTED_ORIGINS=[	"http://localhost:5173/",
+			"https://authly-red.vercel.app/", String(process.env.VERCEL_URL )]
+
 export const DEV_MODE = IS_CLOUD;
 
 export const TELEMETRY_ENABLED = process.env.TELEMETRY_ENABLED

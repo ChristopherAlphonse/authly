@@ -47,7 +47,6 @@ export default function PasskeyRegisterPage() {
 		if (!isPending) {
 			setCheckingAuth(false);
 			if (!session) {
-				// User must be authenticated to add a passkey
 				setError("You must be signed in to register a passkey.");
 			}
 		}
@@ -64,14 +63,12 @@ export default function PasskeyRegisterPage() {
 		setError("");
 
 		try {
-			// Better Auth passkey registration
-			// Note: User must be authenticated to add a passkey
+
 			const result = await authClient.passkey.addPasskey();
 
 			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
 				if (r.user || r.session || r.data) {
-					// Success! Redirect to home
 					router.push("/");
 					return;
 				}
@@ -81,7 +78,7 @@ export default function PasskeyRegisterPage() {
 				}
 			}
 
-			// If we get here, registration failed
+
 			setError(uiMessageFromError(result as unknown));
 		} catch (err: unknown) {
 			console.error("[Passkey Register] Error:", err);

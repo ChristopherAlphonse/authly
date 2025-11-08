@@ -1,5 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -7,12 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 function ResetPasswordForm() {
@@ -66,7 +66,7 @@ function ResetPasswordForm() {
 			});
 
 			setSuccess(true);
-			// Redirect to login after 2 seconds
+
 			setTimeout(() => {
 				router.push("/login");
 			}, 2000);

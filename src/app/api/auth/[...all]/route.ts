@@ -1,10 +1,8 @@
 import type { NextRequest, NextResponse } from "next/server";
-
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
 const { POST: basePOST, GET: baseGET } = toNextJsHandler(auth);
-
 
 const normalizeOrigin = (o: string | null | undefined) =>
 	typeof o === "string" && o.length ? o.replace(/\/+$|\s+/g, "") : o;
@@ -33,7 +31,6 @@ const isAllowedOrigin = (origin: string | null): boolean => {
 	return allowedOrigins.some((allowed) => allowed === normalized);
 };
 
-
 const getDefaultOrigin = (): string => {
 	if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
 		return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
@@ -50,8 +47,6 @@ const addCorsHeaders = (
 	requestUrl?: string,
 ): Response => {
 	const headers = new Headers(response.headers);
-
-
 	if (origin && isAllowedOrigin(origin)) {
 		headers.set("Access-Control-Allow-Origin", origin);
 		headers.set("Access-Control-Allow-Credentials", "true");
@@ -175,7 +170,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 		});
 
 		const response = await basePOST(forwardRequest);
-
 		console.log("[Better Auth] Response status:", response.status);
 		console.log("[Better Auth] Response statusText:", response.statusText);
 

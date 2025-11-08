@@ -45,12 +45,12 @@ export default function LoginPage() {
 			},
 			{
 				onError: (ctx) => {
-					// Handle the error
+
 					if (ctx.error.status === 403) {
 						setError("Please verify your email address");
 						setShowResendVerification(true);
 					} else {
-						// Show the original error message
+
 						setError(
 							ctx.error.message || "Sign in failed. Please try again.",
 						);
@@ -61,28 +61,24 @@ export default function LoginPage() {
 			},
 		);
 
-		// Better Auth's signIn.email returns an object with user/session on success
+
 		if (result && typeof result === "object") {
 			const r = result as { [k: string]: unknown };
-			// Sign-in succeeded if we have user or session
 			if (r.user || r.session || r.data) {
-				// Store email for future login page visits
+
 				if (typeof window !== "undefined" && email) {
 					localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, email);
 				}
-				// Success! Redirect to home
+
 				router.push("/");
 				setLoading(false);
 				return;
 			}
 		}
-
-		// If we get here and no error was set in onError, something unexpected happened
-		// This shouldn't happen if onError is called for all errors, but handle it just in case
 		setLoading(false);
 	};
 
-	// Use Better Auth's social sign-in for direct Google OAuth
+
 	const handleGoogleSignIn = async () => {
 		try {
 			await authClient.signIn.social({
@@ -105,7 +101,7 @@ export default function LoginPage() {
 		}
 	};
 
-	// Handle passkey sign-in
+
 	const handlePasskeySignIn = async () => {
 		setLoading(true);
 		setError("");
@@ -116,7 +112,7 @@ export default function LoginPage() {
 			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
 				if (r.user || r.session || r.data) {
-					// Store email for future login page visits
+
 					if (typeof window !== "undefined") {
 						const userEmail = typeof r.user === "object" && r.user !== null && "email" in r.user
 							? String(r.user.email)
@@ -172,7 +168,7 @@ export default function LoginPage() {
 		}
 	};
 
-	// Check for previous login and passkey on mount
+
 	useEffect(() => {
 		const checkPreviousLogin = async (): Promise<void> => {
 			if (typeof window === "undefined") {
@@ -181,10 +177,9 @@ export default function LoginPage() {
 			}
 
 			try {
-				// First, try to check via secure session cookie (most secure)
 				const sessionRes = await fetch("/api/passkey/check-returning-user", {
 					method: "GET",
-					credentials: "include", // Important: include cookies
+					credentials: "include",
 				});
 
 				if (sessionRes.ok) {
@@ -195,7 +190,6 @@ export default function LoginPage() {
 						Boolean(sessionData.isReturningUser) &&
 						Boolean(sessionData.hasPasskey)
 					) {
-						// User has active session and passkey - show only passkey button
 						setShowOnlyPasskey(true);
 						if (sessionData.user?.email) {
 							setEmail(sessionData.user.email);
@@ -205,14 +199,13 @@ export default function LoginPage() {
 					}
 				}
 
-				// Fallback: check localStorage email (for users who logged out)
 				const previousEmail = localStorage.getItem(PREVIOUS_LOGIN_EMAIL_KEY);
 				if (!previousEmail) {
 					setCheckingPreviousLogin(false);
 					return;
 				}
 
-				// Check if this user has a passkey
+
 				const res = await fetch("/api/passkey/has-passkeys", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -222,7 +215,6 @@ export default function LoginPage() {
 				if (res.ok) {
 					const data = await res.json();
 					if (data && typeof data === "object" && Boolean(data.hasPasskey)) {
-						// User has logged in before and has a passkey - show only passkey button
 						setShowOnlyPasskey(true);
 						setEmail(previousEmail);
 					}
@@ -269,7 +261,7 @@ export default function LoginPage() {
 		}
 	}
 
-	// Show loading state while checking previous login
+
 	if (checkingPreviousLogin) {
 		return (
 			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
@@ -284,7 +276,7 @@ export default function LoginPage() {
 		);
 	}
 
-	// Show only passkey button if user has logged in before and has a passkey
+
 	if (showOnlyPasskey) {
 		return (
 			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">

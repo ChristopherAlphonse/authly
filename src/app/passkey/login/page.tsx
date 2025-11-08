@@ -52,7 +52,7 @@ export default function PasskeyLoginPage() {
 			if (result && typeof result === "object") {
 				const r = result as { [k: string]: unknown };
 				if (r.user || r.session || r.data) {
-					// Success! Redirect to home
+
 					router.push("/");
 					return;
 				}
@@ -62,7 +62,7 @@ export default function PasskeyLoginPage() {
 				}
 			}
 
-			// If we get here, sign-in failed
+
 			setError(uiMessageFromError(result as unknown));
 		} catch (err: unknown) {
 			console.error("[Passkey Login] Error:", err);
