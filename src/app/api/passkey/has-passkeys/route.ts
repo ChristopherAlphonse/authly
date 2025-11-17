@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
 		console.info(`/api/passkey/has-passkeys request from ${ip}`, {
 			emailProvided: !!emailRaw,
-			adminTokenProvided: !!adminToken,
+			// adminTokenProvided: !!adminToken,
 		});
 
 		if (emailRaw) {

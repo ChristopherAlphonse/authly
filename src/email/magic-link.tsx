@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {
 	Body,
 	Button,
@@ -8,48 +6,37 @@ import {
 	Heading,
 	Hr,
 	Html,
-	Img,
 	Preview,
 	Section,
 	Tailwind,
 	Text,
 } from "@react-email/components";
+import * as React from "react";
 
 interface MagicLinkProps {
 	userEmail: string;
 	magicLinkUrl: string;
 	expiryText?: string;
-	baseURL?: string;
 }
 
 const MagicLink = (props: MagicLinkProps) => {
-	const { userEmail, magicLinkUrl, expiryText, } = props;
-	const logoUrl = 'https://authly-red.vercel.app/authly_logo.png';
+	const { userEmail, magicLinkUrl, expiryText } = props;
+
 
 	return (
 		<Html lang="en" dir="ltr">
 			<Tailwind>
 				<Head />
 				<Preview>Sign in to your Authly account</Preview>
-
 				<Hr className="my-[16px]" />
-
 				<Body className="bg-[#F6F8FA] font-sans py-[40px]">
 					<Container className="bg-[#FFFFFF] rounded-[8px] max-w-[600px] mx-auto px-[40px] py-[40px]">
-						{/* Header with Logo */}
-						<Section className="text-center mb-[32px]">
-							<Img
-								src={logoUrl}
-								alt="Authly"
-								className="w-full h-auto max-w-[200px] mx-auto"
-							/>
-						</Section>
-
 						<Hr className="my-[16px] " />
 
-						{/* Main Content */}
+                        {/* Main Content */}
 						<Section className="mb-[32px]">
-							<Heading className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
+
+                            <Heading className="text-[#020304] text-[16px] leading-[24px] mb-[24px] m-0">
 								Sign in to your account
 							</Heading>
 
@@ -58,7 +45,6 @@ const MagicLink = (props: MagicLinkProps) => {
 								associated with <strong>{userEmail}</strong>. Click the button
 								below to sign in securely without a password.
 							</Text>
-
 							{/* Magic Link Button */}
 							<Section className="text-center mb-[32px]">
 								<Button
@@ -101,4 +87,3 @@ const MagicLink = (props: MagicLinkProps) => {
 };
 
 export default MagicLink;
-
