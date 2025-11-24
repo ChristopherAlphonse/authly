@@ -1,7 +1,7 @@
 import { jwtClient, magicLinkClient, passkeyClient } from "better-auth/client/plugins";
 
-import { createAuthClient } from "better-auth/react";
 import { TRUSTED_ORIGINS } from "./utils";
+import { createAuthClient } from "better-auth/react";
 
 const getBaseURL = () => {
 	if (typeof window !== "undefined") {

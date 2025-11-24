@@ -1,5 +1,5 @@
 import {
-	bigint,
+
 	boolean,
 	integer,
 	pgTable,
@@ -48,7 +48,6 @@ export const account = pgTable("account", {
 	accessTokenExpiresAt: timestamp("access_token_expires_at"),
 	refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
 	scope: text("scope"),
-	password: text("password"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => /* @__PURE__ */ new Date())
@@ -67,40 +66,6 @@ export const verification = pgTable("verification", {
 		.notNull(),
 });
 
-export const jwks = pgTable("jwks", {
-	id: text("id").primaryKey(),
-	publicKey: text("public_key").notNull(),
-	privateKey: text("private_key").notNull(),
-	createdAt: timestamp("created_at").notNull(),
-});
-
-export const apikey = pgTable("apikey", {
-	id: text("id").primaryKey(),
-	name: text("name"),
-	start: text("start"),
-	prefix: text("prefix"),
-	key: text("key").notNull(),
-	userId: text("user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-	refillInterval: integer("refill_interval"),
-	refillAmount: integer("refill_amount"),
-	lastRefillAt: timestamp("last_refill_at"),
-	enabled: boolean("enabled").default(true),
-	rateLimitEnabled: boolean("rate_limit_enabled").default(true),
-	rateLimitTimeWindow: integer("rate_limit_time_window").default(86400000),
-	rateLimitMax: integer("rate_limit_max").default(10),
-	requestCount: integer("request_count").default(0),
-	remaining: integer("remaining"),
-	lastRequest: timestamp("last_request"),
-	expiresAt: timestamp("expires_at"),
-	createdAt: timestamp("created_at").notNull(),
-	updatedAt: timestamp("updated_at").notNull(),
-	permissions: text("permissions"),
-	metadata: text("metadata"),
-});
-
-
 
 export const passkey = pgTable("passkey", {
 	id: text("id").primaryKey(),
@@ -116,14 +81,4 @@ export const passkey = pgTable("passkey", {
 	transports: text("transports").notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	aaguid: text("aaguid"),
-});
-
-export const rateLimit = pgTable("rateLimit", {
-	id: text("id").primaryKey(),
-	key: text("key").notNull().unique(),
-	count: integer("count").notNull(),
-	lastRequest: bigint("last_request", { mode: "number" }).notNull(),
-	userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
-	ipAddress: text("ip_address"),
-	userAgent: text("user_agent"),
 });

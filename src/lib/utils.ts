@@ -24,21 +24,8 @@ export const TRUSTED_ORIGINS = [
 
 export const DEV_MODE = IS_CLOUD;
 
-export const TELEMETRY_ENABLED = process.env.TELEMETRY_ENABLED
-	? process.env.TELEMETRY_ENABLED === 'true'
-	: process.env.NODE_ENV === 'development';
-
-    export const SESSION_EXPIRES_IN = 60 * 60 * 12;
-export const SESSION_UPDATE_AGE = 60 * 60 * 2;
 
 
-	export const RESET_PASSWORD_EXPIRES_IN = process.env.RESET_PASSWORD_EXPIRES_IN
-		? Number(process.env.RESET_PASSWORD_EXPIRES_IN)
-		: 60 * 5;
-
-	export const EMAIL_VERIFICATION_EXPIRES_IN = process.env.EMAIL_VERIFICATION_EXPIRES_IN
-		? Number(process.env.EMAIL_VERIFICATION_EXPIRES_IN)
-		: 60 * 15;
 	export function formatExpiry(seconds: number): string {
 		if (seconds < 60) return `${seconds} seconds`;
 		if (seconds < 3600) {

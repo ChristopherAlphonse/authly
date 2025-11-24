@@ -19,9 +19,9 @@ const PREVIOUS_LOGIN_EMAIL_KEY = "authly_previous_login_email";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [success, setSuccess] = useState(false);
 	const [showPasskeyButton, setShowPasskeyButton] = useState(false);
 	const [showOnlyPasskey, setShowOnlyPasskey] = useState(false);
 	const [checkingPreviousLogin, setCheckingPreviousLogin] = useState(true);
@@ -31,145 +31,45 @@ export default function LoginPage() {
 	const [resendSuccess, setResendSuccess] = useState(false);
 	const [resendError, setResendError] = useState("");
 
+
+
+
 	const router = useRouter();
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setLoading(true);
-		setError("");
-
-		const result = await authClient.signIn.email(
-			{
-				email,
-				password,
-			},
-			{
-				onError: (ctx) => {
-
-					if (ctx.error.status === 403) {
-						setError("Please verify your email address");
-						setShowResendVerification(true);
-					} else {
-
-						setError(
-							ctx.error.message || "Sign in failed. Please try again.",
-						);
-						setShowResendVerification(false);
-					}
-					setLoading(false);
-				},
-			},
-		);
-
-
-		if (result && typeof result === "object") {
-			const r = result as { [k: string]: unknown };
-			if (r.user || r.session || r.data) {
-
-				if (typeof window !== "undefined" && email) {
-					localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, email);
-				}
-
-				router.push("/");
-				setLoading(false);
-				return;
-			}
-		}
-		setLoading(false);
-	};
-
-
-	const handleGoogleSignIn = async () => {
-		try {
-			await authClient.signIn.social({
-				provider: "google",
-				callbackURL: "/",
-			});
-		} catch (err: unknown) {
-			let errorMessage = "Failed to sign in with Google. Please try again.";
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			} else if (typeof err === "object" && err !== null) {
-				const errorObj = err as { error?: string; message?: string; provider?: string };
-				if (errorObj.error === "Provider not configured") {
-					errorMessage = "Google sign-in is not configured. Please contact support or use email/password.";
-				} else if (errorObj.message) {
-					errorMessage = errorObj.message;
-				}
-			}
-			setError(errorMessage);
-		}
-	};
-
-
-	const handlePasskeySignIn = async () => {
-		setLoading(true);
-		setError("");
-
-		try {
-			const result = await authClient.signIn.passkey();
-
-			if (result && typeof result === "object") {
-				const r = result as { [k: string]: unknown };
-				if (r.user || r.session || r.data) {
-
-					if (typeof window !== "undefined") {
-						const userEmail = typeof r.user === "object" && r.user !== null && "email" in r.user
-							? String(r.user.email)
-							: email;
-						if (userEmail) {
-							localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, userEmail);
-						}
-					}
-					router.push("/");
-					return;
-				}
-				if (r.error) {
-					setError(r.error instanceof Error ? r.error.message : "Failed to sign in with Passkey. Please try again.");
-					return;
-				}
-			}
-
-			setError("Failed to sign in with Passkey. Please try again.");
-		} catch (error: unknown) {
-			console.error("[Login] Passkey sign-in error:", error);
-			setError((error as Error | undefined)?.message || "Failed to sign in with Passkey. Please try again.");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const handleResendVerification = async (): Promise<void> => {
-		if (!email) {
-			setResendError("Please enter your email address");
-			return;
-		}
-
-		setResendLoading(true);
-		setResendError("");
-		setResendSuccess(false);
-
-		try {
-			await authClient.sendVerificationEmail({
-				email,
-				callbackURL: "/",
-			});
-			setResendSuccess(true);
-			setResendError("");
-		} catch (err: unknown) {
-			const errorMessage =
-				err instanceof Error
-					? err.message
-					: "Failed to send verification email. Please try again.";
-			setResendError(errorMessage);
-			setResendSuccess(false);
-		} finally {
-			setResendLoading(false);
-		}
-	};
-
-
 	useEffect(() => {
+		// Test IP API and log the response
+		const testIPAPI = async (): Promise<void> => {
+			try {
+				console.log("=".repeat(80));
+				console.log("[Login Page] Testing IP API...");
+				const apiUrl = "/api/ip";
+				console.log(`[Login Page] Calling: ${apiUrl}`);
+
+				const response = await fetch(apiUrl);
+				console.log(`[Login Page] Response status: ${response.status}`);
+
+				if (response.ok) {
+					const data = await response.json();
+					console.log("[Login Page] IP API Response:");
+					console.log(JSON.stringify(data, null, 2));
+					console.log(`[Login Page] IP: ${data.ip}`);
+					console.log(`[Login Page] City: ${data.city}`);
+					console.log(`[Login Page] State: ${data.state}`);
+					console.log(`[Login Page] Region: ${data.region}`);
+					console.log(`[Login Page] Country: ${data.country_name}`);
+				} else {
+					const errorText = await response.text();
+					console.error(`[Login Page] IP API Error (${response.status}):`, errorText);
+				}
+				console.log("=".repeat(80));
+			} catch (error) {
+				console.error("[Login Page] Failed to call IP API:", error);
+			}
+		};
+
+		// Call IP API on page load
+		testIPAPI();
+
 		const checkPreviousLogin = async (): Promise<void> => {
 			if (typeof window === "undefined") {
 				setCheckingPreviousLogin(false);
@@ -205,7 +105,6 @@ export default function LoginPage() {
 					return;
 				}
 
-
 				const res = await fetch("/api/passkey/has-passkeys", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -232,6 +131,170 @@ export default function LoginPage() {
 			if (debounceRef.current) window.clearTimeout(debounceRef.current);
 		};
 	}, []);
+
+	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+		e.preventDefault();
+		setLoading(true);
+		setError("");
+		setSuccess(false);
+		setShowResendVerification(false);
+
+		try {
+			await authClient.signIn.magicLink({
+				email,
+				callbackURL: `${window.location.origin}/`,
+			});
+			setSuccess(true);
+		} catch (err: unknown) {
+			console.error("[Magic Link Login] Error:", err);
+			const errorMessage =
+				err instanceof Error
+					? err.message
+					: "Failed to send magic link. Please try again.";
+			setError(errorMessage);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleGoogleSignIn = async () => {
+		try {
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/",
+			});
+		} catch (err: unknown) {
+			let errorMessage = "Failed to sign in with Google. Please try again.";
+			if (err instanceof Error) {
+				errorMessage = err.message;
+			} else if (typeof err === "object" && err !== null) {
+				const errorObj = err as {
+					error?: string;
+					message?: string;
+					provider?: string;
+				};
+				if (errorObj.error === "Provider not configured") {
+					errorMessage =
+						"Google sign-in is not configured. Please contact support or use email/password.";
+				} else if (errorObj.message) {
+					errorMessage = errorObj.message;
+				}
+			}
+			setError(errorMessage);
+		}
+	};
+
+	const handlePasskeySignIn = async () => {
+		setLoading(true);
+		setError("");
+
+		try {
+			const result = await authClient.signIn.passkey();
+
+			if (result && typeof result === "object") {
+				const r = result as { [k: string]: unknown };
+				if (r.user || r.session || r.data) {
+					if (typeof window !== "undefined") {
+						const userEmail =
+							typeof r.user === "object" && r.user !== null && "email" in r.user
+								? String(r.user.email)
+								: email;
+						if (userEmail) {
+							localStorage.setItem(PREVIOUS_LOGIN_EMAIL_KEY, userEmail);
+						}
+					}
+					router.push("/");
+					return;
+				}
+				if (r.error) {
+					setError(
+						r.error instanceof Error
+							? r.error.message
+							: "Failed to sign in with Passkey. Please try again.",
+					);
+					return;
+				}
+			}
+
+			setError("Failed to sign in with Passkey. Please try again.");
+		} catch (error: unknown) {
+			console.error("[Login] Passkey sign-in error:", error);
+			setError(
+				(error as Error | undefined)?.message ||
+					"Failed to sign in with Passkey. Please try again.",
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleResendVerification = async (): Promise<void> => {
+		if (!email) {
+			setResendError("Please enter your email address");
+			return;
+		}
+
+		setResendLoading(true);
+		setResendError("");
+		setResendSuccess(false);
+
+		try {
+			await authClient.sendVerificationEmail({
+				email,
+				callbackURL: "/",
+			});
+			setResendSuccess(true);
+			setResendError("");
+		} catch (err: unknown) {
+			const errorMessage =
+				err instanceof Error
+					? err.message
+					: "Failed to send verification email. Please try again.";
+			setResendError(errorMessage);
+			setResendSuccess(false);
+		} finally {
+			setResendLoading(false);
+		}
+	};
+
+	if (success) {
+		return (
+			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+				<div className="w-full max-w-md">
+					<Card className="bg-zinc-900 border-zinc-800 shadow-2xl">
+						<CardHeader className="text-center">
+							<CardTitle className="text-2xl font-bold text-white">
+								Check your email
+							</CardTitle>
+							<CardDescription className="text-zinc-400">
+								We&apos;ve sent a magic link to {email}
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-4">
+								<p className="text-zinc-300 text-sm text-center">
+									Click the link in the email to sign in. The link will expire
+									in 10 minutes.
+								</p>
+								<div className="text-center">
+									<button
+										type="button"
+										onClick={() => {
+											setSuccess(false);
+											setEmail("");
+										}}
+										className="text-sm text-zinc-400 hover:text-white hover:underline"
+									>
+										Use a different email
+									</button>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
 
 	async function checkPasskeyForEmail(emailToCheck: string) {
 		if (!emailToCheck || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailToCheck)) {
@@ -261,7 +324,6 @@ export default function LoginPage() {
 		}
 	}
 
-
 	if (checkingPreviousLogin) {
 		return (
 			<div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
@@ -275,7 +337,6 @@ export default function LoginPage() {
 			</div>
 		);
 	}
-
 
 	if (showOnlyPasskey) {
 		return (
@@ -292,7 +353,9 @@ export default function LoginPage() {
 						</CardHeader>
 						<CardContent>
 							{error && (
-								<div className="text-red-400 text-sm text-center mb-4">{error}</div>
+								<div className="text-red-400 text-sm text-center mb-4">
+									{error}
+								</div>
 							)}
 							<Button
 								type="button"
@@ -352,49 +415,26 @@ export default function LoginPage() {
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
 							<div className="space-y-2">
-                                <Input
+								<Input
 									type="email"
 									placeholder="Email"
 									value={email}
-				onChange={(e) => {
-					const next = e.target.value;
-					setEmail(next);
-					setShowResendVerification(false);
-					setResendSuccess(false);
-					setResendError("");
+									onChange={(e) => {
+										const next = e.target.value;
+										setEmail(next);
+										setShowResendVerification(false);
+										setResendSuccess(false);
+										setResendError("");
 
-					if (debounceRef.current) window.clearTimeout(debounceRef.current);
-					debounceRef.current = window.setTimeout(() => {
-						checkPasskeyForEmail(next);
-					}, 400);
-				}}
+										if (debounceRef.current)
+											window.clearTimeout(debounceRef.current);
+										debounceRef.current = window.setTimeout(() => {
+											checkPasskeyForEmail(next);
+										}, 400);
+									}}
 									required
 									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
 								/>
-							</div>
-							<div className="space-y-2">
-								<Input
-									type="password"
-									placeholder="Password"
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									required
-									className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus:border-zinc-600 focus:ring-zinc-600"
-								/>
-							</div>
-							<div className="flex justify-between items-center">
-								<Link
-									href="/magic-link"
-									className="text-sm text-zinc-400 hover:text-white hover:underline"
-								>
-									Passwordless sign in
-								</Link>
-								<Link
-									href="/forgot-password"
-									className="text-sm text-zinc-400 hover:text-white hover:underline"
-								>
-									Forgot password?
-								</Link>
 							</div>
 							{error && (
 								<div className="text-red-400 text-sm text-center">{error}</div>
@@ -402,7 +442,8 @@ export default function LoginPage() {
 							{showResendVerification && (
 								<div className="space-y-3 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
 									<p className="text-zinc-300 text-sm text-center">
-										Your email address needs to be verified before you can sign in.
+										Your email address needs to be verified before you can sign
+										in.
 									</p>
 									{resendSuccess && (
 										<div className="text-green-400 text-sm text-center">
@@ -420,17 +461,19 @@ export default function LoginPage() {
 										disabled={resendLoading || loading}
 										className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium"
 									>
-										{resendLoading
-											? "Sending..."
-											: "Resend Verification Email"}
+										{resendLoading ? "Sending..." : "Resend Verification Email"}
 									</Button>
 									<div className="text-center">
-										<Link
-											href="/resend-verification"
+										<button
+											type="button"
+											onClick={() => {
+												setShowResendVerification(false);
+												setEmail("");
+											}}
 											className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
 										>
 											Or use a different email address
-										</Link>
+										</button>
 									</div>
 								</div>
 							)}
@@ -439,7 +482,7 @@ export default function LoginPage() {
 								disabled={loading}
 								className="w-full bg-white text-zinc-900 hover:bg-zinc-100 font-medium"
 							>
-								{loading ? "Signing In..." : "Sign In"}
+								{loading ? "Sending Magic Link..." : "Send Magic Link"}
 							</Button>
 						</form>
 
@@ -463,7 +506,7 @@ export default function LoginPage() {
 										onClick={handlePasskeySignIn}
 										disabled={loading}
 										className="w-full bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-										>
+									>
 										<svg
 											className="w-4 h-4 mr-2"
 											viewBox="0 0 24 24"
@@ -472,12 +515,12 @@ export default function LoginPage() {
 											strokeWidth="2"
 											strokeLinecap="round"
 											strokeLinejoin="round"
-											>
-												<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-												<path d="M9 12l2 2 4-4" />
-											</svg>
-											{loading ? "Signing In..." : "Sign in with Passkey"}
-										</Button>
+										>
+											<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+											<path d="M9 12l2 2 4-4" />
+										</svg>
+										{loading ? "Signing In..." : "Sign in with Passkey"}
+									</Button>
 								)}
 								<Button
 									type="button"
