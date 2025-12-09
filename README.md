@@ -5,8 +5,9 @@
 A comprehensive authentication system built with Next.js and Better Auth, featuring email/password authentication, passkeys (WebAuthn), magic links, OAuth integration, and robust security features.
 
 
-### Auth Visual
-<img width="3702" height="2219" alt="image" src="https://github.com/user-attachments/assets/f47f2530-d11f-4a05-b83c-e2b2c9fb3efc" />
+### Authly future ERD
+
+<img width="3083" height="2487" alt="Blank diagram" src="https://github.com/user-attachments/assets/8964b39c-2389-45e2-b37f-5bc80f2f597a" />
 
 
 ### Authentication Flows
